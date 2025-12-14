@@ -38,7 +38,6 @@
             <span>MQTT:</span>
             <span id="mqttStatusLabel" style="color: #555; font-weight: normal;">Verbinden...</span>
         </div>
-      
         <div class="status-item">
             <div id="heaterLed" class="status-led"></div>
             <div class="status-label">Heizung</div>
@@ -53,16 +52,17 @@
         </div>
         <div class="status-item">
             <div id="tempLed" class="status-led"></div>
-            <div class="status-label">Temp/Licht</div>
+            <div class="status-label">Temperatur</div>
         </div>
         <div class="status-item">
             <div id="waterLed" class="status-led"></div>
-            <div class="status-label">Wasser</div>
+            <div class="status-label">Wasserstand</div>
         </div>
-        
+        <div class="status-item">
+            <div id="cpLed" class="status-led"></div>
+            <div class="status-label">CP Plus</div>
+        </div>
     </div>
-
-    
     <div class="data-card">
         
         <div class="data-item">
@@ -127,10 +127,22 @@
 <script>
     // --- MQTT Logik ---
     let client;
-    const mqttStatusLabelElement = document.getElementById('mqttStatusLabel');
+    
+    // Elemente für Status-LEDs (von index.html übernommen)
     const mqttLedElement = document.getElementById('mqttLed');
+    const mqttStatusLabelElement = document.getElementById('mqttStatusLabel');
     const switchAutoFan = document.getElementById('switchAutoFan');
     const switchCeilingMode = document.getElementById('switchCeilingMode');
+    
+    // Mapping der Status-Topics zu den LEDs (von index.html übernommen)
+    const ledMap = {
+        [HEATER_STATE_TOPIC]: 'heaterLed',
+        [ESPGEOPOS_STATE_TOPIC]: 'gpsLed',
+        [MAXXFAN_STATE_TOPIC]: 'maxxFanLed',
+        [ESPTEMP_STATE_TOPIC]: 'tempLed',
+        [WATERLEVEL_STATUS_TOPIC]: 'waterLed', // LWT für HFW
+        [CP_PLUS_ALIVE_TOPIC]: 'cpLed'
+    };
     
     // Sendet einen Befehl über MQTT
     function sendCommand(topic, payload) {
@@ -139,15 +151,6 @@
             console.log(`Befehl gesendet: ${payload} an ${topic}`);
         } else {
             console.warn("MQTT nicht verbunden. Befehl konnte nicht gesendet werden.");
-        }
-    }
-
-    // Zeigt den Status der Status-LEDs an
-    function updateLedStatus(elementId, payload) {
-        const ledElement = document.getElementById(elementId + 'Led');
-        if (ledElement) {
-            const isOnline = payload.toUpperCase() === 'ONLINE';
-            ledElement.className = isOnline ? 'status-led status-led-online' : 'status-led status-led-offline';
         }
     }
 
@@ -172,19 +175,24 @@
 
     // Verarbeitet eingehende MQTT-Nachrichten
     function onMessage(topic, message) {
-        const payload = message.toString().toUpperCase();
+        const originalPayload = message.toString();
+        const payloadUpper = originalPayload.toUpperCase();
 
+        // === 1. LWT/LED STATUS PRÜFUNG (Logik von index.html übernommen) ===
+        if (ledMap.hasOwnProperty(topic)) {
+            const ledElement = document.getElementById(ledMap[topic]);
+            if (ledElement) {
+                // Prüft auf 1, online, ON, True, true
+                const isOnline = ( originalPayload === '1'|| originalPayload === 'online' || payloadUpper === 'ON' || payloadUpper === 'TRUE');
+                ledElement.className = `status-led ${isOnline ? 'status-led-online' : 'status-led-offline'}`; 
+            }
+        }
+        // ================================================================
+        
         switch (topic) {
-            // --- LWT Status ---
-            case HEATER_STATE_TOPIC: updateLedStatus('heater', payload); break;
-            case ESPGEOPOS_STATE_TOPIC: updateLedStatus('gps', payload); break;
-            case MAXXFAN_STATE_TOPIC: updateLedStatus('maxxFan', payload); break;
-            case ESPTEMP_STATE_TOPIC: updateLedStatus('temp', payload); break;
-            case WATERFILL_STATE_TOPIC: updateLedStatus('water', payload); break;
-            
             // --- MaxxFan Status ---
-            case MAXXFAN_AUTO_STATE_TOPIC: setSwitchState(switchAutoFan, payload); break;
-            case MAXXFAN_CEILING_STATE_TOPIC: setSwitchState(switchCeilingMode, payload); break;
+            case MAXXFAN_AUTO_STATE_TOPIC: setSwitchState(switchAutoFan, originalPayload); break;
+            case MAXXFAN_CEILING_STATE_TOPIC: setSwitchState(switchCeilingMode, originalPayload); break;
             
             default:
                 break;
@@ -208,9 +216,16 @@
             mqttStatusLabelElement.textContent = "Verbunden (OK)";
             mqttLedElement.className = "status-led status-led-online"; 
 
+            // Abonniert alle Status- und Kontroll-Topics
             client.subscribe([
-                HEATER_STATE_TOPIC, ESPGEOPOS_STATE_TOPIC, MAXXFAN_STATE_TOPIC, ESPTEMP_STATE_TOPIC, WATERFILL_STATE_TOPIC,
-                MAXXFAN_AUTO_STATE_TOPIC, MAXXFAN_CEILING_STATE_TOPIC
+                HEATER_STATE_TOPIC, 
+                ESPGEOPOS_STATE_TOPIC, 
+                MAXXFAN_STATE_TOPIC, 
+                ESPTEMP_STATE_TOPIC, 
+                WATERLEVEL_STATUS_TOPIC, // KORRIGIERTES TOPIC
+                CP_PLUS_ALIVE_TOPIC,     // NEUE LED
+                MAXXFAN_AUTO_STATE_TOPIC, 
+                MAXXFAN_CEILING_STATE_TOPIC
             ], { qos: 0 });
             console.log("Status-Topics abonniert.");
         });
@@ -261,6 +276,7 @@
                 document.getElementById("tempSetpoint").value = temp; // Optional: Setzt den Wert im Eingabefeld
                 sendCommand(SETPOINT_SET_TOPIC, temp); // Sendet den Befehl
             };
+        });
 
         // Funktion zum Senden des Kalibrierungsbefehls
         function setupCalibrateButton(buttonId, topic, sensorName) {
@@ -289,7 +305,7 @@
         // Lage-Sensor Kalibrierung (ZUWEISUNGEN)
         setupCalibrateButton("btnCalibrateRoll", GPS_CALIBRATE_ROLL_TOPIC, "Roll");
         setupCalibrateButton("btnCalibratePitch", GPS_CALIBRATE_PITCH_TOPIC, "Pitch");
-        });
+        
         
         // 3. MaxxFan Schalter
         switchAutoFan.onchange = function() {

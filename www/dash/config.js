@@ -31,7 +31,11 @@ const ESPHOME_NODE_GPS    = "espgeopos";
 const ESPHOME_NODE_TEMP   = "esptemp";
 const ESPHOME_NODE_WATER  = "fuellstand";
 
-const HFW_NODE_ID = "8673"; //Waterlevel node
+// Node ID und Basis-Topic für das Wassersystem (toc/nodes/8673...)
+const WATER_NODE_ID = "8673"; 
+const WATER_MQTT_BASE = `toc/nodes/${WATER_NODE_ID}`;
+
+
 // **********************************************
 // --- Topics für Allgemeine LEDs & System (LWT) ---
 // **********************************************
@@ -41,8 +45,8 @@ const HEATER_STATE_TOPIC    = `${ESPHOME_NODE_HEATER}/status`;
 const ESPGEOPOS_STATE_TOPIC = `${ESPHOME_NODE_GPS}/status`; 
 const MAXXFAN_STATE_TOPIC   = `${ESPHOME_NODE_FAN}/status`; 
 const ESPTEMP_STATE_TOPIC   = `${ESPHOME_NODE_TEMP}/status`; 
-const WATERFILL_STATE_TOPIC = `hfw/toc/nodes/${HFW_NODE_ID}/mqttconnected`; 
 const CP_PLUS_ALIVE_TOPIC   = `${ESPHOME_NODE_HEATER}/binary_sensor/cp_plus_alive/state`;
+const WATERLEVEL_STATUS_TOPIC = `${WATER_MQTT_BASE}/mqttconnected`;
 
 // **********************************************
 // --- Topics für Sensoren & Anzeigen ---
@@ -95,12 +99,11 @@ const RESTART_TEMP_TOPIC   = `${ESPHOME_NODE_TEMP}/button/restart_switch/command
 const RESTART_WATER_TOPIC  = `${ESPHOME_NODE_WATER}/button/restart_switch/command`;
 
 
-// --- WASSERTANK TOPICS (HFW-System) ---
-const FRESH_WATER_STATE_TOPIC = `hfw/toc/nodes/${HFW_NODE_ID}/wasser_stand_prozent/state`;
+// --- WASSERLevel AtomS3 ---
+const FRESH_WATER_STATE_TOPIC = `${WATER_MQTT_BASE}/wasser_stand_prozent/state`;
 // --- WASSER KALIBRIERUNGS TOPICS ---
-const CALIBRATE_WATER_FULL_TOPIC = `hfw/toc/nodes/${HFW_NODE_ID}/button/wasser_voll_kalibrieren/command`;
-const CALIBRATE_WATER_EMPTY_TOPIC = `hfw/toc/nodes/${HFW_NODE_ID}/button/wasser_leer_kalibrieren/command`;
-
+const CALIBRATE_WATER_FULL_TOPIC = `${WATER_MQTT_BASE}/button/wasser_voll_kalibrieren/command`;
+const CALIBRATE_WATER_EMPTY_TOPIC = `${WATER_MQTT_BASE}/button/wasser_leer_kalibrieren/command`;
 
 // (Zeroing) 
 const GPS_CALIBRATE_ROLL_TOPIC = `${ESPHOME_NODE_GPS}/button/calibrate_imu_roll/command`; 
