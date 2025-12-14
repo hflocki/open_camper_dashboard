@@ -28,7 +28,7 @@
       <img id="navLogo" src="./imag/felix.png" alt="Logo" class="nav-logo">
     
     <h2 id="appTitle">Camper Status</h2> 
-    <a href="control.html" class="nav-button">Zur Steuerung</a>
+    <a href="control.html" class="nav-button"><i class="fa-solid fa-gear"></i></a>
 </nav>
 
   <div class="container">
@@ -209,7 +209,7 @@
                 const ledElement = document.getElementById(ledMap[topic]);
                 if (ledElement) {
                     // Verwende die korrekten Farbklassen
-                    const isOnline = (payload === 'online' || payload === 'ON' || payload === 'True');
+                    const isOnline = ( payload === '1'|| payload === 'online' || payload === 'ON' || payload === 'True' || payload === 'TRUE' || payload.toLowerCase() === 'true');
                     ledElement.className = `status-led ${isOnline ? 'status-led-online' : 'status-led-offline'}`; 
                 }
             }
