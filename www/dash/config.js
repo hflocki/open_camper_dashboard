@@ -11,8 +11,8 @@ const WS_HOST = window.location.hostname; //IP adress local and tailscale
 const WS_PORT = 9001;              // WebSocket Port des Brokers
 const WS_PATH = "/";
 
-const MQTT_USERNAME = "xxxxxx";
-const MQTT_PASSWORD = "xxxxxx";
+const MQTT_USERNAME = "mqttcaruser";
+const MQTT_PASSWORD = "eUZT2zR9VG4rJ3";
 
 /*
  * Die ClientID muss einzigartig sein, daher wird sie im HTML/JS-Code generiert.
