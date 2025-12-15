@@ -313,6 +313,91 @@ h3 {
     left: 0;
 }
 
+/* --- Änderung 1: Padding des Hauptcontainers wird entfernt (wird auf Header/Body aufgeteilt) --- */
+.data-item {
+    background-color: white; 
+    border-radius: 10px; 
+    /* NEU: Padding entfernen, da es durch Header und Body gesteuert wird */
+    padding: 0; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center; 
+}
+
+/* --- Änderung 2: Original H3 Styling anpassen --- */
+.data-item h3 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    /* NEU: Blauen Rand und Abstand entfernen, da dies vom Header-Wrapper übernommen wird */
+    border-bottom: none; 
+    border-image: none;
+    color: #007bff; 
+    margin-bottom: 0; 
+}
+
+
+/* ========================================================= */
+/* --- NEU: ACCORDION / TOGGLE STYLING --- */
+/* ========================================================= */
+
+.steuerelement-header {
+    cursor: pointer;
+    /* Übernimmt das ursprüngliche Padding (20px horizontal) */
+    padding: 20px 20px 15px 20px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    /* Übernahme des blauen Trennstrichs vom Original h3 */
+    border-bottom: 1px solid;
+    border-image: linear-gradient(to right, #007bff, transparent) 1;
+}
+
+/* Der umschaltbare Inhaltsbereich */
+.steuerelement-body {
+    max-height: 500px; /* Muss größer sein als der tatsächliche Inhalt */
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out; 
+    /* Padding wie im Original .data-item, aber oben kleiner (oder 0 im collapsed) */
+    padding: 5px 20px 20px 20px; 
+    text-align: center;
+}
+
+/* Zustand: GESCHLOSSEN (Klasse 'collapsed' auf .data-item) */
+.data-item.collapsed .steuerelement-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+/* Icon Styling */
+.toggle-icon {
+    font-size: 1.5em; 
+    color: #007bff;
+    transition: transform 0.3s ease-in-out;
+    line-height: 1; 
+    margin-left: 10px;
+}
+
+/* Icon drehen, wenn die Box geöffnet ist */
+.data-item:not(.collapsed) .toggle-icon {
+    transform: rotate(180deg);
+}
+
+/* === Abrundung Logik (Wichtig für die Beibehaltung der runden Ecken) === */
+
+/* Im geschlossenen Zustand: Header bekommt die Abrundung unten */
+.data-item.collapsed .steuerelement-header {
+    border-bottom-left-radius: 10px; /* Übernimmt die 10px Abrundung */
+    border-bottom-right-radius: 10px; /* Übernimmt die 10px Abrundung */
+    border-bottom: none; /* Keine Trennlinie nötig, da der Header die Box abschließt */
+}
+
+/* Im geöffneten Zustand: Header hat keine unteren Abrundungen (geht in den Body über) */
+.data-item:not(.collapsed) .steuerelement-header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
 /* ========================================================= */
 /* --- 4. STEUERUNGS-ELEMENTE (Buttons & Inputs) --- */
 /* ========================================================= */
