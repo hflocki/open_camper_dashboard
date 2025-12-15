@@ -70,20 +70,20 @@ const GPS_ALT_TOPIC = `${ESPHOME_NODE_GPS}/sensor/espgeopos_altitude/state`;
 const GPS_SPEED_TOPIC = `${ESPHOME_NODE_GPS}/sensor/espgeopos_speed/state`;
 const GPS_SAT_TOPIC = `${ESPHOME_NODE_GPS}/sensor/espgeopos_satellites/state`;
 
-// Topics für Geschwindigkeit und Richtung (nehmen Standard ESPHome Fan Component Pfade an)
-const MAXXFAN_SPEED_SET_TOPIC     = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/set`; // Setzt Geschwindigkeit 0-100%
-const MAXXFAN_DIRECTION_SET_TOPIC = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/set_direction`; // Setzt FORWARD/REVERSE
-
-// MaxxFan Status-Topics
+// --- MaxxAir Fan Topics (Status & Steuerung) ---
+const MAXXFAN_FAN_STATE_TOPIC       = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/state`;
+const MAXXFAN_LID_STATE_TOPIC       = `${ESPHOME_NODE_FAN}/cover/maxxair_lid/state`;
+const MAXXFAN_DIRECTION_TOPIC       = `${ESPHOME_NODE_FAN}/text_sensor/maxxfan_direction_text/state`;
 const MAXXFAN_AUTO_STATE_TOPIC      = `${ESPHOME_NODE_FAN}/switch/auto_fan/state`;
 const MAXXFAN_CEILING_STATE_TOPIC   = `${ESPHOME_NODE_FAN}/switch/ceiling_fan_mode/state`;
-const MAXXFAN_DIRECTION_TOPIC       = `${ESPHOME_NODE_FAN}/text_sensor/maxxfan_direction_text/state`; // Status der Richtung
 
-// Steuerung Topics (falls Sie diese später für control.html benötigen)
-const MAXXFAN_FAN_COMMAND_TOPIC  = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/command`;
-const MAXXFAN_LID_COMMAND_TOPIC  = `${ESPHOME_NODE_FAN}/cover/maxxair_lid/command`;
-const MAXXFAN_AUTO_COMMAND_TOPIC = `${ESPHOME_NODE_FAN}/switch/auto_fan/command`;
+// **Steuerung Topics** (HIER Konsolidiert, um Duplikate zu vermeiden)
+const MAXXFAN_FAN_COMMAND_TOPIC     = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/command`;
+const MAXXFAN_LID_COMMAND_TOPIC     = `${ESPHOME_NODE_FAN}/cover/maxxair_lid/command`;
+const MAXXFAN_AUTO_COMMAND_TOPIC    = `${ESPHOME_NODE_FAN}/switch/auto_fan/command`;
 const MAXXFAN_CEILING_COMMAND_TOPIC = `${ESPHOME_NODE_FAN}/switch/ceiling_fan_mode/command`;
+const MAXXFAN_SPEED_SET_TOPIC       = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/set`; 
+const MAXXFAN_DIRECTION_SET_TOPIC   = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/set_direction`;
 
 // **********************************************
 // --- Topics für Licht & Heizung Steuerung ---
