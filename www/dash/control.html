@@ -23,12 +23,9 @@
     
     // NEUE Funktion für das Akkordeon
     function toggleBox(headerElement) {
-    // 1. Finde das Eltern-Element der gesamten Box (.data-item)
-    const box = headerElement.closest('.data-item');
-
-    // 2. Schalte die Klasse 'collapsed' um
-    box.classList.toggle('collapsed');
-}
+        const box = headerElement.closest('.data-item');
+        box.classList.toggle('collapsed');
+    }
 </script>
 </head>
 <body>
@@ -113,16 +110,55 @@
                 <span class="toggle-icon">▼</span>
             </div>
             <div class="steuerelement-body">
-                <p>Auto-Modus:</p>
-                <label class="switch">
-                    <input type="checkbox" id="switchAutoFan" class="switch-input">
-                    <span class="slider round"></span>
-                </label>
-                <p style="margin-top: 15px;">Dach-Ventilator:</p>
-                <label class="switch">
-                    <input type="checkbox" id="switchCeilingMode" class="switch-input">
-                    <span class="slider round"></span>
-                </label>
+                
+                <h4><i class="fas fa-door-open"></i> Deckel</h4>
+                <button class="btn btn-on" id="btnLidOpen">Öffnen</button>
+                <button class="btn btn-off" id="btnLidClose">Schließen</button>
+                
+                <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;"></p>
+
+                <h4><i class="fas fa-tachometer-alt"></i> Lüftergeschwindigkeit (%)</h4>
+                <input type="number" id="fanSpeedInput" value="50" step="1" min="0" max="100" class="input-field">
+                <button class="btn btn-action" id="btnSetFanSpeed">Setzen</button>
+                
+                <div class="temp-preset-buttons">
+                    <button class="btn btn-preset fan-preset" data-speed="10">10%</button>
+                    <button class="btn btn-preset fan-preset" data-speed="30">30%</button>
+                    <button class="btn btn-preset fan-preset" data-speed="50">50%</button>
+                    <button class="btn btn-preset fan-preset" data-speed="70">70%</button>
+                    <button class="btn btn-preset fan-preset" data-speed="100">100%</button>
+                </div>
+                
+                <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;"></p>
+
+                <h4><i class="fas fa-sync-alt"></i> Lüfterrichtung</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 80%; max-width: 300px; margin: 15px auto;">
+                    <span>Absaugen (FORWARD)</span>
+                    <span>Einblasen (REVERSE)</span>
+                </div>
+                <input type="range" id="fanDirectionSlider" min="0" max="1" step="1" value="0" style="width: 80%; max-width: 300px;">
+                <p class="control-info">Aktuelle Richtung: <span id="fanDirectionValue">Absaugen (FORWARD)</span></p>
+
+                <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;"></p>
+                
+                <h4><i class="fas fa-toggle-on"></i> Spezialmodi</h4>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div class="control-group switch-group" style="display: flex; justify-content: space-between; width: 80%; max-width: 300px; margin-bottom: 10px;">
+                        <p class="control-label">Auto-Modus</p>
+                        <label class="switch">
+                            <input type="checkbox" id="switchAutoFan" class="switch-input">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="control-group switch-group" style="display: flex; justify-content: space-between; width: 80%; max-width: 300px;">
+                        <p class="control-label">Decken-Lüfter Modus</p>
+                        <label class="switch">
+                            <input type="checkbox" id="switchCeilingMode" class="switch-input">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -140,7 +176,7 @@
 
                 <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;"></p>
                 
-                <h4><i class="fas fa-tint"></i> Kalibrierung</h4>
+                <h4><i class="fas fa-tint"></i> Wassertank Kalibrierung</h4>
                 
                 <button class="btn btn-action" id="btnCalibrateWaterFull">100% (Tank Voll)</button>
                 <button class="btn btn-action" id="btnCalibrateWaterEmpty">0% (Tank Leer)</button>
@@ -171,6 +207,7 @@
     // Elemente für Status-LEDs (von index.html übernommen)
     const mqttLedElement = document.getElementById('mqttLed');
     const mqttStatusLabelElement = document.getElementById('mqttStatusLabel');
+    // NEU: MaxxFan Schalter
     const switchAutoFan = document.getElementById('switchAutoFan');
     const switchCeilingMode = document.getElementById('switchCeilingMode');
     
@@ -180,7 +217,7 @@
         [ESPGEOPOS_STATE_TOPIC]: 'gpsLed',
         [MAXXFAN_STATE_TOPIC]: 'maxxFanLed',
         [ESPTEMP_STATE_TOPIC]: 'tempLed',
-        [WATERLEVEL_STATUS_TOPIC]: 'waterLed', // LWT für HFW
+        [WATERLEVEL_STATUS_TOPIC]: 'waterLed', 
         [CP_PLUS_ALIVE_TOPIC]: 'cpLed'
     };
     
@@ -196,43 +233,48 @@
 
     // Setzt den Zustand eines Schalters
     function setSwitchState(switchElement, payload) {
+        if (!switchElement) return; // Robustheit
         const isChecked = payload.toUpperCase() === 'ON' || payload.toUpperCase() === 'TRUE';
         switchElement.checked = isChecked;
     }
 
-    // KORRIGIERT: Funktion zum Einrichten der Neustart-Buttons (OHNE CONFIRM)
+    // Funktion zum Einrichten der Neustart-Buttons (OHNE CONFIRM)
     function setupRestartButton(buttonId, topic, nodeName) {
-        document.getElementById(buttonId).onclick = function() {
-            if (client && client.connected) {
-                // Senden des Neustart-Befehls direkt
-                client.publish(topic, "ON", { qos: 0, retain: false }); 
-                console.log(`Neustart-Befehl gesendet an ${topic} (Gerät: ${nodeName})`);
-            } else {
-                console.warn("MQTT nicht verbunden. Kann Neustart-Befehl nicht senden.");
-                alert(`MQTT nicht verbunden. Kann Neustart-Befehl für ${nodeName} nicht senden.`);
-            }
-        };
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.onclick = function() {
+                if (client && client.connected) {
+                    client.publish(topic, "ON", { qos: 0, retain: false }); 
+                    console.log(`Neustart-Befehl gesendet an ${topic} (Gerät: ${nodeName})`);
+                } else {
+                    console.warn("MQTT nicht verbunden. Kann Neustart-Befehl nicht senden.");
+                    alert(`MQTT nicht verbunden. Kann Neustart-Befehl für ${nodeName} nicht senden.`);
+                }
+            };
+        }
     }
 
-    // KORRIGIERT: Funktion zum Senden des Kalibrierungsbefehls (OHNE CONFIRM)
+    // Funktion zum Senden des Kalibrierungsbefehls (OHNE CONFIRM)
     function setupCalibrateButton(buttonId, topic, sensorName) {
-        document.getElementById(buttonId).onclick = function() {
-            if (client && client.connected) {
-                // Befehl direkt senden
-                sendCommand(topic, "ON"); // ESPHome Button Trigger
-                
-                // Visuelles Feedback
-                const button = this;
-                const originalText = button.textContent;
-                button.textContent = `Kommando (${sensorName}) gesendet...`;
-                setTimeout(() => {
-                    button.textContent = originalText;
-                }, 3000); 
-            } else {
-                console.warn(`MQTT nicht verbunden. Kann Kommando für ${sensorName} nicht senden.`);
-                alert(`MQTT nicht verbunden. Kann Kommando für ${sensorName} nicht senden.`);
-            }
-        };
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.onclick = function() {
+                if (client && client.connected) {
+                    sendCommand(topic, "ON"); // ESPHome Button Trigger
+                    
+                    // Visuelles Feedback
+                    const button = this;
+                    const originalText = button.textContent;
+                    button.textContent = `Kommando (${sensorName}) gesendet...`;
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                    }, 3000); 
+                } else {
+                    console.warn(`MQTT nicht verbunden. Kann Kommando für ${sensorName} nicht senden.`);
+                    alert(`MQTT nicht verbunden. Kann Kommando für ${sensorName} nicht senden.`);
+                }
+            };
+        }
     }
 
     // Verarbeitet eingehende MQTT-Nachrichten
@@ -240,25 +282,22 @@
         const originalPayload = message.toString();
         const payloadUpper = originalPayload.toUpperCase();
 
-        // === 1. LWT/LED STATUS PRÜFUNG (Logik von index.html übernommen) ===
+        // === 1. LWT/LED STATUS PRÜFUNG ===
         if (ledMap.hasOwnProperty(topic)) {
             const ledElement = document.getElementById(ledMap[topic]);
             if (ledElement) {
-                // Prüft auf 1, online, ON, True, true
                 const isOnline = ( originalPayload === '1'|| originalPayload === 'online' || payloadUpper === 'ON' || payloadUpper === 'TRUE');
                 ledElement.className = `status-led ${isOnline ? 'status-led-online' : 'status-led-offline'}`; 
             }
         }
-        // ================================================================
         
         switch (topic) {
-            // --- MaxxFan Status ---
+            // --- MaxxFan Status (Updates der Schalter) ---
             case MAXXFAN_AUTO_STATE_TOPIC: setSwitchState(switchAutoFan, originalPayload); break;
             case MAXXFAN_CEILING_STATE_TOPIC: setSwitchState(switchCeilingMode, originalPayload); break;
             
-            // --- Hinzufügung der Status-Updates für die neuen Steuerelemente (falls Topics vorhanden) ---
-            // case LIGHT_STATE_TOPIC: // Hier müsste der Status für das Hauptlicht verarbeitet werden
-            // case HEATER_SETPOINT_TOPIC: // Hier müsste der aktuelle Sollwert verarbeitet werden
+            // --- Weitere Status-Updates (Optional) ---
+            // case LIGHT_STATE_TOPIC: setSwitchState(document.getElementById('switchMainLight'), originalPayload); break;
             
             default:
                 break;
@@ -323,7 +362,75 @@
     document.addEventListener('DOMContentLoaded', function() {
         connectClient();
 
-        // 1. Licht Steuerung
+        // --- 1. MaxxFan Steuerung ---
+        
+        // Deckelsteuerung
+        document.getElementById('btnLidOpen').onclick = () => sendCommand(MAXXFAN_LID_COMMAND_TOPIC, 'OPEN');
+        document.getElementById('btnLidClose').onclick = () => sendCommand(MAXXFAN_LID_COMMAND_TOPIC, 'CLOSE');
+
+        const fanSpeedInput = document.getElementById('fanSpeedInput');
+        const btnSetFanSpeed = document.getElementById('btnSetFanSpeed');
+
+        // Geschwindigkeit: Setzen Button
+        if (btnSetFanSpeed) {
+            btnSetFanSpeed.onclick = function() {
+                const speed = fanSpeedInput.value;
+                sendCommand(MAXXFAN_SPEED_SET_TOPIC, speed); // Sendet Wert (0-100)
+            };
+        }
+
+        // Geschwindigkeit: Preset Buttons (MaxxFan)
+        document.querySelectorAll('.data-item .steuerelement-body .fan-preset').forEach(button => {
+            button.onclick = function() {
+                const speed = this.getAttribute('data-speed');
+                if (fanSpeedInput) fanSpeedInput.value = speed; 
+                sendCommand(MAXXFAN_SPEED_SET_TOPIC, speed);
+            };
+        });
+
+        // Richtung: Slider
+        const fanDirectionSlider = document.getElementById('fanDirectionSlider');
+        const fanDirectionValue = document.getElementById('fanDirectionValue');
+
+        if (fanDirectionSlider) {
+            fanDirectionSlider.oninput = function() {
+                const value = parseInt(this.value);
+                const direction = value === 0 ? "FORWARD" : "REVERSE";
+                const text = value === 0 ? "Absaugen (FORWARD)" : "Einblasen (REVERSE)";
+
+                if (fanDirectionValue) fanDirectionValue.textContent = text;
+                sendCommand(MAXXFAN_DIRECTION_SET_TOPIC, direction); 
+            };
+             // Initialer Text setzen 
+            if (fanDirectionValue) fanDirectionValue.textContent = parseInt(fanDirectionSlider.value) === 0 ? "Absaugen (FORWARD)" : "Einblasen (REVERSE)";
+        }
+
+        // Modi: Switches (Logik ohne Confirm, mit gegenseitiger Deaktivierung)
+        if (switchAutoFan) {
+            switchAutoFan.onchange = function() {
+                const state = this.checked ? "ON" : "OFF";
+                sendCommand(MAXXFAN_AUTO_COMMAND_TOPIC, state);
+                
+                if (this.checked && switchCeilingMode) {
+                     if (switchCeilingMode.checked) sendCommand(MAXXFAN_CEILING_COMMAND_TOPIC, "OFF");
+                     switchCeilingMode.checked = false;
+                }
+            }
+        }
+        
+        if (switchCeilingMode) {
+            switchCeilingMode.onchange = function() {
+                const state = this.checked ? "ON" : "OFF";
+                sendCommand(MAXXFAN_CEILING_COMMAND_TOPIC, state);
+                
+                if (this.checked && switchAutoFan) {
+                    if (switchAutoFan.checked) sendCommand(MAXXFAN_AUTO_COMMAND_TOPIC, "OFF");
+                    switchAutoFan.checked = false;
+                }
+            }
+        }
+
+        // --- 2. Licht und Truma Steuerung ---
         document.getElementById("btnMainLightOn").onclick = function() {
             sendCommand(LIGHT_SET_TOPIC, "ON");
         };
@@ -331,14 +438,13 @@
             sendCommand(LIGHT_SET_TOPIC, "OFF");
         };
 
-        // 2. Heizung Setpoint und Presets
         document.getElementById("btnSetTemp").onclick = function() {
             const selectedTemp = document.getElementById("tempSetpoint").value;
             sendCommand(SETPOINT_SET_TOPIC, selectedTemp);
         };
         
-        // Preset Buttons Logik
-        document.querySelectorAll('.btn-preset').forEach(button => {
+        // Truma Preset Buttons
+        document.querySelectorAll('.data-item .steuerelement-body .temp-preset-buttons .btn-preset:not(.fan-preset)').forEach(button => {
             button.onclick = function() {
                 const temp = this.getAttribute('data-temp');
                 document.getElementById("tempSetpoint").value = temp; 
@@ -346,34 +452,14 @@
             };
         });
 
-        // 3. MaxxFan Schalter (Auto / Ceiling Mode)
-        switchAutoFan.onchange = function() {
-            const state = this.checked ? "ON" : "OFF";
-            sendCommand(MAXXFAN_AUTO_COMMAND_TOPIC, state);
-            
-            if (this.checked) {
-                 if (switchCeilingMode.checked) sendCommand(MAXXFAN_CEILING_COMMAND_TOPIC, "OFF");
-                 switchCeilingMode.checked = false;
-            }
-        }
-        
-        switchCeilingMode.onchange = function() {
-            const state = this.checked ? "ON" : "OFF";
-            sendCommand(MAXXFAN_CEILING_COMMAND_TOPIC, state);
-            
-            if (this.checked) {
-                if (switchAutoFan.checked) sendCommand(MAXXFAN_AUTO_COMMAND_TOPIC, "OFF");
-                switchAutoFan.checked = false;
-            }
-        }
-        
-        // 4. Kalibrierung Zuweisungen (Lage und Wasser)
+
+        // --- 3. Kalibrierung Zuweisungen ---
         setupCalibrateButton("btnCalibrateRoll", GPS_CALIBRATE_ROLL_TOPIC, "Roll");
         setupCalibrateButton("btnCalibratePitch", GPS_CALIBRATE_PITCH_TOPIC, "Pitch");
         setupCalibrateButton("btnCalibrateWaterFull", CALIBRATE_WATER_FULL_TOPIC, "Wasser VOLL");
         setupCalibrateButton("btnCalibrateWaterEmpty", CALIBRATE_WATER_EMPTY_TOPIC, "Wasser LEER");
         
-        // 5. Restart-Buttons zuweisen
+        // --- 4. Restart-Buttons zuweisen ---
         setupRestartButton("btnRestartHeater", RESTART_HEATER_TOPIC, "Heizung");
         setupRestartButton("btnRestartFan", RESTART_FAN_TOPIC, "MaxxFan");
         setupRestartButton("btnRestartGps", RESTART_GPS_TOPIC, "GPS/Lage");
