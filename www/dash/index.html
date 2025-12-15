@@ -166,15 +166,36 @@
 </div>
 
 <div class="data-item">
-<h3><i class="fas fa-tint"></i> Frischwassertank</h3>
-<div class="water-container">
-<div class="water-tank">
-<div class="water-bar-shell">
-<div id="freshWaterBar" class="water-bar fresh-color" style="height: 0%;"></div>
-</div>
-<div id="freshWaterValue" class="value-label">-- %</div>
-</div>
-</div>
+    <h3><i class="fas fa-tint"></i> Frischwassertank</h3>
+
+    <div class="fresh-water-content">
+        <div class="water-tank-bar-container">
+            <div class="water-bar-shell">
+                <div id="freshWaterBar" class="water-bar fresh-color" style="height: 0%;"></div>
+            </div>
+        </div>
+
+        <div class="water-values-group">
+            <div class="position-item">
+                <div class="display-value large-value-small large-value-smaller">
+                    <span id="levelPercentValue">N/A</span>
+                    <span class="unit-label">%</span>
+                </div>
+            </div>
+            <div class="position-item">
+                <div class="display-value large-value-small large-value-smaller">
+                    <span id="levelVolumeValue">N/A</span>
+                    <span class="unit-label">L</span>
+                </div>
+            </div>
+            <div class="position-item">
+                <div class="display-value large-value-small large-value-smaller">
+                    <span id="adcValue">N/A</span>
+                    <span class="unit-label">V</span>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -268,6 +289,40 @@ function updateTiltGauge(roll, pitch) {
     // Aktualisiere die Textwerte zur Kontrolle
     rollValueElement.textContent = `${roll.toFixed(1)} °`;
     pitchValueElement.textContent = `${pitch.toFixed(1)} °`;
+
+// NEU: Allgemeine Payload Parsing Funktion
+/**
+ * Extrahiert einen bestimmten Wert aus einem Semikolon-getrennten String oder JSON.
+ */
+function parsePayloadForKey(payload, key) {
+    if (!payload || typeof payload !== 'string') return null;
+
+    try {
+        // VERSUCH 1: JSON-Parsing
+        const json = JSON.parse(payload.trim());
+        if (json.hasOwnProperty(key)) {
+            return String(json[key]);
+        }
+    } catch (e) {
+        // Ignoriere
+    }
+
+    // VERSUCH 2: Semikolon-getrennte Schlüssel-Wert-Paare (z.B. adc:1234;levelPercent:55;)
+    const trimmedPayload = payload.trim().replace(/;$/, '');
+    const parts = trimmedPayload.split(';');
+
+    for (const part of parts) {
+        const subParts = part.split(':');
+        if (subParts.length >= 2) {
+            const currentKey = subParts[0].trim();
+            const currentValue = subParts.slice(1).join(':').trim(); 
+
+            if (currentKey === key) {
+                return currentValue;
+            }
+        }
+    }
+    return null;
 }
 
    // --- Verbindung herstellen ---
@@ -374,24 +429,47 @@ function updateTiltGauge(roll, pitch) {
 
                 // Wassertank Füllstand (Jetzt mit der extrahierten Zahl oder dem Original-Payload)
                 case FRESH_WATER_STATE_TOPIC:
-                    // 'payloadToUse' enthält jetzt entweder die Zahl (aus dem HFW-Parsing)
-                    // oder den Original-String (falls das Parsen fehlschlug oder es schon eine Zahl war).
-                    const level = parseFloat(payloadToUse).toFixed(0);
+                    const payloadToParse = message.toString();
 
-                    if (isNaN(level)) break;
+                    const levelPercentStr = parsePayloadForKey(payloadToParse, 'levelPercent');
+                    const levelVolumeStr = parsePayloadForKey(payloadToParse, 'levelVolume');
+                    const adcStr = parsePayloadForKey(payloadToParse, 'adc');
 
-                    document.getElementById('freshWaterValue').textContent = `${level} %`;
-                    document.getElementById('freshWaterBar').style.height = `${level}%`;
+                    // 1. LevelPercent (Prozent)
+                    if (levelPercentStr) {
+                        const level = parseFloat(levelPercentStr);
+                        if (!isNaN(level)) {
+                            const levelFixed = level.toFixed(0);
+                            document.getElementById('levelPercentValue').textContent = levelFixed;
+                            document.getElementById('freshWaterBar').style.height = `${levelFixed}%`;
+                            
+                            // Farbe nur auf den Prozentwert anwenden
+                            const valueElement = document.getElementById('levelPercentValue');
+                            if (level < 15) {
+                                valueElement.style.color = 'red';
+                            } else {
+                                valueElement.style.color = '#007bff'; // Blauer Akzent
+                            }
+                        }
+                    }
 
-                    const valueElement = document.getElementById('freshWaterValue');
-                    if (level < 15) {
-                        valueElement.style.color = 'red';
-                    } else {
-                        // Normale Farbe, falls in style.css definiert, sonst schwarz/grau
-                        valueElement.style.color = '#333';
+                    // 2. LevelVolume (Liter)
+                    if (levelVolumeStr) {
+                        const volume = parseFloat(levelVolumeStr);
+                        if (!isNaN(volume)) {
+                            document.getElementById('levelVolumeValue').textContent = volume.toFixed(0);
+                        }
+                    }
+
+                    // 3. ADC Value (Volt)
+                    if (adcStr) {
+                        const adcValue = parseFloat(adcStr);
+                        if (!isNaN(adcValue)) {
+                           // Annahme: Max 3300 = 3.3V (standard ESP-Eingang), Wert in Volt anzeigen
+                           document.getElementById('adcValue').textContent = (adcValue / 1000).toFixed(2);
+                        }
                     }
                     break;
-            }
         });
 
       client.on('error', function (err) {
