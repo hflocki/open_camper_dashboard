@@ -124,21 +124,36 @@
                     <span class="slider round"></span>
                 </label>
             </div>
-            </div>
-            <div class="data-item system-restart-box collapsed">
+        </div>
+
+        <div class="data-item collapsed">
             <div class="steuerelement-header" onclick="toggleBox(this)">
-                 <h3><i class="fas fa-tools"></i> System Aktionen</h3>
+                <h3><i class="fas fa-wrench"></i> System Kalibrierung</h3>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="steuerelement-body">
+                
+                <h4><i class="fas fa-compass"></i> Lage-Sensor Nullpunkt</h4>
+                
+                <button class="btn btn-action" id="btnCalibrateRoll">Roll (Links/Rechts)</button>
+                <button class="btn btn-action" id="btnCalibratePitch">Pitch (Vorne/Hinten)</button>
+
+                <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;"></p>
+                
+                <h4><i class="fas fa-tint"></i> Wassertank Kalibrierung</h4>
+                
+                <button class="btn btn-action" id="btnCalibrateWaterFull">100% (Tank Voll)</button>
+                <button class="btn btn-action" id="btnCalibrateWaterEmpty">0% (Tank Leer)</button>
+            </div>
+        </div>
+
+        <div class="data-item system-restart-box collapsed">
+            <div class="steuerelement-header" onclick="toggleBox(this)">
+                 <h3><i class="fas fa-redo"></i> System Neustart</h3>
                  <span class="toggle-icon">▼</span>
             </div>
             <div class="steuerelement-body">
-                <p>Lage-Sensor Nullpunkt setzen:</p>
-                <button class="btn btn-action" id="btnCalibrateRoll">Roll (Links/Rechts)</button>
-                <button class="btn btn-action" id="btnCalibratePitch">Pitch (Vorne/Hinten)</button>
-                <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;">Wassertank Kalibrierung (Frischwasser):</p>
-                <button class="btn btn-action" id="btnCalibrateWaterFull">100% (Tank Voll)</button>
-                <button class="btn btn-action" id="btnCalibrateWaterEmpty">0% (Tank Leer)</button>
-    
-                <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;">System Neustart:</p>
+                
                 <button class="btn btn-restart" id="btnRestartHeater">Heizung</button>
                 <button class="btn btn-restart" id="btnRestartFan">MaxxFan</button>
                 <button class="btn btn-restart" id="btnRestartGps">GPS/Lage</button>
@@ -147,6 +162,7 @@
             </div>
         </div>
        </div>
+    </div>
 
 <script>
     // --- MQTT Logik ---
@@ -184,15 +200,37 @@
         switchElement.checked = isChecked;
     }
 
-    // Funktion zum Einrichten der Neustart-Buttons (OHNE CONFIRM)
+    // KORRIGIERT: Funktion zum Einrichten der Neustart-Buttons (OHNE CONFIRM)
     function setupRestartButton(buttonId, topic, nodeName) {
         document.getElementById(buttonId).onclick = function() {
             if (client && client.connected) {
-                client.publish(topic, "", { qos: 0, retain: false }); 
+                // Senden des Neustart-Befehls direkt
+                client.publish(topic, "ON", { qos: 0, retain: false }); 
                 console.log(`Neustart-Befehl gesendet an ${topic} (Gerät: ${nodeName})`);
             } else {
                 console.warn("MQTT nicht verbunden. Kann Neustart-Befehl nicht senden.");
                 alert(`MQTT nicht verbunden. Kann Neustart-Befehl für ${nodeName} nicht senden.`);
+            }
+        };
+    }
+
+    // KORRIGIERT: Funktion zum Senden des Kalibrierungsbefehls (OHNE CONFIRM)
+    function setupCalibrateButton(buttonId, topic, sensorName) {
+        document.getElementById(buttonId).onclick = function() {
+            if (client && client.connected) {
+                // Befehl direkt senden
+                sendCommand(topic, "ON"); // ESPHome Button Trigger
+                
+                // Visuelles Feedback
+                const button = this;
+                const originalText = button.textContent;
+                button.textContent = `Kommando (${sensorName}) gesendet...`;
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 3000); 
+            } else {
+                console.warn(`MQTT nicht verbunden. Kann Kommando für ${sensorName} nicht senden.`);
+                alert(`MQTT nicht verbunden. Kann Kommando für ${sensorName} nicht senden.`);
             }
         };
     }
@@ -217,6 +255,10 @@
             // --- MaxxFan Status ---
             case MAXXFAN_AUTO_STATE_TOPIC: setSwitchState(switchAutoFan, originalPayload); break;
             case MAXXFAN_CEILING_STATE_TOPIC: setSwitchState(switchCeilingMode, originalPayload); break;
+            
+            // --- Hinzufügung der Status-Updates für die neuen Steuerelemente (falls Topics vorhanden) ---
+            // case LIGHT_STATE_TOPIC: // Hier müsste der Status für das Hauptlicht verarbeitet werden
+            // case HEATER_SETPOINT_TOPIC: // Hier müsste der aktuelle Sollwert verarbeitet werden
             
             default:
                 break;
@@ -246,10 +288,12 @@
                 ESPGEOPOS_STATE_TOPIC, 
                 MAXXFAN_STATE_TOPIC, 
                 ESPTEMP_STATE_TOPIC, 
-                WATERLEVEL_STATUS_TOPIC, // KORRIGIERTES TOPIC
-                CP_PLUS_ALIVE_TOPIC,     // NEUE LED
+                WATERLEVEL_STATUS_TOPIC, 
+                CP_PLUS_ALIVE_TOPIC,
                 MAXXFAN_AUTO_STATE_TOPIC, 
-                MAXXFAN_CEILING_STATE_TOPIC
+                MAXXFAN_CEILING_STATE_TOPIC,
+                LIGHT_STATE_TOPIC,
+                HEATER_SETPOINT_TOPIC
             ], { qos: 0 });
             console.log("Status-Topics abonniert.");
         });
@@ -293,50 +337,20 @@
             sendCommand(SETPOINT_SET_TOPIC, selectedTemp);
         };
         
-        // NEU: Preset Buttons Logik
+        // Preset Buttons Logik
         document.querySelectorAll('.btn-preset').forEach(button => {
             button.onclick = function() {
                 const temp = this.getAttribute('data-temp');
-                document.getElementById("tempSetpoint").value = temp; // Optional: Setzt den Wert im Eingabefeld
-                sendCommand(SETPOINT_SET_TOPIC, temp); // Sendet den Befehl
+                document.getElementById("tempSetpoint").value = temp; 
+                sendCommand(SETPOINT_SET_TOPIC, temp); 
             };
         });
 
-        // Funktion zum Senden des Kalibrierungsbefehls
-        function setupCalibrateButton(buttonId, topic, sensorName) {
-        document.getElementById(buttonId).onclick = function() {
-            if (client && client.connected) {
-                // Senden eines leeren Payloads, um den Button-Trigger in ESPHome auszulösen
-                sendCommand(topic, ""); 
-                console.log(`Kalibrierungsbefehl gesendet an ${topic} (Sensor: ${sensorName})`);
-                
-                // Visuelles Feedback
-                const originalText = this.textContent;
-                this.textContent = `Kalibrierung (${sensorName}) gesendet...`;
-                setTimeout(() => {
-                    this.textContent = originalText;
-                }, 3000); 
-                
-            } else {
-                console.warn(`MQTT nicht verbunden. Kann Kalibrierungsbefehl für ${sensorName} nicht senden.`);
-                alert(`MQTT nicht verbunden. Kann Kalibrierungsbefehl für ${sensorName} nicht senden.`);
-            }
-        };
-    }
-        // Wassertank Kalibrierung (ZUWEISUNGEN)
-        setupCalibrateButton("btnCalibrateWaterFull", CALIBRATE_WATER_FULL_TOPIC, "Wasser VOLL");
-        setupCalibrateButton("btnCalibrateWaterEmpty", CALIBRATE_WATER_EMPTY_TOPIC, "Wasser LEER");
-        // Lage-Sensor Kalibrierung (ZUWEISUNGEN)
-        setupCalibrateButton("btnCalibrateRoll", GPS_CALIBRATE_ROLL_TOPIC, "Roll");
-        setupCalibrateButton("btnCalibratePitch", GPS_CALIBRATE_PITCH_TOPIC, "Pitch");
-        
-        
-        // 3. MaxxFan Schalter
+        // 3. MaxxFan Schalter (Auto / Ceiling Mode)
         switchAutoFan.onchange = function() {
             const state = this.checked ? "ON" : "OFF";
             sendCommand(MAXXFAN_AUTO_COMMAND_TOPIC, state);
             
-            // Logik: Deaktiviert Ceiling Mode wenn Auto AN
             if (this.checked) {
                  if (switchCeilingMode.checked) sendCommand(MAXXFAN_CEILING_COMMAND_TOPIC, "OFF");
                  switchCeilingMode.checked = false;
@@ -347,14 +361,19 @@
             const state = this.checked ? "ON" : "OFF";
             sendCommand(MAXXFAN_CEILING_COMMAND_TOPIC, state);
             
-            // Logik: Deaktiviert Auto Mode wenn Ceiling Mode AN
             if (this.checked) {
                 if (switchAutoFan.checked) sendCommand(MAXXFAN_AUTO_COMMAND_TOPIC, "OFF");
                 switchAutoFan.checked = false;
             }
         }
-
-        // 4. Restart-Buttons zuweisen (OHNE CONFIRM)
+        
+        // 4. Kalibrierung Zuweisungen (Lage und Wasser)
+        setupCalibrateButton("btnCalibrateRoll", GPS_CALIBRATE_ROLL_TOPIC, "Roll");
+        setupCalibrateButton("btnCalibratePitch", GPS_CALIBRATE_PITCH_TOPIC, "Pitch");
+        setupCalibrateButton("btnCalibrateWaterFull", CALIBRATE_WATER_FULL_TOPIC, "Wasser VOLL");
+        setupCalibrateButton("btnCalibrateWaterEmpty", CALIBRATE_WATER_EMPTY_TOPIC, "Wasser LEER");
+        
+        // 5. Restart-Buttons zuweisen
         setupRestartButton("btnRestartHeater", RESTART_HEATER_TOPIC, "Heizung");
         setupRestartButton("btnRestartFan", RESTART_FAN_TOPIC, "MaxxFan");
         setupRestartButton("btnRestartGps", RESTART_GPS_TOPIC, "GPS/Lage");
