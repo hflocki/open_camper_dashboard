@@ -20,6 +20,15 @@
         });
       });
     }
+    
+    // NEUE Funktion für das Akkordeon
+    function toggleBox(headerElement) {
+    // 1. Finde das Eltern-Element der gesamten Box (.data-item)
+    const box = headerElement.closest('.data-item');
+
+    // 2. Schalte die Klasse 'collapsed' um
+    box.classList.toggle('collapsed');
+}
 </script>
 </head>
 <body>
@@ -65,64 +74,79 @@
     </div>
     <div class="data-card">
         
-        <div class="data-item">
-            <h3><i class="fas fa-lightbulb"></i> Beleuchtung</h3>
-            <p>Hauptlicht:</p>
-            <button class="btn btn-on" id="btnMainLightOn">AN</button>
-            <button class="btn btn-off" id="btnMainLightOff">AUS</button>
+        <div class="data-item collapsed">
+            <div class="steuerelement-header" onclick="toggleBox(this)">
+                <h3><i class="fas fa-lightbulb"></i> Beleuchtung</h3>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="steuerelement-body">
+                <p>Hauptlicht:</p>
+                <button class="btn btn-on" id="btnMainLightOn">AN</button>
+                <button class="btn btn-off" id="btnMainLightOff">AUS</button>
+            </div>
         </div>
 
-        <div class="data-item">
-            <h3><i class="fas fa-fire"></i> Truma</h3>
-            <p>Zieltemperatur (&deg;C):</p>
-            <input type="number" id="tempSetpoint" value="20.0" step="0.5" min="10" max="30" class="input-field">
-            <button class="btn btn-action" id="btnSetTemp">Setzen</button>
-            
-            <div class="temp-preset-buttons">
-                <button class="btn btn-preset" data-temp="17">17&deg;C</button>
-                <button class="btn btn-preset" data-temp="19">19&deg;C</button>
-                <button class="btn btn-preset" data-temp="21">21&deg;C</button>
-                <button class="btn btn-preset" data-temp="23">23&deg;C</button>
-                <button class="btn btn-preset" data-temp="26">26&deg;C</button>
-                <button class="btn btn-preset" data-temp="28">28&deg;C</button>
+        <div class="data-item collapsed">
+            <div class="steuerelement-header" onclick="toggleBox(this)">
+                <h3><i class="fas fa-fire"></i> Truma</h3>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="steuerelement-body">
+                <p>Zieltemperatur (&deg;C):</p>
+                <input type="number" id="tempSetpoint" value="20.0" step="0.5" min="10" max="30" class="input-field">
+                <button class="btn btn-action" id="btnSetTemp">Setzen</button>
+                
+                <div class="temp-preset-buttons">
+                    <button class="btn btn-preset" data-temp="17">17&deg;C</button>
+                    <button class="btn btn-preset" data-temp="19">19&deg;C</button>
+                    <button class="btn btn-preset" data-temp="21">21&deg;C</button>
+                    <button class="btn btn-preset" data-temp="23">23&deg;C</button>
+                    <button class="btn btn-preset" data-temp="26">26&deg;C</button>
+                    <button class="btn btn-preset" data-temp="28">28&deg;C</button>
+                </div>
             </div>
         </div>
         
-        <div class="data-item">
-            <h3><i class="fas fa-fan"></i> MaxxFan</h3>
-            <p>Auto-Modus:</p>
-            <label class="switch">
-                <input type="checkbox" id="switchAutoFan" class="switch-input">
-                <span class="slider round"></span>
-            </label>
-            <p style="margin-top: 15px;">Dach-Ventilator:</p>
-            <label class="switch">
-                <input type="checkbox" id="switchCeilingMode" class="switch-input">
-                <span class="slider round"></span>
-            </label>
-        </div>
-        
-        <div class="data-item system-restart-box">
-             <h3><i class="fas fa-tools"></i> System Aktionen</h3>
-            <p>Lage-Sensor Nullpunkt setzen:</p>
-            <button class="btn btn-action" id="btnCalibrateRoll">Roll (Links/Rechts)</button>
-            <button class="btn btn-action" id="btnCalibratePitch">Pitch (Vorne/Hinten)</button>
-            <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;">Wassertank Kalibrierung (Frischwasser):</p>
-            <button class="btn btn-action" id="btnCalibrateWaterFull">100% (Tank Voll)</button>
-            <button class="btn btn-action" id="btnCalibrateWaterEmpty">0% (Tank Leer)</button>
-
-            <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;">System Neustart:</p>
-            <button class="btn btn-restart" id="btnRestartHeater">Heizung</button>
-            <button class="btn btn-restart" id="btnRestartFan">MaxxFan</button>
-            <button class="btn btn-restart" id="btnRestartGps">GPS/Lage</button>
-            <button class="btn btn-restart" id="btnRestartTemp">Temp/Licht</button>
-            <button class="btn btn-restart" id="btnRestartWater">Wasser</button>
-        </div>
-        
-    </div>
+        <div class="data-item collapsed">
+            <div class="steuerelement-header" onclick="toggleBox(this)">
+                <h3><i class="fas fa-fan"></i> MaxxFan</h3>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="steuerelement-body">
+                <p>Auto-Modus:</p>
+                <label class="switch">
+                    <input type="checkbox" id="switchAutoFan" class="switch-input">
+                    <span class="slider round"></span>
+                </label>
+                <p style="margin-top: 15px;">Dach-Ventilator:</p>
+                <label class="switch">
+                    <input type="checkbox" id="switchCeilingMode" class="switch-input">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            </div>
+            <div class="data-item system-restart-box collapsed">
+            <div class="steuerelement-header" onclick="toggleBox(this)">
+                 <h3><i class="fas fa-tools"></i> System Aktionen</h3>
+                 <span class="toggle-icon">▼</span>
+            </div>
+            <div class="steuerelement-body">
+                <p>Lage-Sensor Nullpunkt setzen:</p>
+                <button class="btn btn-action" id="btnCalibrateRoll">Roll (Links/Rechts)</button>
+                <button class="btn btn-action" id="btnCalibratePitch">Pitch (Vorne/Hinten)</button>
+                <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;">Wassertank Kalibrierung (Frischwasser):</p>
+                <button class="btn btn-action" id="btnCalibrateWaterFull">100% (Tank Voll)</button>
+                <button class="btn btn-action" id="btnCalibrateWaterEmpty">0% (Tank Leer)</button>
     
-  </div>
-
+                <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;">System Neustart:</p>
+                <button class="btn btn-restart" id="btnRestartHeater">Heizung</button>
+                <button class="btn btn-restart" id="btnRestartFan">MaxxFan</button>
+                <button class="btn btn-restart" id="btnRestartGps">GPS/Lage</button>
+                <button class="btn btn-restart" id="btnRestartTemp">Temp/Licht</button>
+                <button class="btn btn-restart" id="btnRestartWater">Wasser</button>
+            </div>
+        </div>
+       </div>
 
 <script>
     // --- MQTT Logik ---
