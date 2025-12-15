@@ -428,13 +428,20 @@ function parsePayloadForKey(payload, key) {
                     // (Die ID 'pitchValue' wird nicht mehr benötigt, da updateTiltGauge dies macht)
                     break;
 
- // KORRIGIERT: Wassertank Füllstand (Mit 120L Fallback Logik und NULL-Prüfung)
+// KORRIGIERT: Wassertank Füllstand (Mit 120L Fallback Logik und NULL-Prüfung)
                 case FRESH_WATER_STATE_TOPIC:
                     const payloadToParse = message.toString();
 
                     const levelPercentStr = parsePayloadForKey(payloadToParse, 'levelPercent');
                     let levelVolumeStr = parsePayloadForKey(payloadToParse, 'levelVolume');
                     const adcStr = parsePayloadForKey(payloadToParse, 'adc');
+                    
+                    // Element-Referenzen abrufen (nur einmal pro Element)
+                    const percentValueElement = document.getElementById('levelPercentValue');
+                    const barElement = document.getElementById('freshWaterBar');
+                    const volumeValueElement = document.getElementById('levelVolumeValue');
+                    const adcValueElement = document.getElementById('adcValue');
+
 
                     // 1. LevelPercent (Prozent)
                     if (levelPercentStr) {
@@ -442,9 +449,7 @@ function parsePayloadForKey(payload, key) {
                         if (!isNaN(level)) {
                             const levelFixed = level.toFixed(0);
                             
-                            const percentValueElement = document.getElementById('levelPercentValue');
-                            const barElement = document.getElementById('freshWaterBar');
-
+                            // *** WICHTIG: Null-Prüfung ***
                             if (percentValueElement) {
                                 percentValueElement.textContent = levelFixed;
                             }
@@ -452,8 +457,8 @@ function parsePayloadForKey(payload, key) {
                                 barElement.style.height = `${levelFixed}%`;
                             }
                             
-                            // Farbe nur auf den Prozentwert anwenden
-                            if (percentValueElement) { // Prüfen, ob Element existiert
+                            // Farbe nur auf den Prozentwert anwenden (mit Null-Prüfung)
+                            if (percentValueElement) { 
                                 if (level < 15) {
                                     percentValueElement.style.color = 'red';
                                 } else {
@@ -474,7 +479,7 @@ function parsePayloadForKey(payload, key) {
                         }
                     }
 
-                    const volumeValueElement = document.getElementById('levelVolumeValue');
+                    // *** WICHTIG: Null-Prüfung ***
                     if (levelVolumeStr && volumeValueElement) {
                         const volume = parseFloat(levelVolumeStr);
                         if (!isNaN(volume)) {
@@ -483,7 +488,7 @@ function parsePayloadForKey(payload, key) {
                     }
 
                     // 3. ADC Value (Volt)
-                    const adcValueElement = document.getElementById('adcValue');
+                    // *** WICHTIG: Null-Prüfung ***
                     if (adcStr && adcValueElement) {
                         const adcValue = parseFloat(adcStr);
                         if (!isNaN(adcValue)) {
