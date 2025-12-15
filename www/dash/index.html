@@ -249,7 +249,7 @@
     function updateMapLink() {
         if (currentLat !== 'N/A' && currentLon !== 'N/A') {
             // Fiktiver Link-Platzhalter
-            mapLinkElement.href = `http://maps.google.com/maps?q=$${currentLat},${currentLon}`;
+            mapLinkElement.href = `http://maps.google.com/maps?q=$$${currentLat},${currentLon}`;
             mapLinkElement.style.display = 'inline-block';
         } else {
             mapLinkElement.style.display = 'none';
@@ -289,6 +289,7 @@ function updateTiltGauge(roll, pitch) {
     // Aktualisiere die Textwerte zur Kontrolle
     rollValueElement.textContent = `${roll.toFixed(1)} °`;
     pitchValueElement.textContent = `${pitch.toFixed(1)} °`;
+} // <-- FEHLERBEHEBUNG: Schließende Klammer für updateTiltGauge
 
 // NEU: Allgemeine Payload Parsing Funktion
 /**
@@ -427,12 +428,12 @@ function parsePayloadForKey(payload, key) {
                     // (Die ID 'pitchValue' wird nicht mehr benötigt, da updateTiltGauge dies macht)
                     break;
 
-                // Wassertank Füllstand (Jetzt mit der extrahierten Zahl oder dem Original-Payload)
+                // KORRIGIERT: Wassertank Füllstand (Mit 120L Fallback Logik)
                 case FRESH_WATER_STATE_TOPIC:
                     const payloadToParse = message.toString();
 
                     const levelPercentStr = parsePayloadForKey(payloadToParse, 'levelPercent');
-                    const levelVolumeStr = parsePayloadForKey(payloadToParse, 'levelVolume');
+                    let levelVolumeStr = parsePayloadForKey(payloadToParse, 'levelVolume');
                     const adcStr = parsePayloadForKey(payloadToParse, 'adc');
 
                     // 1. LevelPercent (Prozent)
@@ -453,7 +454,18 @@ function parsePayloadForKey(payload, key) {
                         }
                     }
 
-                    // 2. LevelVolume (Liter)
+                    // 2. LevelVolume (Liter) - MIT 120L FALLBACK
+                    const MAX_VOLUME = 120; // Maximalwert in Litern
+
+                    if (!levelVolumeStr && levelPercentStr) {
+                        // FALLBACK: Wenn levelVolume nicht gesendet wird, berechne es aus dem Prozentwert
+                        const level = parseFloat(levelPercentStr);
+                        if (!isNaN(level)) {
+                           const calculatedVolume = (level / 100) * MAX_VOLUME;
+                           levelVolumeStr = calculatedVolume.toFixed(0); // Setze den berechneten String
+                        }
+                    }
+
                     if (levelVolumeStr) {
                         const volume = parseFloat(levelVolumeStr);
                         if (!isNaN(volume)) {
@@ -470,9 +482,10 @@ function parsePayloadForKey(payload, key) {
                         }
                     }
                     break;
-        });
+            }
+        }); // <-- Wichtig: Schließt den 'message' Handler.
 
-      client.on('error', function (err) {
+        client.on('error', function (err) {
             console.error("Verbindung fehlgeschlagen (Client Error): ", err);
             mqttStatusLabelElement.textContent = "FEHLER";
             mqttLedElement.className = "status-led status-led-offline"; // Rot
