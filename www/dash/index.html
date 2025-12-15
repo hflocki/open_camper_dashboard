@@ -96,7 +96,14 @@
                 <span class="unit-label">m</span>
             </div>
         </div>
+        <div class="position-item" style="text-align: right; padding-right: 10px;">
+            <div class="display-value large-value-smaller" style="font-size: 1.3em;">
+                <i class="fas fa-satellite" style="margin-right: 5px; color: #007bff;"></i>
+                <span id="satValue">N/A</span>
+            </div>
+        </div>
     </div>
+
 </div>
 
 <div class="data-item">
@@ -361,6 +368,7 @@ function parsePayloadForKey(payload, key) {
             client.subscribe(GPS_LON_TOPIC, { qos: 0 });
             client.subscribe(GPS_ALT_TOPIC, { qos: 0 });
             client.subscribe(GPS_SPEED_TOPIC, { qos: 0 });
+            client.subscribe(GPS_SAT_TOPIC, { qos: 0 });
             client.subscribe(MAXXFAN_FAN_STATE_TOPIC, { qos: 0 });
             client.subscribe(MAXXFAN_LID_STATE_TOPIC, { qos: 0 });
             client.subscribe(MAXXFAN_DIRECTION_TOPIC, { qos: 0 });
@@ -412,6 +420,13 @@ function parsePayloadForKey(payload, key) {
                     currentLat = parseFloat(payloadToUse).toFixed(4);
                     document.getElementById('latValue').textContent = currentLat;
                     updateMapLink();
+                    break;
+                case GPS_ALT_TOPIC: 
+                     document.getElementById('altValue').textContent = parseFloat(payloadToUse).toFixed(1); 
+                     break;
+                case GPS_SAT_TOPIC: 
+                    // Setzt den Wert auf 0 Dezimalstellen
+                    document.getElementById('satValue').textContent = parseFloat(payloadToUse).toFixed(0); 
                     break;
 
                 case GPS_ROLL_TOPIC:
