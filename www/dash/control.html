@@ -213,7 +213,7 @@
 
         client.on('connect', function () {
             console.log("MQTT Broker verbunden!");
-            mqttStatusLabelElement.textContent = "Verbunden (OK)";
+            mqttStatusLabelElement.textContent = "OK";
             mqttLedElement.className = "status-led status-led-online"; 
 
             // Abonniert alle Status- und Kontroll-Topics
