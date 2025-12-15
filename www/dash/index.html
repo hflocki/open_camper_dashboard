@@ -71,7 +71,7 @@
 <div id="tiltMarker" class="tilt-marker"></div>
 </div>
 </div>
-<p>R: <span id="rollValueGraph">-- °</span> | P: <span id="pitchValueGraph">-- °</span></p>
+<p>R/L: <span id="rollValueGraph">-- °</span> | V/H: <span id="pitchValueGraph">-- °</span></p>
 </div>
 
 <div class="data-item">
@@ -205,29 +205,93 @@
     </div>
 </div>
 
+<div class="data-item govee-card" id="goveeCard1">
+    <h3><i class="fas fa-thermometer-half"></i> Außentemperatur</h3>
+    <div class="govee-card-body">
+        <div class="govee-temp-hum-group">
+            
+            <div class="govee-value-item">
+                <span class="unit-label">Temperatur</span>
+                <div class="large-value">
+                    <span id="goveeTempValue1">N/A</span>
+                    <span style="font-size: 0.6em; vertical-align: top;">°C</span>
+                </div>
+            </div>
+            
+            <div class="govee-value-item">
+                <span class="unit-label">Luftfeuchte</span>
+                <div class="large-value">
+                    <span id="goveeHumValue1">N/A</span>
+                    <span style="font-size: 0.6em; vertical-align: top;">%</span>
+                </div>
+            </div>
 
-  <div class="data-item">
-    <h3><i class="fas fa-circle"></i> Empty</h3>
-    <div class="position-group">
-        <div class="position-item">
-          
         </div>
-        <div class="position-item">
         
+        <div class="battery-display">
+            <i class="fas fa-battery-full"></i> Batt: <span id="goveeBattValue1">N/A</span> %
         </div>
     </div>
-  </div>  
-  <div class="data-item">
-    <h3><i class="fas fa-circle"></i> Empty</h3>
-    <div class="position-group">
-        <div class="position-item">
-          
+</div>
+
+<div class="data-item govee-card" id="goveeCard2">
+    <h3><i class="fas fa-box"></i> Staufach Temperatur</h3>
+    <div class="govee-card-body">
+        <div class="govee-temp-hum-group">
+            
+            <div class="govee-value-item">
+                <span class="unit-label">Temperatur</span>
+                <div class="large-value">
+                    <span id="goveeTempValue2">N/A</span>
+                    <span style="font-size: 0.6em; vertical-align: top;">°C</span>
+                </div>
+            </div>
+            
+            <div class="govee-value-item">
+                <span class="unit-label">Luftfeuchte</span>
+                <div class="large-value">
+                    <span id="goveeHumValue2">N/A</span>
+                    <span style="font-size: 0.6em; vertical-align: top;">%</span>
+                </div>
+            </div>
+
         </div>
-        <div class="position-item">
         
+        <div class="battery-display">
+            <i class="fas fa-battery-full"></i> Batt: <span id="goveeBattValue2">N/A</span> %
         </div>
     </div>
+</div>
+
+<div class="data-item govee-card" id="goveeCard3">
+    <h3><i class="fas fa-bed"></i> Schlafbereich</h3>
+    <div class="govee-card-body">
+        <div class="govee-temp-hum-group">
+            
+            <div class="govee-value-item">
+                <span class="unit-label">Temperatur</span>
+                <div class="large-value">
+                    <span id="goveeTempValue3">N/A</span>
+                    <span style="font-size: 0.6em; vertical-align: top;">°C</span>
+                </div>
+            </div>
+            
+            <div class="govee-value-item">
+                <span class="unit-label">Luftfeuchte</span>
+                <div class="large-value">
+                    <span id="goveeHumValue3">N/A</span>
+                    <span style="font-size: 0.6em; vertical-align: top;">%</span>
+                </div>
+            </div>
+
+        </div>
+        
+        <div class="battery-display">
+            <i class="fas fa-battery-full"></i> Batt: <span id="goveeBattValue3">N/A</span> %
+        </div>
     </div>
+</div>
+  
 </div>
   
 </div>
@@ -251,12 +315,41 @@
         [WATERLEVEL_STATUS_TOPIC]: 'waterLed',
         [CP_PLUS_ALIVE_TOPIC]: 'cpLed'
     };
+    
+    // NEUE FUNKTION: Sendet die Authentifizierungsnachricht an den Wasser-Node
+    function sendAuthToWaterNode() {
+        if (!client || !client.connected || WATER_NODE_SEC === "IHR_SEC_KEY_HIER") {
+            if (WATER_NODE_SEC === "IHR_SEC_KEY_HIER") {
+                console.warn("ACHTUNG: WATER_NODE_SEC ist noch nicht in config.js gesetzt! Auth wird nicht gesendet.");
+            }
+            return;
+        }
+
+        // KORREKTUR: Der Source muss 'app' sein.
+        const authPayload = `app:${WATER_NODE_ID}:auth:${WATER_NODE_SEC};`; 
+        // Der Topic-Pfad kommt aus der vorherigen Korrektur: <MQTT_ROOT_ID>/toc/pipe
+        const authTopic = `${MQTT_ROOT_ID}/toc/pipe`; 
+
+        client.publish(authTopic, authPayload, { qos: 0, retain: false }, function(err) {
+            if (err) {
+                console.error("Fehler beim Senden der AUTH-Nachricht:", err);
+            } else {
+                console.log(`AUTH-Nachricht gesendet an ${WATER_NODE_ID}.`);
+                
+                // AUTOSEND AKTIVIEREN (von vorheriger Logik übernommen)
+                const autoSendPayload = `app:${WATER_NODE_ID}:autosend:1;`;
+                client.publish(authTopic, autoSendPayload, { qos: 0, retain: false });
+                console.log(`AutoSend aktiviert für ${WATER_NODE_ID}. Erwarte jetzt Daten...`);
+            }
+        });
+    }
+
 
     // Funktion zum Aktualisieren des Karten-Links
     function updateMapLink() {
         if (currentLat !== 'N/A' && currentLon !== 'N/A') {
             // Fiktiver Link-Platzhalter
-            mapLinkElement.href = `http://maps.google.com/maps?q=$$${currentLat},${currentLon}`;
+            mapLinkElement.href = `http://maps.google.com/maps?q=$$$${currentLat},${currentLon}`;
             mapLinkElement.style.display = 'inline-block';
         } else {
             mapLinkElement.style.display = 'none';
@@ -269,8 +362,6 @@ let currentPitch = 0;
 
 /**
  * Aktualisiert die Position des Markers im Neigungsindikator.
- * @param {number} roll Roll-Wert in Grad (-15 bis +15)
- * @param {number} pitch Pitch-Wert in Grad (-15 bis +15)
  */
 function updateTiltGauge(roll, pitch) {
     const marker = document.getElementById('tiltMarker');
@@ -286,59 +377,44 @@ function updateTiltGauge(roll, pitch) {
     let shiftX = (roll / MAX_DEGREES) * maxPixelShift;
     let shiftY = (pitch / MAX_DEGREES) * maxPixelShift;
 
-    // Begrenzung
     shiftX = Math.max(-maxPixelShift, Math.min(maxPixelShift, shiftX));
     shiftY = Math.max(-maxPixelShift, Math.min(maxPixelShift, shiftY));
 
-    // Wenden Sie die Verschiebung an: Roll positiv = links (negativ X), Pitch positiv = unten (positiv Y)
     marker.style.transform = `translate(calc(-50% - ${shiftX}px), calc(-50% + ${shiftY}px))`;
 
-    // Aktualisiere die Textwerte zur Kontrolle
     rollValueElement.textContent = `${roll.toFixed(1)} °`;
     pitchValueElement.textContent = `${pitch.toFixed(1)} °`;
-} // <-- FEHLERBEHEBUNG: Schließende Klammer für updateTiltGauge
+} 
 
-// NEU: Allgemeine Payload Parsing Funktion
 /**
- * Extrahiert einen bestimmten Wert aus einem Semikolon-getrennten String oder JSON.
+ * Verarbeitet den JSON-Payload eines Govee-Sensors
+ * @param {string} payload Die JSON-Nachricht
+ * @param {string} index Index der Kachel (1, 2 oder 3)
  */
-function parsePayloadForKey(payload, key) {
-    if (!payload || typeof payload !== 'string') return null;
-
+function processGoveeData(payload, index) {
     try {
-        // VERSUCH 1: JSON-Parsing
-        const json = JSON.parse(payload.trim());
-        if (json.hasOwnProperty(key)) {
-            return String(json[key]);
-        }
+        const data = JSON.parse(payload);
+        
+        const tempElement = document.getElementById(`goveeTempValue${index}`);
+        const humElement = document.getElementById(`goveeHumValue${index}`);
+        const battElement = document.getElementById(`goveeBattValue${index}`);
+        
+        if (tempElement) tempElement.textContent = data.tempc.toFixed(1);
+        if (humElement) humElement.textContent = data.hum.toFixed(1);
+        if (battElement) battElement.textContent = data.batt.toFixed(0);
+
     } catch (e) {
-        // Ignoriere
+        console.error(`Fehler beim Parsen der Govee JSON-Daten (Sensor ${index}):`, e);
     }
-
-    // VERSUCH 2: Semikolon-getrennte Schlüssel-Wert-Paare (z.B. adc:1234;levelPercent:55;)
-    const trimmedPayload = payload.trim().replace(/;$/, '');
-    const parts = trimmedPayload.split(';');
-
-    for (const part of parts) {
-        const subParts = part.split(':');
-        if (subParts.length >= 2) {
-            const currentKey = subParts[0].trim();
-            const currentValue = subParts.slice(1).join(':').trim(); 
-
-            if (currentKey === key) {
-                return currentValue;
-            }
-        }
-    }
-    return null;
 }
+
 
    // --- Verbindung herstellen ---
     function connectClient() {
-        const connectUrl = `ws://${WS_HOST}:${WS_PORT}`;
+        const connectUrl = `ws://${WS_HOST}:${WS_PORT}${WS_PATH}`;
         console.log(`Versuche Verbindung zu ${connectUrl}`);
         mqttStatusLabelElement.textContent = "Verbinden...";
-        mqttLedElement.className = "status-led"; // Setzt auf grau
+        mqttLedElement.className = "status-led"; 
 
         client = mqtt.connect(connectUrl, {
             clientId: clientId,
@@ -350,9 +426,9 @@ function parsePayloadForKey(payload, key) {
         client.on('connect', function () {
             console.log("Verbunden!");
             mqttStatusLabelElement.textContent = "OK";
-            mqttLedElement.className = "status-led status-led-online"; // Grün
+            mqttLedElement.className = "status-led status-led-online"; 
 
-            // Abonnements (alle Topics aus config.js)
+            // 1. Abonniere alle Topics
             for (const topic in ledMap) {
                 if (ledMap.hasOwnProperty(topic)) {
                     client.subscribe(topic, { qos: 0 });
@@ -368,24 +444,50 @@ function parsePayloadForKey(payload, key) {
             client.subscribe(GPS_LON_TOPIC, { qos: 0 });
             client.subscribe(GPS_ALT_TOPIC, { qos: 0 });
             client.subscribe(GPS_SPEED_TOPIC, { qos: 0 });
-            client.subscribe(GPS_SAT_TOPIC, { qos: 0 });
+            client.subscribe(GPS_SAT_TOPIC, { qos: 0 }); 
             client.subscribe(MAXXFAN_FAN_STATE_TOPIC, { qos: 0 });
             client.subscribe(MAXXFAN_LID_STATE_TOPIC, { qos: 0 });
             client.subscribe(MAXXFAN_DIRECTION_TOPIC, { qos: 0 });
             client.subscribe(MAXXFAN_AUTO_STATE_TOPIC, { qos: 0 });
             client.subscribe(MAXXFAN_CEILING_STATE_TOPIC, { qos: 0 });
-            client.subscribe(FRESH_WATER_STATE_TOPIC, { qos: 0 });
+            
+            // ABONNEMENTS FÜR WASSER
+            client.subscribe(FRESH_WATER_PERCENT_TOPIC, { qos: 0 }); 
+            client.subscribe(FRESH_WATER_VOLUME_TOPIC, { qos: 0 });
+            client.subscribe(FRESH_WATER_ADC_TOPIC, { qos: 0 });
+
+            // NEU: ABONNEMENTS FÜR 3 GOVEE-SENSOREN (müssen in config.js definiert sein!)
+            if (typeof GOVEE_TEMP_TOPIC_1 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_1, { qos: 0 });
+            if (typeof GOVEE_TEMP_TOPIC_2 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_2, { qos: 0 });
+            if (typeof GOVEE_TEMP_TOPIC_3 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_3, { qos: 0 });
+            
             console.log("Alle Topics abonniert.");
+            
+            // 2. Sende AUTH-Nachricht und aktiviere AutoSend für den Wasser-Node
+            sendAuthToWaterNode();
         });
 
             client.on('message', function (topic, message) {
             const payloadToUse = message.toString();
 
+            // --- GOVEE SENSOR LOGIK (JSON Parsing) ---
+            if (topic === GOVEE_TEMP_TOPIC_1) {
+                processGoveeData(payloadToUse, 1);
+                return;
+            }
+            if (topic === GOVEE_TEMP_TOPIC_2) {
+                processGoveeData(payloadToUse, 2);
+                return;
+            }
+            if (topic === GOVEE_TEMP_TOPIC_3) {
+                processGoveeData(payloadToUse, 3);
+                return;
+            }
+            
             // 2. --- Aktualisiere LEDs basierend auf LWT (Online/Offline) ---
             if (ledMap.hasOwnProperty(topic)) {
                 const ledElement = document.getElementById(ledMap[topic]);
                 if (ledElement) {
-                    // Prüft auf 1, online, ON, True, true
                     const payloadUpper = payloadToUse.toUpperCase();
                     const isOnline = (
                         payloadUpper === 'ONLINE' || 
@@ -408,8 +510,16 @@ function parsePayloadForKey(payload, key) {
                 case MAXXFAN_LID_STATE_TOPIC: document.getElementById('lidStateValue').textContent = payloadToUse; break;
                 case MAXXFAN_DIRECTION_TOPIC: document.getElementById('directionValue').textContent = payloadToUse; break;
                 case MAXXFAN_AUTO_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break;
-                case GPS_ALT_TOPIC: document.getElementById('altValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
                 case GPS_SPEED_TOPIC: document.getElementById('speedValue').textContent = parseFloat(payloadToUse).toFixed(0); break;
+                
+                case GPS_ALT_TOPIC: document.getElementById('altValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
+                
+                case GPS_SAT_TOPIC: 
+                    const satValueElement = document.getElementById('satValue');
+                    if (satValueElement) {
+                        satValueElement.textContent = parseFloat(payloadToUse).toFixed(0); 
+                    }
+                    break; 
 
                 case GPS_LON_TOPIC:
                     currentLon = parseFloat(payloadToUse).toFixed(4);
@@ -421,115 +531,81 @@ function parsePayloadForKey(payload, key) {
                     document.getElementById('latValue').textContent = currentLat;
                     updateMapLink();
                     break;
-                case GPS_ALT_TOPIC: 
-                     document.getElementById('altValue').textContent = parseFloat(payloadToUse).toFixed(1); 
-                     break;
-                case GPS_SAT_TOPIC: 
-                    // Setzt den Wert auf 0 Dezimalstellen
-                    document.getElementById('satValue').textContent = parseFloat(payloadToUse).toFixed(0); 
-                    break;
 
                 case GPS_ROLL_TOPIC:
                     currentRoll = parseFloat(payloadToUse);
                     updateTiltGauge(currentRoll, currentPitch);
-                    // Roll-Wert im Textfeld unter dem Gauge aktualisieren
-                    // (Die ID 'rollValue' wird nicht mehr benötigt, da updateTiltGauge dies macht)
                     break;
 
                 case GPS_PITCH_TOPIC:
                     currentPitch = parseFloat(payloadToUse);
                     updateTiltGauge(currentRoll, currentPitch);
-                    // Pitch-Wert im Textfeld unter dem Gauge aktualisieren
-                    // (Die ID 'pitchValue' wird nicht mehr benötigt, da updateTiltGauge dies macht)
                     break;
 
-// KORRIGIERT: Wassertank Füllstand (Mit 120L Fallback Logik und NULL-Prüfung)
-                case FRESH_WATER_STATE_TOPIC:
-                    const payloadToParse = message.toString();
-
-                    const levelPercentStr = parsePayloadForKey(payloadToParse, 'levelPercent');
-                    let levelVolumeStr = parsePayloadForKey(payloadToParse, 'levelVolume');
-                    const adcStr = parsePayloadForKey(payloadToParse, 'adc');
-                    
-                    // Element-Referenzen abrufen (nur einmal pro Element)
+                // --- WASSERSTAND LOGIK ---
+                
+                // 1. LevelPercent (Prozent und Balken)
+                case FRESH_WATER_PERCENT_TOPIC:
+                    const levelPercent = parseFloat(payloadToUse);
                     const percentValueElement = document.getElementById('levelPercentValue');
                     const barElement = document.getElementById('freshWaterBar');
+
+                    if (!isNaN(levelPercent)) {
+                        const levelFixed = levelPercent.toFixed(0);
+                        
+                        if (percentValueElement) {
+                            percentValueElement.textContent = levelFixed;
+                            // Farbe nur auf den Prozentwert anwenden
+                            if (levelPercent < 15) {
+                                percentValueElement.style.color = 'red';
+                            } else {
+                                percentValueElement.style.color = '#007bff'; 
+                            }
+                        }
+                        if (barElement) {
+                            barElement.style.height = `${levelFixed}%`;
+                        }
+                    }
+                    break;
+
+                // 2. LevelVolume (Liter)
+                case FRESH_WATER_VOLUME_TOPIC:
+                    const levelVolume = parseFloat(payloadToUse);
                     const volumeValueElement = document.getElementById('levelVolumeValue');
+                    
+                    if (!isNaN(levelVolume) && volumeValueElement) {
+                        volumeValueElement.textContent = levelVolume.toFixed(0);
+                    }
+                    break;
+
+                // 3. ADC Value (Volt)
+                case FRESH_WATER_ADC_TOPIC:
+                    const adcValueRaw = parseFloat(payloadToUse);
                     const adcValueElement = document.getElementById('adcValue');
 
-
-                    // 1. LevelPercent (Prozent)
-                    if (levelPercentStr) {
-                        const level = parseFloat(levelPercentStr);
-                        if (!isNaN(level)) {
-                            const levelFixed = level.toFixed(0);
-                            
-                            // *** WICHTIG: Null-Prüfung ***
-                            if (percentValueElement) {
-                                percentValueElement.textContent = levelFixed;
-                            }
-                            if (barElement) {
-                                barElement.style.height = `${levelFixed}%`;
-                            }
-                            
-                            // Farbe nur auf den Prozentwert anwenden (mit Null-Prüfung)
-                            if (percentValueElement) { 
-                                if (level < 15) {
-                                    percentValueElement.style.color = 'red';
-                                } else {
-                                    percentValueElement.style.color = '#007bff'; // Blauer Akzent
-                                }
-                            }
-                        }
-                    }
-
-                    // 2. LevelVolume (Liter) - MIT 120L FALLBACK
-                    const MAX_VOLUME = 120; // Maximalwert in Litern
-
-                    if (!levelVolumeStr && levelPercentStr) {
-                        const level = parseFloat(levelPercentStr);
-                        if (!isNaN(level)) {
-                           const calculatedVolume = (level / 100) * MAX_VOLUME;
-                           levelVolumeStr = calculatedVolume.toFixed(0); 
-                        }
-                    }
-
-                    // *** WICHTIG: Null-Prüfung ***
-                    if (levelVolumeStr && volumeValueElement) {
-                        const volume = parseFloat(levelVolumeStr);
-                        if (!isNaN(volume)) {
-                            volumeValueElement.textContent = volume.toFixed(0);
-                        }
-                    }
-
-                    // 3. ADC Value (Volt)
-                    // *** WICHTIG: Null-Prüfung ***
-                    if (adcStr && adcValueElement) {
-                        const adcValue = parseFloat(adcStr);
-                        if (!isNaN(adcValue)) {
-                           adcValueElement.textContent = (adcValue / 1000).toFixed(2);
-                        }
+                    if (!isNaN(adcValueRaw) && adcValueElement) {
+                       adcValueElement.textContent = adcValueRaw.toFixed(2);
                     }
                     break;
             }
-        }); // <-- Wichtig: Schließt den 'message' Handler.
+        }); 
 
         client.on('error', function (err) {
             console.error("Verbindung fehlgeschlagen (Client Error): ", err);
             mqttStatusLabelElement.textContent = "FEHLER";
-            mqttLedElement.className = "status-led status-led-offline"; // Rot
+            mqttLedElement.className = "status-led status-led-offline"; 
         });
 
         client.on('close', function () {
             console.log("Verbindung geschlossen/verloren. Versuche Wiederverbindung...");
             mqttStatusLabelElement.textContent = "Verloren";
-            mqttLedElement.className = "status-led status-led-offline"; // Rot
+            mqttLedElement.className = "status-led status-led-offline"; 
         });
 
         client.on('offline', function () {
             console.log("Client ist offline.");
             mqttStatusLabelElement.textContent = "Offline";
-            mqttLedElement.className = "status-led status-led-offline"; // Rot
+            mqttLedElement.className = "status-led status-led-offline"; 
         });
     }
 

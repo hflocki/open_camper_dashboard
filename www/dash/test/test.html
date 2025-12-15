@@ -3,100 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP Test Switch</title>
+    <title>ESP Test Dashboard</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="./style.css"> 
     
     <script src="./mqtt.min.js"></script> 
-    
     <script src="./config_test.js"></script>
     
-    <link rel="stylesheet" href="./style.css"> 
-
     <style>
-        /* --- Zusätzliche Styles für die Testseite --- */
-        .container {
+        /* Temporäre Anpassungen für die Testseite */
+        .data-card {
             display: grid;
-            /* Neue Spalten-Anordnung, damit der Restart-Block passt */
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
-            padding: 20px;
-            max-width: 800px;
-            margin: 20px auto;
-            background-color: #333; 
+            padding: 20px 0;
+        }
+        .data-item {
+            background-color: #f8f9fa; /* Hellgrauer Hintergrund wie in index.html */
             border-radius: 8px;
-        }
-        .block {
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            color: #333;
         }
-        .status-block {
-            background-color: #444; 
+        .data-item h3 {
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            color: #007bff;
         }
-        .control-block {
-            background-color: #555;
-            text-align: center;
+        .control-block button {
+             padding: 10px 20px;
+             margin: 5px;
+             border: none;
+             border-radius: 5px;
+             cursor: pointer;
+             font-weight: bold;
         }
-        .status-text {
-            font-size: 1.8em;
-            font-weight: bold;
+        .control-block .btn-on { background-color: #28a745; color: white; } /* Grün */
+        .control-block .btn-off { background-color: #dc3545; color: white; } /* Rot */
+
+        /* Styles für die Govee-Kachel */
+        .govee-temp-hum-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-top: 10px;
         }
-        .btn {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
+        .govee-value-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
-        .btn-on { background-color: #4CAF50; color: white; } /* Grün */
-        .btn-off { background-color: #f44336; color: white; } /* Rot */
-        .mqtt-status-banner {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px;
-            text-align: center;
+        .large-value {
+            font-size: 2.2em;
             font-weight: bold;
-            margin-bottom: 20px;
-            border-radius: 8px;
+            color: #333;
+            line-height: 1;
         }
+        .unit-label {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        /* --- KORREKTUR: Batterieanzeige weiter nach unten verschoben --- */
+        .battery-display {
+            font-size: 0.9em;
+            color: #6c757d;
+            position: absolute; 
+            bottom: 5px; /* Von 10px auf 5px reduziert */
+            left: 10px;
+        }
+        .govee-card-body {
+            position: relative; /* Für die absolute Positionierung der Batterie */
+            padding-bottom: 25px; /* Platz für die Batterie leicht reduziert */
+        }
+
     </style>
 </head>
 <body>
 
-    <h2 style="text-align:center; color:#333;">ESP Test Switch Steuerung</h2>
+    <h2 style="text-align:center; color:#333; margin-top: 20px;">ESP Test Dashboard</h2>
     
-    <div class="container">
+    <div class="container" style="max-width: 900px;">
         <div class="mqtt-status-banner" style="grid-column: span 2;" id="mqtt_status_banner">
             MQTT Status: Verbinden...
         </div>
-
-        <div class="block status-block">
-            <h3>LED 1 Status</h3>
-            <div id="led1_status_indicator" class="status-text">Lade...</div>
-        </div>
-
-        <div class="block control-block">
-            <h3>LED 1 Steuerung</h3>
-            <button class="btn btn-on" onclick="setLEDState(LED1_SET_TOPIC, 'ON')">AN</button>
-            <button class="btn btn-off" onclick="setLEDState(LED1_SET_TOPIC, 'OFF')">AUS</button>
-        </div>
-
-        <div class="block status-block">
-            <h3>LED 2 Status</h3>
-            <div id="led2_status_indicator" class="status-text">Lade...</div>
-        </div>
-
-        <div class="block control-block">
-            <h3>LED 2 Steuerung</h3>
-            <button class="btn btn-on" onclick="setLEDState(LED2_SET_TOPIC, 'ON')">AN</button>
-            <button class="btn btn-off" onclick="setLEDState(LED2_SET_TOPIC, 'OFF')">AUS</button>
-        </div>
         
-        <div class="block control-block" style="grid-column: span 2;">
-            <h3>System Neustart: <span id="nodeNameDisplay" style="font-weight: normal;">(Node wird geladen...)</span></h3>
-            <button class="btn btn-off" id="btnRestartTest">Gerät Neustart</button>
+        <div class="data-card">
+            
+            <div class="data-item govee-card">
+                <h3><i class="fas fa-thermometer-half"></i> Thermo-Hygrometer</h3>
+                <div class="govee-card-body">
+                    <div class="govee-temp-hum-group">
+                        
+                        <div class="govee-value-item">
+                            <span class="unit-label">Temperatur</span>
+                            <div class="large-value">
+                                <span id="goveeTempValue">N/A</span>
+                                <span style="font-size: 0.6em; vertical-align: top;">°C</span>
+                            </div>
+                        </div>
+                        
+                        <div class="govee-value-item">
+                            <span class="unit-label">Luftfeuchte</span>
+                            <div class="large-value">
+                                <span id="goveeHumValue">N/A</span>
+                                <span style="font-size: 0.6em; vertical-align: top;">%</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="battery-display">
+                        <p></p>
+                        <i class="fas fa-battery-full"></i> Batterie: <span id="goveeBattValue">N/A</span> %
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-item control-block">
+                <h3>LED 1 Status / Steuerung</h3>
+                <div class="govee-temp-hum-group" style="border-bottom: 1px solid #e9ecef; padding-bottom: 10px;">
+                    <span class="unit-label">Status:</span>
+                    <div id="led1_status_indicator" class="status-text" style="font-size: 1.2em; margin-top: 0;">Lade...</div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-on" onclick="setLEDState(LED1_SET_TOPIC, 'ON')">AN</button>
+                    <button class="btn btn-off" onclick="setLEDState(LED1_SET_TOPIC, 'OFF')">AUS</button>
+                </div>
+            </div>
+
+            <div class="data-item control-block">
+                <h3>LED 2 Status / Steuerung</h3>
+                <div class="govee-temp-hum-group" style="border-bottom: 1px solid #e9ecef; padding-bottom: 10px;">
+                    <span class="unit-label">Status:</span>
+                    <div id="led2_status_indicator" class="status-text" style="font-size: 1.2em; margin-top: 0;">Lade...</div>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-on" onclick="setLEDState(LED2_SET_TOPIC, 'ON')">AN</button>
+                    <button class="btn btn-off" onclick="setLEDState(LED2_SET_TOPIC, 'OFF')">AUS</button>
+                </div>
+            </div>
+
+            <div class="data-item control-block" style="grid-column: span 1;">
+                <h3>System Neustart: <span id="nodeNameDisplay" style="font-weight: normal; color: #555;">(Node wird geladen...)</span></h3>
+                <button class="btn btn-off" id="btnRestartTest">Gerät Neustart</button>
+            </div>
+            
         </div>
         
     </div>
@@ -105,6 +159,11 @@
     <script>
         let client;
         const statusBanner = document.getElementById('mqtt_status_banner');
+        
+        // Element-Referenzen für den Govee Sensor
+        const goveeTempValue = document.getElementById('goveeTempValue');
+        const goveeHumValue = document.getElementById('goveeHumValue');
+        const goveeBattValue = document.getElementById('goveeBattValue');
         
         // Funktion zum Senden eines MQTT-Kommandos
         function setLEDState(topic, state) {
@@ -118,23 +177,41 @@
 
         // Wird bei Empfang einer MQTT-Nachricht aufgerufen
         function onMessage(topic, message) {
-            const payload = message.toString().toUpperCase();
+            const payload = message.toString();
+            const payloadUpper = payload.toUpperCase();
             
+            // --- LED Status Logik ---
             let indicator_id;
             
             if (topic === LED1_STATE_TOPIC) {
                 indicator_id = 'led1_status_indicator';
             } else if (topic === LED2_STATE_TOPIC) {
                 indicator_id = 'led2_status_indicator';
-            } else {
-                return; // Nicht unser Topic
             }
             
-            const indicator = document.getElementById(indicator_id);
-            if (indicator) {
-                indicator.textContent = payload;
-                // Farbe basierend auf dem Status setzen
-                indicator.style.color = (payload === "ON" || payload === "TRUE") ? '#4CAF50' : '#f44336';
+            if (indicator_id) {
+                const indicator = document.getElementById(indicator_id);
+                if (indicator) {
+                    indicator.textContent = payloadUpper;
+                    // Farbe basierend auf dem Status setzen
+                    indicator.style.color = (payloadUpper === "ON" || payloadUpper === "TRUE") ? '#28a745' : '#dc3545';
+                }
+                return; 
+            }
+            
+            // --- GOVEE SENSOR LOGIK (JSON Parsing) ---
+            if (topic === GOVEE_TEMP_TOPIC) {
+                try {
+                    const data = JSON.parse(payload);
+                    
+                    // Aktualisierung der Govee-Werte
+                    if (goveeTempValue) goveeTempValue.textContent = data.tempc.toFixed(1);
+                    if (goveeHumValue) goveeHumValue.textContent = data.hum.toFixed(1); 
+                    if (goveeBattValue) goveeBattValue.textContent = data.batt.toFixed(0);
+
+                } catch (e) {
+                    console.error("Fehler beim Parsen der Govee JSON-Daten:", e);
+                }
             }
         }
 
@@ -157,11 +234,14 @@
             client.on('connect', function () {
                 console.log("MQTT Broker verbunden!");
                 statusBanner.textContent = 'MQTT Status: Verbunden (OK)';
-                statusBanner.style.backgroundColor = '#4CAF50';
+                statusBanner.style.backgroundColor = '#28a745'; // Grün
 
                 // Abonnieren der Status-Topics
-                client.subscribe(LED1_STATE_TOPIC, { qos: 0 });
-                client.subscribe(LED2_STATE_TOPIC, { qos: 0 });
+                client.subscribe([
+                    LED1_STATE_TOPIC, 
+                    LED2_STATE_TOPIC,
+                    GOVEE_TEMP_TOPIC // GOVEE TOPIC ABONNIEREN
+                ], { qos: 0 });
                 console.log("Topics abonniert.");
             });
 
@@ -170,19 +250,19 @@
             client.on('error', function (err) {
                 console.error("Verbindung fehlgeschlagen (Client Error): ", err);
                 statusBanner.textContent = 'MQTT Status: FEHLER';
-                statusBanner.style.backgroundColor = 'darkred';
+                statusBanner.style.backgroundColor = '#dc3545'; // Rot
             });
 
             client.on('close', function () {
                 console.log("Verbindung geschlossen/verloren. Versuche Wiederverbindung...");
                 statusBanner.textContent = 'MQTT Status: Verloren';
-                statusBanner.style.backgroundColor = '#f44336';
+                statusBanner.style.backgroundColor = '#ffc107'; // Gelb/Warnung
             });
             
             client.on('offline', function () {
                 console.log("Client ist offline.");
                 statusBanner.textContent = 'MQTT Status: Offline';
-                statusBanner.style.backgroundColor = '#f44336';
+                statusBanner.style.backgroundColor = '#f44336'; // Rot
             });
         }
 
@@ -193,13 +273,12 @@
             // Setzen des Node-Namens aus der config_test.js Konstante
             document.getElementById('nodeNameDisplay').textContent = ESPHOME_NODE_TEST;
 
-            // Restart-Button-Logik (OHNE CONFIRM-ABFRAGE)
+            // Restart-Button-Logik
             document.getElementById("btnRestartTest").onclick = function() {
                 if (client && client.connected) {
                      // Senden eines leeren Payloads, um den Button-Trigger auszulösen
                      client.publish(RESTART_TEST_TOPIC, "", { qos: 0, retain: false }); 
                      console.log(`Neustart-Befehl gesendet an ${RESTART_TEST_TOPIC}`);
-                     // Keine alert()-Meldung, da sie den Testablauf stören könnte
                 } else {
                      alert("MQTT nicht verbunden. Kann Befehl nicht senden.");
                 }

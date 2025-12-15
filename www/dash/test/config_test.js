@@ -5,8 +5,9 @@ const MQTT_BROKER_IP = window.location.hostname;
 const MQTT_PORT = 9001; // Der Websocket-Port
 
 // SICHERHEIT: HIER MÜSSEN IHRE ZUGANGSDATEN EINGEFÜGT WERDEN
-const MQTT_USERNAME = "xxxxxxxx"; 
-const MQTT_PASSWORD = "xxxxxxxx"; 
+const MQTT_USERNAME = "mqttcaruser";
+const MQTT_PASSWORD = "eUZT2zR9VG4rJ3";
+
 // =========================================================
 // TOPIC DEFINITIONEN
 // =========================================================
@@ -29,3 +30,7 @@ const LED2_STATE_TOPIC = LED2_TOPIC_PREFIX + "state";
 // ---------------- System-Steuerung ----------------
 // ESPHome Restart Topic: [NODE_NAME]/button/restart_switch/command
 const RESTART_TEST_TOPIC = `${ESPHOME_NODE_TEST}/button/restart_switch/command`;
+
+// ---------------- GOVEE TEST SENSOR ----------------
+// BITTE ANPASSEN: Dies muss durch das tatsächliche Govee Topic ersetzt werden!
+const GOVEE_TEMP_TOPIC = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678";
