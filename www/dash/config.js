@@ -70,11 +70,6 @@ const GPS_ALT_TOPIC = `${ESPHOME_NODE_GPS}/sensor/espgeopos_altitude/state`;
 const GPS_SPEED_TOPIC = `${ESPHOME_NODE_GPS}/sensor/espgeopos_speed/state`;
 const GPS_SAT_TOPIC = `${ESPHOME_NODE_GPS}/sensor/espgeopos_satellites/state`;
 
-// Fan Component ID ist "maxxair_fan_id" laut YAML
-//const MAXXFAN_LID_COMMAND_TOPIC     = `${ESPHOME_NODE_FAN}/cover/maxxair_lid/command`;
-const MAXXFAN_AUTO_COMMAND_TOPIC    = `${ESPHOME_NODE_FAN}/switch/auto_fan/command`;
-const MAXXFAN_CEILING_COMMAND_TOPIC = `${ESPHOME_NODE_FAN}/switch/ceiling_fan_mode/command`;
-
 // Topics für Geschwindigkeit und Richtung (nehmen Standard ESPHome Fan Component Pfade an)
 const MAXXFAN_SPEED_SET_TOPIC     = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/set`; // Setzt Geschwindigkeit 0-100%
 const MAXXFAN_DIRECTION_SET_TOPIC = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/set_direction`; // Setzt FORWARD/REVERSE
