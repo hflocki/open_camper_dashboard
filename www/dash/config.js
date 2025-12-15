@@ -32,7 +32,7 @@ const ESPHOME_NODE_TEMP   = "esptemp";
 const ESPHOME_NODE_WATER  = "fuellstand";
 
 // Node ID und Basis-Topic für das Wassersystem (toc/nodes/8673...)
-const WATER_NODE_ID = "8673"; 
+const WATER_NODE_ID = "09c6"; 
 const WATER_MQTT_BASE = `toc/nodes/${WATER_NODE_ID}`;
 
 
