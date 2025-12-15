@@ -220,6 +220,30 @@
         [WATERLEVEL_STATUS_TOPIC]: 'waterLed', 
         [CP_PLUS_ALIVE_TOPIC]: 'cpLed'
     };
+
+    // NEUE FUNKTION: Sendet die Authentifizierungsnachricht an den Wasser-Node
+    function sendAuthToWaterNode() {
+        // Der SEC Key muss in config.js als WATER_NODE_SEC definiert sein.
+        // Wir prüfen hier nicht den MaxxFan (ESPHome), nur den WaterLevel Sensor.
+        if (!client || !client.connected || typeof WATER_NODE_SEC === 'undefined' || WATER_NODE_SEC === "IHR_SEC_KEY_HIER") {
+            if (typeof WATER_NODE_SEC === 'undefined' || WATER_NODE_SEC === "IHR_SEC_KEY_HIER") {
+                console.warn("ACHTUNG: WATER_NODE_SEC ist in config.js nicht korrekt gesetzt. Kalibrierung ist möglicherweise gesperrt.");
+            }
+            return;
+        }
+
+        // Korrigierter Payload: Source muss 'app' sein.
+        const authPayload = `app:${WATER_NODE_ID}:auth:${WATER_NODE_SEC};`; 
+        const authTopic = 'toc/pipe'; 
+
+        client.publish(authTopic, authPayload, { qos: 0, retain: false }, function(err) {
+            if (err) {
+                console.error("Fehler beim Senden der AUTH-Nachricht (Wasser):", err);
+            } else {
+                console.log(`AUTH-Nachricht (Wasser) gesendet an ${WATER_NODE_ID}. Kalibrierung freigeschaltet.`);
+            }
+        });
+    }
     
     // Sendet einen Befehl über MQTT
     function sendCommand(topic, payload) {
@@ -233,7 +257,7 @@
 
     // Setzt den Zustand eines Schalters
     function setSwitchState(switchElement, payload) {
-        if (!switchElement) return; // Robustheit
+        if (!switchElement) return; 
         const isChecked = payload.toUpperCase() === 'ON' || payload.toUpperCase() === 'TRUE';
         switchElement.checked = isChecked;
     }
@@ -296,9 +320,6 @@
             case MAXXFAN_AUTO_STATE_TOPIC: setSwitchState(switchAutoFan, originalPayload); break;
             case MAXXFAN_CEILING_STATE_TOPIC: setSwitchState(switchCeilingMode, originalPayload); break;
             
-            // --- Weitere Status-Updates (Optional) ---
-            // case LIGHT_STATE_TOPIC: setSwitchState(document.getElementById('switchMainLight'), originalPayload); break;
-            
             default:
                 break;
         }
@@ -321,7 +342,7 @@
             mqttStatusLabelElement.textContent = "OK";
             mqttLedElement.className = "status-led status-led-online"; 
 
-            // Abonniert alle Status- und Kontroll-Topics
+            // 1. Abonniert alle Status- und Kontroll-Topics
             client.subscribe([
                 HEATER_STATE_TOPIC, 
                 ESPGEOPOS_STATE_TOPIC, 
@@ -331,10 +352,13 @@
                 CP_PLUS_ALIVE_TOPIC,
                 MAXXFAN_AUTO_STATE_TOPIC, 
                 MAXXFAN_CEILING_STATE_TOPIC,
-                LIGHT_STATE_TOPIC,
+                LIGHT_SET_TOPIC,
                 HEATER_SETPOINT_TOPIC
             ], { qos: 0 });
             console.log("Status-Topics abonniert.");
+            
+            // 2. Sende AUTH-Nachricht für den Wasser-Node
+            sendAuthToWaterNode();
         });
 
         client.on('message', onMessage); 
