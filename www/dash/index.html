@@ -428,7 +428,7 @@ function parsePayloadForKey(payload, key) {
                     // (Die ID 'pitchValue' wird nicht mehr benötigt, da updateTiltGauge dies macht)
                     break;
 
-                // KORRIGIERT: Wassertank Füllstand (Mit 120L Fallback Logik)
+ // KORRIGIERT: Wassertank Füllstand (Mit 120L Fallback Logik und NULL-Prüfung)
                 case FRESH_WATER_STATE_TOPIC:
                     const payloadToParse = message.toString();
 
@@ -441,15 +441,24 @@ function parsePayloadForKey(payload, key) {
                         const level = parseFloat(levelPercentStr);
                         if (!isNaN(level)) {
                             const levelFixed = level.toFixed(0);
-                            document.getElementById('levelPercentValue').textContent = levelFixed;
-                            document.getElementById('freshWaterBar').style.height = `${levelFixed}%`;
+                            
+                            const percentValueElement = document.getElementById('levelPercentValue');
+                            const barElement = document.getElementById('freshWaterBar');
+
+                            if (percentValueElement) {
+                                percentValueElement.textContent = levelFixed;
+                            }
+                            if (barElement) {
+                                barElement.style.height = `${levelFixed}%`;
+                            }
                             
                             // Farbe nur auf den Prozentwert anwenden
-                            const valueElement = document.getElementById('levelPercentValue');
-                            if (level < 15) {
-                                valueElement.style.color = 'red';
-                            } else {
-                                valueElement.style.color = '#007bff'; // Blauer Akzent
+                            if (percentValueElement) { // Prüfen, ob Element existiert
+                                if (level < 15) {
+                                    percentValueElement.style.color = 'red';
+                                } else {
+                                    percentValueElement.style.color = '#007bff'; // Blauer Akzent
+                                }
                             }
                         }
                     }
@@ -458,27 +467,27 @@ function parsePayloadForKey(payload, key) {
                     const MAX_VOLUME = 120; // Maximalwert in Litern
 
                     if (!levelVolumeStr && levelPercentStr) {
-                        // FALLBACK: Wenn levelVolume nicht gesendet wird, berechne es aus dem Prozentwert
                         const level = parseFloat(levelPercentStr);
                         if (!isNaN(level)) {
                            const calculatedVolume = (level / 100) * MAX_VOLUME;
-                           levelVolumeStr = calculatedVolume.toFixed(0); // Setze den berechneten String
+                           levelVolumeStr = calculatedVolume.toFixed(0); 
                         }
                     }
 
-                    if (levelVolumeStr) {
+                    const volumeValueElement = document.getElementById('levelVolumeValue');
+                    if (levelVolumeStr && volumeValueElement) {
                         const volume = parseFloat(levelVolumeStr);
                         if (!isNaN(volume)) {
-                            document.getElementById('levelVolumeValue').textContent = volume.toFixed(0);
+                            volumeValueElement.textContent = volume.toFixed(0);
                         }
                     }
 
                     // 3. ADC Value (Volt)
-                    if (adcStr) {
+                    const adcValueElement = document.getElementById('adcValue');
+                    if (adcStr && adcValueElement) {
                         const adcValue = parseFloat(adcStr);
                         if (!isNaN(adcValue)) {
-                           // Annahme: Max 3300 = 3.3V (standard ESP-Eingang), Wert in Volt anzeigen
-                           document.getElementById('adcValue').textContent = (adcValue / 1000).toFixed(2);
+                           adcValueElement.textContent = (adcValue / 1000).toFixed(2);
                         }
                     }
                     break;
