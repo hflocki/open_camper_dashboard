@@ -79,14 +79,51 @@ body {
     justify-content: center; 
 }
 
-.status-item { display: flex; flex-direction: column; align-items: center; }
-.status-led {
-    width: 18px; height: 18px; border-radius: 50%;
-    background-color: #ccc; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border: 1px solid #aaa;
+.status-bar {
+    margin-top: 40px; /* Schafft Platz nach oben zu den Kacheln */
+    margin-bottom: 20px; /* Abstand zum ganz unteren Bildschirmrand */
+    border-top: 1px solid var(--border-color); /* Optionale Trennlinie */
+    padding-top: 20px;
 }
-.status-led-online { background-color: #28a745; box-shadow: 0 0 12px rgba(40, 167, 69, 0.8); }
-.status-led-offline { background-color: #dc3545; box-shadow: 0 0 12px rgba(220, 53, 69, 0.8); }
-.status-label { font-size: 0.8em; margin-top: 8px; }
+
+.status-item { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+}
+
+.status-led {
+    width: 18px; 
+    height: 18px; 
+    border-radius: 50%;
+    background-color: #ccc; 
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); 
+    border: 1px solid #aaa;
+}
+
+.status-led-online { 
+    background-color: #28a745; 
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.8); 
+}
+
+.status-led-offline { 
+    background-color: #dc3545; 
+    box-shadow: 0 0 12px rgba(220, 53, 69, 0.8); 
+}
+
+/* KORREKTUR: Textfarbe auf Blau setzen */
+.status-label { 
+    font-size: 0.8em; 
+    margin-top: 8px; 
+    color: #007bff; /* Das Blau deiner Überschriften */
+    font-weight: bold; /* Damit es besser lesbar ist */
+}
+
+/* MQTT Status im Footer ebenfalls in Blau */
+.mqtt-info {
+    color: #007bff;
+    font-weight: bold;
+}
 
 /* ========================================================= */
 /* --- 3. KACHEL-LAYOUT (GRID) ---                           */
@@ -157,16 +194,76 @@ body {
     width: 120px; height: 120px; border: 3px solid #666; border-radius: 50%;
     position: relative; background-color: #f0f0f0; overflow: hidden;
 }
-.tilt-marker { width: 15px; height: 15px; background-color: #e74c3c; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.tilt-marker { width: 15px; height: 15px; background-color: #e74c3c; border-radius: 50%; position: absolute; z-index: 10; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.tilt-indicator-shell::before {
+    content: '';
+    position: absolute;
+    top: 50%; 
+    left: 0; 
+    width: 100%; 
+    height: 1px;
+    background: rgba(0, 0, 0, 0.8); /* Kräftigeres Schwarz */
+    box-shadow: 0 0.5px 0.5px rgba(255, 255, 255, 0.1); /* Hauchdünne Lichtkante für Dark Mode */
+}
 
+.tilt-indicator-shell::after {
+    content: '';
+    position: absolute;
+    left: 50%; 
+    top: 0; 
+    width: 1px; 
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8); /* Kräftigeres Schwarz */
+    box-shadow: 0.5px 0 0.5px rgba(255, 255, 255, 0.1); /* Hauchdünne Lichtkante */
+}
 /* Wassertank */
-.fresh-water-content { display: flex; align-items: flex-start; gap: 40px; padding: 20px; justify-content: center; }
-.water-bar-shell { width: 40px; height: 150px; border: 2px solid #ccc; border-radius: 8px; position: relative; overflow: hidden; background-color: #eee; }
+.water-values-group { display: flex; flex-direction: column; justify-content: center; padding-top: 5px; gap: 8px; }
+.fresh-water-content { display: flex; align-items: flex-start; gap: 15px; padding: 20px; justify-content: center; }
+.water-bar-shell { width: 40px; height: 130px; border: 2px solid #ccc; border-radius: 8px; position: relative; overflow: hidden; background-color: #eee; }
 .water-bar { width: 100%; position: absolute; bottom: 0; background-color: #2a88d5; transition: height 0.5s ease; }
 
 /* Position */
 .position-group { display: flex; justify-content: space-around; padding: 10px; }
 .large-value-small { font-size: 1.6em; font-weight: 700; color: var(--accent-blue); }
+
+/* Container für die Positionierung */
+.gps-card {
+    position: relative;
+    padding-bottom: 20px; /* Schafft Platz unten */
+}
+
+/* Das Overlay für die Satelliten im Zwischenraum */
+.sat-display-overlay {
+    position: absolute;
+    top: 55px;    /* Justierung: Schiebt es unter die Überschrift */
+    right: 15px;  /* Positionierung am rechten Rand oder mittig */
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85em;
+    color: #007bff; /* Dein einheitliches Blau */
+    background: rgba(0, 0, 0, 0.2); /* Optional: dunkler Hintergrund für bessere Lesbarkeit */
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.sat-display-overlay i {
+    color: #007bff;
+}
+/* Verhindert, dass die Farbe durch JS überschrieben wird (optional) */
+#satValue {
+    color: inherit; 
+}
+
+.sat-header-info {
+    color: #007bff; /* Das gleiche Blau wie der Text "Position" */
+    opacity: 0.9;
+    padding-left: 10px;
+}
+
+.sat-header-info i {
+    margin-right: 2px;
+}
 
 /* ========================================================= */
 /* --- 6. STEUERUNG (Buttons & Accordion) ---                */

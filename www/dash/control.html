@@ -6,7 +6,7 @@
   <title>Camper Dashboard - Steuerung</title>
   <link rel="icon" type="image/png" href="./imag/felix.png">
   <link rel="apple-touch-icon" href="./imag/felix.png">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="./fonts/css/all.min.css">
   <link rel="stylesheet" href="./style.css"> 
   <script src="./mqtt.min.js"></script>
   <script src="./config.js"></script> 
@@ -40,37 +40,6 @@
 
   <div class="container">
     
-    <div class="system-status-container">
-        <div class="mqtt-status-group" style="display: flex; align-items: center; gap: 5px; margin-right: 30px; font-size: 1em; color: #333; font-weight: 600;">
-            <div id="mqttLed" class="status-led" style="margin-top: 0;"></div>
-            <span>MQTT:</span>
-            <span id="mqttStatusLabel" style="color: #555; font-weight: normal;">Verbinden...</span>
-        </div>
-        <div class="status-item">
-            <div id="heaterLed" class="status-led"></div>
-            <div class="status-label">Heizung</div>
-        </div>
-        <div class="status-item">
-            <div id="gpsLed" class="status-led"></div>
-            <div class="status-label">GPS/Lage</div>
-        </div>
-        <div class="status-item">
-            <div id="maxxFanLed" class="status-led"></div>
-            <div class="status-label">MaxxFan</div>
-        </div>
-        <div class="status-item">
-            <div id="tempLed" class="status-led"></div>
-            <div class="status-label">Temperatur</div>
-        </div>
-        <div class="status-item">
-            <div id="waterLed" class="status-led"></div>
-            <div class="status-label">Wasserstand</div>
-        </div>
-        <div class="status-item">
-            <div id="cpLed" class="status-led"></div>
-            <div class="status-label">CP Plus</div>
-        </div>
-    </div>
     <div class="data-card">
         
         <div class="data-item collapsed">
@@ -200,6 +169,40 @@
             </div>
         </div>
        </div>
+
+       <div class="system-status-container">
+        <div class="mqtt-status-group" style="display: flex; align-items: center; gap: 5px; margin-right: 30px; font-size: 1em; color: #333; font-weight: 600;">
+            <div id="mqttLed" class="status-led" style="margin-top: 0;"></div>
+            <div class="mqtt-info">MQTT:</div>
+            <span id="mqttStatusLabel" style="color: #007bff; font-weight: normal;">Verbinden...</span>
+        </div>
+        
+        <div class="status-item">
+            <div id="heaterLed" class="status-led"></div>
+            <div class="status-label">Heizung</div>
+        </div>
+                <div class="status-item">
+            <div id="gpsLed" class="status-led"></div>
+            <div class="status-label">GPS/Lage</div>
+        </div>
+        <div class="status-item">
+            <div id="maxxFanLed" class="status-led"></div>
+            <div class="status-label">MaxxFan</div>
+        </div>
+        <div class="status-item">
+            <div id="tempLed" class="status-led"></div>
+            <div class="status-label">Temperatur</div>
+        </div>
+        <div class="status-item">
+            <div id="waterLed" class="status-led"></div>
+            <div class="status-label">Wasserstand</div>
+        </div>
+        <div class="status-item">
+            <div id="cpLed" class="status-led"></div>
+            <div class="status-label">CP Plus</div>
+        </div>
+    </div>
+    
     </div>
 
 <script>
@@ -312,8 +315,24 @@
         if (ledMap.hasOwnProperty(topic)) {
             const ledElement = document.getElementById(ledMap[topic]);
             if (ledElement) {
-                const isOnline = ( originalPayload === '1'|| originalPayload === 'online' || payloadUpper === 'ON' || payloadUpper === 'TRUE');
-                ledElement.className = `status-led ${isOnline ? 'status-led-online' : 'status-led-offline'}`; 
+                // Wir wandeln den Wert (z.B. 1 oder "1") sicher in Text um
+                const val = String(payloadToUse).trim().toUpperCase();
+                
+                // Prüfung: Erkennt '1', 'ON', 'ONLINE', 'TRUE' oder 'AN'
+                const isOnline = (
+                    val === '1' || 
+                    val === 'ONLINE' || 
+                    val === 'ON' || 
+                    val === 'TRUE' ||
+                    val === 'AN' ||
+                    val === 'CONNECTED'
+                );
+                
+                // Klassen setzen: status-led-online (grün) oder status-led-offline (rot)
+                ledElement.className = `status-led ${isOnline ? 'status-led-online' : 'status-led-offline'}`;
+                
+                // Debugging: Falls es immer noch nicht geht, siehst du hier in der Konsole (F12) warum
+                console.log(`LED [${topic}]: Empfangen="${val}" -> Ergebnis=${isOnline ? 'GRÜN' : 'ROT'}`);
             }
         }
         

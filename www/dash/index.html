@@ -6,7 +6,7 @@
   <title>Camper Dashboard - Status</title>
   <link rel="icon" type="image/png" href="./imag/felix.png">
   <link rel="apple-touch-icon" href="./imag/felix.png">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="./fonts/css/all.min.css">
   <link rel="stylesheet" href="./style.css">
   <script src="./mqtt.min.js"></script>
   <script src="./config.js"></script>
@@ -34,37 +34,7 @@
 </nav>
 
 <div class="container">
-<div class="system-status-container">
-<div class="mqtt-status-group" style="display: flex; align-items: center; gap: 5px; margin-right: 30px; font-size: 1em; color: #333; font-weight: 600;">
-<div id="mqttLed" class="status-led" style="margin-top: 0;"></div>
-<span>MQTT:</span>
-<span id="mqttStatusLabel" style="color: #555; font-weight: normal;">Verbinden...</span>
-</div>
-<div class="status-item">
-<div id="heaterLed" class="status-led"></div>
-<div class="status-label">Heizung</div>
-</div>
-<div class="status-item">
-<div id="gpsLed" class="status-led"></div>
-<div class="status-label">GPS/Lage</div>
-</div>
-<div class="status-item">                                                                                                                                                   
-<div id="maxxFanLed" class="status-led"></div>
-<div class="status-label">MaxxFan</div>
-</div>
-<div class="status-item">
-<div id="tempLed" class="status-led"></div>
-<div class="status-label">Temperatur</div>
-</div>
-<div class="status-item">
-<div id="waterLed" class="status-led"></div>
-<div class="status-label">Wasserstand</div>
-</div>
-<div class="status-item">
-<div id="cpLed" class="status-led"></div>
-<div class="status-label">CP Plus</div>
-</div>
-</div>
+
 <div class="data-card">
 <div class="data-item">
 <h3><i class="fas fa-compass"></i> Orientierung</h3>
@@ -76,10 +46,18 @@
 <p>R/L: <span id="rollValueGraph">-- °</span> | V/H: <span id="pitchValueGraph">-- °</span></p>
 </div>
 
-<div class="data-item">
-    <h3><a href="#" id="mapLink" class="map-icon" target="_blank" title="Position auf Karte">
-        <i class="fas fa-map-pin"></i> Position</a>
+<div class="data-item gps-card">
+    <h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <a href="#" id="mapLink" class="map-icon" target="_blank" title="Position auf Karte" style="color: inherit; text-decoration: none;">
+                <i class="fas fa-map-pin"></i> Position
+            </a>
+            <span class="sat-header-info" style="font-size: 0.7em; font-weight: normal; display: flex; align-items: center; gap: 4px;">
+                <i class="fas fa-satellite"></i> <span id="satValue">--</span>
+            </span>
+        </div>
     </h3>
+
     <div class="position-group">
         <div class="position-item">
             <span class="label">LON</span>
@@ -90,6 +68,7 @@
             <div id="latValue" class="display-value large-value-small">N/A</div>
         </div>
     </div>
+
     <div class="position-group position-secondary">
         <div class="position-item">
             <span class="label">ALT</span>
@@ -97,79 +76,6 @@
                 <span id="altValue">N/A</span>
                 <span class="unit-label">m</span>
             </div>
-        </div>
-        <div class="position-item" style="text-align: right; padding-right: 10px;">
-            <div class="display-value large-value-smaller" style="font-size: 1.3em;">
-                <i class="fas fa-satellite" style="margin-right: 5px; color: #007bff;"></i>
-                <span id="satValue">N/A</span>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="data-item">
-    <h3><i class="fas fa-fire"></i> Heizung</h3>
-    <div class="position-group">
-        <div class="position-item">
-            <span class="label">Sollwert</span>
-            <div class="display-value large-value-small">
-                <span id="setpointValue">N/A</span>
-                <span class="unit-label">°C</span>
-            </div>
-        </div>
-        <div class="position-item">
-            <span class="label">Istwert</span>
-            <div class="display-value large-value-small">
-                <span id="currentValue">N/A</span>
-                <span class="unit-label">°C</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="data-item govee-card" id="geoposCard">
-    <h3><i class="fas fa-home"></i> Innenraum</h3>
-    <div class="govee-card-body">
-        <div class="govee-temp-hum-group">
-            <div class="govee-value-item">
-                <div class="large-value"><span id="geoposTempValue">N/A</span>°C</div>
-                <span class="unit-label">Temperatur</span>
-            </div>
-            <div class="govee-value-item">
-                <div class="large-value"><span id="geoposHumValue">N/A</span>%</div>
-                <span class="unit-label">Feuchte</span>
-            </div>
-        </div>
-        <div class="time-display">
-            <span id="geoposTimeValue">--:--</span>
-        </div>
-    </div>
-</div>
-        
-
-<div class="data-item">
-    <h3><i class="fas fa-fan"></i> MaxxFan</h3>
-
-    <div class="position-group">
-        <div class="position-item">
-            <span class="label">Lüfter Status</span>
-            <div id="fanStateValue" class="display-value large-value-small">N/A</div>
-        </div>
-        <div class="position-item">
-            <span class="label">Lid Status</span>
-            <div id="lidStateValue" class="display-value large-value-small">N/A</div>
-        </div>
-    </div>
-
-    <div class="position-group position-secondary">
-        <div class="position-item">
-            <span class="label">Richtung</span>
-            <div id="directionValue" class="display-value large-value-small">N/A</div>
-        </div>
-        <div class="position-item">
-            <span class="label">Auto-Modus</span>
-            <div id="autoStateValue" class="display-value large-value-small">N/A</div>
         </div>
     </div>
 </div>
@@ -207,6 +113,71 @@
     </div>
 </div>
 
+<div class="data-item">
+    <h3><i class="fas fa-fire"></i> Heizung</h3>
+    <div class="position-group">
+        <div class="position-item">
+            <span class="label">Sollwert</span>
+            <div class="display-value large-value-small">
+                <span id="setpointValue">N/A</span>
+                <span class="unit-label">°C</span>
+            </div>
+        </div>
+        <div class="position-item">
+            <span class="label">Istwert</span>
+            <div class="display-value large-value-small">
+                <span id="currentValue">N/A</span>
+                <span class="unit-label">°C</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="data-item">
+    <h3><i class="fas fa-fan"></i> MaxxFan</h3>
+
+    <div class="position-group">
+        <div class="position-item">
+            <span class="label">Lüfter Status</span>
+            <div id="fanStateValue" class="display-value large-value-small">N/A</div>
+        </div>
+        <div class="position-item">
+            <span class="label">Lid Status</span>
+            <div id="lidStateValue" class="display-value large-value-small">N/A</div>
+        </div>
+    </div>
+
+    <div class="position-group position-secondary">
+        <div class="position-item">
+            <span class="label">Richtung</span>
+            <div id="directionValue" class="display-value large-value-small">N/A</div>
+        </div>
+        <div class="position-item">
+            <span class="label">Auto-Modus</span>
+            <div id="autoStateValue" class="display-value large-value-small">N/A</div>
+        </div>
+    </div>
+</div>
+
+<div class="data-item govee-card" id="geoposCard">
+    <h3><i class="fas fa-home"></i> Innenraum</h3>
+    <div class="govee-card-body">
+        <div class="govee-temp-hum-group">
+            <div class="govee-value-item">
+                <div class="large-value"><span id="geoposTempValue">N/A</span>°C</div>
+                <span class="unit-label">Temperatur</span>
+            </div>
+            <div class="govee-value-item">
+                <div class="large-value"><span id="geoposHumValue">N/A</span>%</div>
+                <span class="unit-label">Feuchte</span>
+            </div>
+        </div>
+        <div class="time-display">
+            <span id="geoposTimeValue">--:--</span>
+        </div>
+    </div>
+</div>
+       
 <div class="data-item govee-card" id="goveeCard1">
     <h3><i class="fas fa-thermometer-half"></i> Außentemperatur</h3>
     <div class="govee-card-body">
@@ -304,6 +275,39 @@
 </div>
   
 </div>
+
+<div class="system-status-container">
+        <div class="mqtt-status-group" style="display: flex; align-items: center; gap: 5px; margin-right: 30px; font-size: 1em; color: #333; font-weight: 600;">
+            <div id="mqttLed" class="status-led" style="margin-top: 0;"></div>
+            <div class="mqtt-info">MQTT:</div>
+            <span id="mqttStatusLabel" style="color: #007bff; font-weight: normal;">Verbinden...</span>
+        </div>
+        
+        <div class="status-item">
+            <div id="heaterLed" class="status-led"></div>
+            <div class="status-label">Heizung</div>
+        </div>
+                <div class="status-item">
+            <div id="gpsLed" class="status-led"></div>
+            <div class="status-label">GPS/Lage</div>
+        </div>
+        <div class="status-item">
+            <div id="maxxFanLed" class="status-led"></div>
+            <div class="status-label">MaxxFan</div>
+        </div>
+        <div class="status-item">
+            <div id="tempLed" class="status-led"></div>
+            <div class="status-label">Temperatur</div>
+        </div>
+        <div class="status-item">
+            <div id="waterLed" class="status-led"></div>
+            <div class="status-label">Wasserstand</div>
+        </div>
+        <div class="status-item">
+            <div id="cpLed" class="status-led"></div>
+            <div class="status-label">CP Plus</div>
+        </div>
+    </div>
   
 </div>
 <script>
@@ -439,109 +443,114 @@ function processGoveeData(payload, index) {
             clean: true,
         });
 
-        client.on('connect', function () {
-            console.log("Verbunden!");
-            mqttStatusLabelElement.textContent = "OK";
-            mqttLedElement.className = "status-led status-led-online"; 
+    client.on('connect', function () {
+    console.log("MQTT Verbunden!");
+    mqttStatusLabelElement.textContent = "OK";
+    mqttLedElement.className = "status-led status-led-online"; 
 
-            // 1. Abonniere alle Topics
-            for (const topic in ledMap) {
-                if (ledMap.hasOwnProperty(topic)) {
-                    client.subscribe(topic, { qos: 0 });
-                }
-            }
-            client.subscribe(HEATER_SETPOINT_TOPIC, { qos: 0 });
-            client.subscribe(HEATER_CURRENT_TOPIC, { qos: 0 });
-            
-            client.subscribe(GPS_PITCH_TOPIC, { qos: 0 });
-            client.subscribe(GPS_ROLL_TOPIC, { qos: 0 });
-            client.subscribe(GPS_LAT_TOPIC, { qos: 0 });
-            client.subscribe(GPS_LON_TOPIC, { qos: 0 });
-            client.subscribe(GPS_ALT_TOPIC, { qos: 0 });
-            client.subscribe(GPS_SPEED_TOPIC, { qos: 0 });
-            client.subscribe(GPS_SAT_TOPIC, { qos: 0 }); 
-            client.subscribe(MAXXFAN_FAN_STATE_TOPIC, { qos: 0 });
-            client.subscribe(MAXXFAN_LID_STATE_TOPIC, { qos: 0 });
-            client.subscribe(MAXXFAN_DIRECTION_TOPIC, { qos: 0 });
-            client.subscribe(MAXXFAN_AUTO_STATE_TOPIC, { qos: 0 });
-            client.subscribe(MAXXFAN_CEILING_STATE_TOPIC, { qos: 0 });
-            client.subscribe(GEOPOS_TEMP_TOPIC);
-            client.subscribe(GEOPOS_HUM_TOPIC);
-            // ABONNEMENTS FÜR WASSER
-            client.subscribe(FRESH_WATER_PERCENT_TOPIC, { qos: 0 }); 
-            client.subscribe(FRESH_WATER_VOLUME_TOPIC, { qos: 0 });
-            client.subscribe(FRESH_WATER_ADC_TOPIC, { qos: 0 });
+    // Alle Topics abonnieren
+    const topicsToSubscribe = [
+        HEATER_STATE_TOPIC, ESPGEOPOS_STATE_TOPIC, MAXXFAN_STATE_TOPIC, 
+        ESPTEMP_STATE_TOPIC, WATERLEVEL_STATUS_TOPIC, CP_PLUS_ALIVE_TOPIC,
+        HEATER_SETPOINT_TOPIC, HEATER_CURRENT_TOPIC,
+        GPS_PITCH_TOPIC, GPS_ROLL_TOPIC, GPS_LAT_TOPIC, GPS_LON_TOPIC,
+        GPS_ALT_TOPIC, GPS_SPEED_TOPIC, GPS_SAT_TOPIC,
+        MAXXFAN_FAN_STATE_TOPIC, MAXXFAN_LID_STATE_TOPIC, MAXXFAN_DIRECTION_TOPIC,
+        MAXXFAN_AUTO_STATE_TOPIC, MAXXFAN_CEILING_STATE_TOPIC,
+        // WASSER TOPICS
+        FRESH_WATER_PERCENT_TOPIC, FRESH_WATER_VOLUME_TOPIC, FRESH_WATER_ADC_TOPIC,
+        // GOVEE TOPICS (über die neue Python-Brücke)
+        GOVEE_TEMP_TOPIC_1, GOVEE_TEMP_TOPIC_2, GOVEE_TEMP_TOPIC_3,
+        // GEOPOS (Innenraum)
+        GEOPOS_TEMP_TOPIC, GEOPOS_HUM_TOPIC
+    ];
 
-            // NEU: ABONNEMENTS FÜR 4 GOVEE-SENSOREN
-            if (typeof GOVEE_TEMP_TOPIC_1 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_1, { qos: 0 });
-            if (typeof GOVEE_TEMP_TOPIC_2 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_2, { qos: 0 });
-            if (typeof GOVEE_TEMP_TOPIC_3 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_3, { qos: 0 });
-            if (typeof GOVEE_TEMP_TOPIC_4 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_4, { qos: 0 });
-            
-            console.log("Alle Topics abonniert.");
-            
-            // 2. Sende AUTH-Nachricht und aktiviere AutoSend für den Wasser-Node
-            sendAuthToWaterNode();
-        });
+    topicsToSubscribe.forEach(topic => {
+        if (topic) client.subscribe(topic, { qos: 0 });
+    });
+    
+    console.log("Abonnements abgeschlossen. Warte auf Daten...");
+});
 
             client.on('message', function (topic, message) {
             const payloadToUse = message.toString();
+            // Zeitstempel für direkt empfangene Werte (Wasser/Innenraum)
+            const nowTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-            // --- GOVEE SENSOR LOGIK (JSON Parsing) ---
-            if (topic === GOVEE_TEMP_TOPIC_1) {
-                processGoveeData(payloadToUse, 1);
-                return;
-            }
-            if (topic === GOVEE_TEMP_TOPIC_2) {
-                processGoveeData(payloadToUse, 2);
-                return;
-            }
-            if (topic === GOVEE_TEMP_TOPIC_3) {
-                processGoveeData(payloadToUse, 3);
-                return;
-            }
-            if (topic === GOVEE_TEMP_TOPIC_4) {
-                processGoveeData(payloadToUse, 4); // Index 4 für Innenraum
-                return;
-            }
-            
-            // 2. --- Aktualisiere LEDs basierend auf LWT (Online/Offline) ---
+            // 1. --- GOVEE SENSOR LOGIK (JSON von Brücke) ---
+            if (topic === GOVEE_TEMP_TOPIC_1) { processGoveeData(payloadToUse, 1); return; }
+            if (topic === GOVEE_TEMP_TOPIC_2) { processGoveeData(payloadToUse, 2); return; }
+            if (topic === GOVEE_TEMP_TOPIC_3) { processGoveeData(payloadToUse, 3); return; }
+
+            // 2. --- STATUS LEDS (Heater/Fan/GPS/Wasser/Truma) ---
             if (ledMap.hasOwnProperty(topic)) {
                 const ledElement = document.getElementById(ledMap[topic]);
                 if (ledElement) {
-                    const payloadUpper = payloadToUse.toUpperCase();
-                    const isOnline = (
-                        payloadUpper === 'ONLINE' || 
-                        payloadUpper === 'ON' || 
-                        payloadUpper === '1' || 
-                        payloadUpper === 'TRUE' ||
-                        payloadUpper === 'AN' 
-                    );
+                    const val = String(payloadToUse).trim().toUpperCase();
+                    const isOnline = (val === '1' || val === 'ONLINE' || val === 'ON' || val === 'TRUE' || val === 'CONNECTED');
                     ledElement.className = `status-led ${isOnline ? 'status-led-online' : 'status-led-offline'}`;
                 }
             }
 
-        // 3. --- Aktualisiere Sensorwerte ---
+            // 3. --- SENSORWERTE (Switch-Case) ---
             switch (topic) {
-                
+                // --- WASSERSTAND DIREKT ---
+                    case FRESH_WATER_PERCENT_TOPIC:
+                    const percent = parseFloat(payloadToUse).toFixed(0);
+                    const pEl = document.getElementById('levelPercentValue');
+                    const bEl = document.getElementById('freshWaterBar');
+
+                    if (pEl) {
+                        pEl.textContent = percent;
+                        // Textfarbe bleibt jetzt immer einheitlich Blau (wie gewünscht)
+                        pEl.style.color = 'inherit'; 
+                    }
+                    if (bEl) {
+                            bEl.style.height = percent + "%";
+                            
+                            // Dynamische Farblogik für den Tankbalken
+                            if (percent >= 50) {
+                                bEl.style.backgroundColor = '#28a745'; // Grün
+                            } else if (percent >= 30) {
+                                bEl.style.backgroundColor = '#ff9800'; // Orange
+                            } else {
+                                bEl.style.backgroundColor = '#dc3545'; // Rot
+                            }
+                        }
+                        break;
+
+                    case FRESH_WATER_VOLUME_TOPIC:
+                    document.getElementById('levelVolumeValue').textContent = parseFloat(payloadToUse).toFixed(0);
+                    break;
+
+                case FRESH_WATER_ADC_TOPIC:
+                const aEl = document.getElementById('adcValue');
+                if (aEl) {
+                    const volt = (parseFloat(payloadToUse) / 1000).toFixed(2); // Macht aus 800 -> 0.80
+                    aEl.textContent = volt;
+                }
+                break;
+
+                // --- HEIZUNG & FAN ---
                 case HEATER_SETPOINT_TOPIC: document.getElementById('setpointValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
                 case HEATER_CURRENT_TOPIC: document.getElementById('currentValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
                 case MAXXFAN_FAN_STATE_TOPIC: document.getElementById('fanStateValue').textContent = payloadToUse; break;
                 case MAXXFAN_LID_STATE_TOPIC: document.getElementById('lidStateValue').textContent = payloadToUse; break;
                 case MAXXFAN_DIRECTION_TOPIC: document.getElementById('directionValue').textContent = payloadToUse; break;
                 case MAXXFAN_AUTO_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break;
-                case MAXXFAN_CEILING_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break; 
-                case GPS_SPEED_TOPIC: document.getElementById('speedValue').textContent = parseFloat(payloadToUse).toFixed(0); break;
                 
+                // --- GPS / LAGE ---
+                case GPS_SPEED_TOPIC: document.getElementById('speedValue').textContent = parseFloat(payloadToUse).toFixed(0); break;
                 case GPS_ALT_TOPIC: document.getElementById('altValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
                 
                 case GPS_SAT_TOPIC: 
-                    const satValueElement = document.getElementById('satValue');
-                    if (satValueElement) {
-                        satValueElement.textContent = parseFloat(payloadToUse).toFixed(0); 
-                    }
-                    break; 
-
+                const satEl = document.getElementById('satValue');
+                if (satEl) {
+                    satEl.textContent = parseFloat(payloadToUse).toFixed(0);
+                    // Sicherstellen, dass die Farbe nicht überschrieben wird
+                    satEl.style.color = 'inherit'; 
+                }
+                break;
                 case GPS_LON_TOPIC:
                     currentLon = parseFloat(payloadToUse).toFixed(4);
                     document.getElementById('lonValue').textContent = currentLon;
@@ -557,60 +566,18 @@ function processGoveeData(payload, index) {
                     currentRoll = parseFloat(payloadToUse);
                     updateTiltGauge(currentRoll, currentPitch);
                     break;
-
                 case GPS_PITCH_TOPIC:
                     currentPitch = parseFloat(payloadToUse);
                     updateTiltGauge(currentRoll, currentPitch);
                     break;
 
+                // --- GEOPOS (Innenraum) ---
                 case GEOPOS_TEMP_TOPIC:
                     document.getElementById('geoposTempValue').textContent = parseFloat(payloadToUse).toFixed(1);
-                    document.getElementById('geoposTimeValue').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    document.getElementById('geoposTimeValue').textContent = nowTime;
                     break;
                 case GEOPOS_HUM_TOPIC:
                     document.getElementById('geoposHumValue').textContent = parseFloat(payloadToUse).toFixed(1);
-                    break;
-                
-                // --- WASSERSTAND LOGIK ---
-                
-                case FRESH_WATER_PERCENT_TOPIC:
-                    const levelPercent = parseFloat(payloadToUse);
-                    const percentValueElement = document.getElementById('levelPercentValue');
-                    const barElement = document.getElementById('freshWaterBar');
-
-                    if (!isNaN(levelPercent)) {
-                        const levelFixed = levelPercent.toFixed(0);
-                        
-                        if (percentValueElement) {
-                            percentValueElement.textContent = levelFixed;
-                            if (levelPercent < 15) {
-                                percentValueElement.style.color = 'red';
-                            } else {
-                                percentValueElement.style.color = '#007bff'; 
-                            }
-                        }
-                        if (barElement) {
-                            barElement.style.height = `${levelFixed}%`;
-                        }
-                    }
-                    break;
-
-                case FRESH_WATER_VOLUME_TOPIC:
-                    const levelVolume = parseFloat(payloadToUse);
-                    const volumeValueElement = document.getElementById('levelVolumeValue');
-                    
-                    if (!isNaN(levelVolume) && volumeValueElement) {
-                        volumeValueElement.textContent = levelVolume.toFixed(0);
-                    }
-                    break;
-
-                case FRESH_WATER_ADC_TOPIC:
-                    const adcValueRaw = parseFloat(payloadToUse);
-                    const adcValueElement = document.getElementById('adcValue');
-
-                    if (!isNaN(adcValueRaw) && adcValueElement) {
-                       adcValueElement.textContent = adcValueRaw.toFixed(2);
-                    }
                     break;
             }
         }); 
