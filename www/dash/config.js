@@ -77,14 +77,13 @@ const FRESH_WATER_ADC_TOPIC     = `${WATER_MQTT_BASE}/adc`;
 // **********************************************
 // --- Topics für Goovee Sensoren (4 STÜCK) ---
 // **********************************************
-//const GOVEE_TEMP_TOPIC_1 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678_1"; 
-//const GOVEE_TEMP_TOPIC_2 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678_2"; 
-//const GOVEE_TEMP_TOPIC_3 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678_3";
-//const GOVEE_TEMP_TOPIC_4 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678_4"; 
 const GOVEE_TEMP_TOPIC_1 = "camper/status/govee/A4C1381EA678"; 
 const GOVEE_TEMP_TOPIC_2 = "camper/status/govee/A4C138C2EF51"; 
 const GOVEE_TEMP_TOPIC_3 = "camper/status/govee/880F10857644";
 const GOVEE_TEMP_TOPIC_4 = "camper/status/govee/45C888599618";
+
+const GEOPOS_TEMP_TOPIC = "espgeopos/sensor/temperature/state";
+const GEOPOS_HUM_TOPIC  = "espgeopos/sensor/humidity/state";
 
 // **********************************************
 // --- Topics für Steuerungs-Befehle (control.html) ---
