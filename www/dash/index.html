@@ -126,21 +126,21 @@
     </div>
 </div>
 
-<div class="data-item govee-card" id="goveeCard4">
+<div class="data-item govee-card" id="geoposCard">
     <h3><i class="fas fa-home"></i> Innenraum</h3>
     <div class="govee-card-body">
         <div class="govee-temp-hum-group">
             <div class="govee-value-item">
-                <div class="large-value"><span id="goveeTempValue4">N/A</span>°C</div>
+                <div class="large-value"><span id="geoposTempValue">N/A</span>°C</div>
                 <span class="unit-label">Temperatur</span>
             </div>
             <div class="govee-value-item">
-                <div class="large-value"><span id="goveeHumValue4">N/A</span>%</div>
+                <div class="large-value"><span id="geoposHumValue">N/A</span>%</div>
                 <span class="unit-label">Feuchte</span>
             </div>
         </div>
-        <div class="battery-display">
-            <i class="fas fa-battery-half"></i> <span id="goveeBattValue4">--</span>%
+        <div class="time-display">
+            <span id="geoposTimeValue">--:--</span>
         </div>
     </div>
 </div>
@@ -231,6 +231,9 @@
         <div class="battery-display">
             <i class="fas fa-battery-full"></i> Batt: <span id="goveeBattValue1">N/A</span> %
         </div>
+        <div class="time-display">
+        <span id="goveeTimeValue1">--:--</span>
+    </div>
     </div>
 </div>
 
@@ -260,6 +263,9 @@
         <div class="battery-display">
             <i class="fas fa-battery-full"></i> Batt: <span id="goveeBattValue2">N/A</span> %
         </div>
+        <div class="time-display">
+        <span id="goveeTimeValue2">--:--</span>
+    </div>
     </div>
 </div>
 
@@ -289,6 +295,9 @@
         <div class="battery-display">
             <i class="fas fa-battery-full"></i> Batt: <span id="goveeBattValue3">N/A</span> %
         </div>
+        <div class="time-display">
+        <span id="goveeTimeValue3">--:--</span>
+    </div>
     </div>
 </div>
   
@@ -398,10 +407,15 @@ function processGoveeData(payload, index) {
         const tempElement = document.getElementById(`goveeTempValue${index}`);
         const humElement = document.getElementById(`goveeHumValue${index}`);
         const battElement = document.getElementById(`goveeBattValue${index}`);
-        
+        const timeElement = document.getElementById(`goveeTimeValue${index}`);
+
         if (tempElement) tempElement.textContent = data.tempc.toFixed(1);
         if (humElement) humElement.textContent = data.hum.toFixed(1);
         if (battElement) battElement.textContent = data.batt.toFixed(0);
+
+        if (timeElement && data.time) {
+            timeElement.textContent = data.time;
+        }
 
     } catch (e) {
         console.error(`Fehler beim Parsen der Govee JSON-Daten (Sensor ${index}):`, e);
@@ -449,7 +463,8 @@ function processGoveeData(payload, index) {
             client.subscribe(MAXXFAN_DIRECTION_TOPIC, { qos: 0 });
             client.subscribe(MAXXFAN_AUTO_STATE_TOPIC, { qos: 0 });
             client.subscribe(MAXXFAN_CEILING_STATE_TOPIC, { qos: 0 });
-            
+            client.subscribe(GEOPOS_TEMP_TOPIC);
+            client.subscribe(GEOPOS_HUM_TOPIC);
             // ABONNEMENTS FÜR WASSER
             client.subscribe(FRESH_WATER_PERCENT_TOPIC, { qos: 0 }); 
             client.subscribe(FRESH_WATER_VOLUME_TOPIC, { qos: 0 });
@@ -513,7 +528,7 @@ function processGoveeData(payload, index) {
                 case MAXXFAN_LID_STATE_TOPIC: document.getElementById('lidStateValue').textContent = payloadToUse; break;
                 case MAXXFAN_DIRECTION_TOPIC: document.getElementById('directionValue').textContent = payloadToUse; break;
                 case MAXXFAN_AUTO_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break;
-                case MAXXFAN_CEILING_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break; // Hier muss man eventuell unterscheiden
+                case MAXXFAN_CEILING_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break; 
                 case GPS_SPEED_TOPIC: document.getElementById('speedValue').textContent = parseFloat(payloadToUse).toFixed(0); break;
                 
                 case GPS_ALT_TOPIC: document.getElementById('altValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
@@ -546,6 +561,14 @@ function processGoveeData(payload, index) {
                     updateTiltGauge(currentRoll, currentPitch);
                     break;
 
+                case GEOPOS_TEMP_TOPIC:
+                    document.getElementById('geoposTempValue').textContent = parseFloat(payloadToUse).toFixed(1);
+                    document.getElementById('geoposTimeValue').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    break;
+                case GEOPOS_HUM_TOPIC:
+                    document.getElementById('geoposHumValue').textContent = parseFloat(payloadToUse).toFixed(1);
+                    break;
+                
                 // --- WASSERSTAND LOGIK ---
                 
                 case FRESH_WATER_PERCENT_TOPIC:

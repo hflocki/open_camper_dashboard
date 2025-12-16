@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import json
+from datetime import datetime
 
 # --- KONFIGURATION ---
 BROKER = "127.0.0.1"
@@ -16,30 +17,25 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     try:
-        # JSON Payload parsen
         data = json.loads(msg.payload.decode('utf-8'))
         
-        # PRÜFUNG: Nur Govee-Markengeräte verarbeiten
         if data.get("brand") == "Govee":
             sensor_id = msg.topic.split('/')[-1]
             
-            # Neues, schlankes JSON-Objekt bauen
+            # Zeitstempel generieren (z.B. 14:35)
+            now = datetime.now().strftime("%H:%M")
+            
             filtered_data = {
                 "tempc": data.get("tempc"),
                 "hum": data.get("hum"),
-                "batt": data.get("batt")
+                "batt": data.get("batt"),
+                "time": now  # Zeitstempel hinzufügen
             }
             
             new_topic = f"{TARGET_BASE}{sensor_id}"
-            new_payload = json.dumps(filtered_data)
-            
-            # Mit Retain senden
-            client.publish(new_topic, new_payload, retain=True, qos=0)
-            
-            print(f"Filter & Retain: {sensor_id} -> {filtered_data}")
+            client.publish(new_topic, json.dumps(filtered_data), retain=True, qos=0)
             
     except Exception as e:
-        # Falls es kein JSON ist oder Felder fehlen, einfach ignorieren
         pass
 
 client = mqtt.Client()
