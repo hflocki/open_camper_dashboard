@@ -1,34 +1,24 @@
 #!/bin/sh
 
-# Pfad zum USB-Stick
 USB_DIR="/tmp/mountd/disk1_part1"
-# Name des Sicherungsverzeichnisses (mit Datum/Zeit)
 BACKUP_NAME="glinet_config_$(date +%Y%m%d_%H%M%S)"
 BACKUP_DIR="$USB_DIR/$BACKUP_NAME"
 
-echo "--- Starte Systemsicherung auf USB-Stick: $BACKUP_DIR ---"
+echo "--- Starte Systemsicherung auf USB-Stick ---"
 
-# 1. Sicherungsverzeichnis erstellen
+# Verzeichnisse vorbereiten
 mkdir -p "$BACKUP_DIR/www"
 mkdir -p "$BACKUP_DIR/etc_config"
-mkdir -p "$BACKUP_DIR/etc_mosquitto"
+mkdir -p "$BACKUP_DIR/system_scripts"
 
-# 2. Dashboard Dateien sichern (www/dash)
-echo "Sichere Dashboard Dateien (/www/dash)..."
+# 1-5. Bestehende Sicherungen (Dashboard, Mosquitto, uHTTPd)
 cp -r /www/dash "$BACKUP_DIR/www/"
-
-# 3. Mosquitto Daemon Konfiguration sichern (sehr wichtig)
-echo "Sichere Mosquitto Konfigurationsdateien..."
 cp /etc/config/mosquitto "$BACKUP_DIR/etc_config/"
-
-# 4. Mosquitto Zertifikate/Keys sichern (falls TLS verwendet wird)
-if [ -d /etc/mosquitto ]; then
-    cp -r /etc/mosquitto/* "$BACKUP_DIR/etc_mosquitto/"
-fi
-
-# 5. uHTTPd Webserver Konfiguration sichern
-echo "Sichere uHTTPd Konfiguration..."
 cp /etc/config/uhttpd "$BACKUP_DIR/etc_config/"
 
-echo "Sicherung abgeschlossen unter: $BACKUP_NAME"
-echo "--- Ende Sicherung ---"
+# --- NEU: 6. Autostart und Retain-Brücke sichern ---
+echo "Sichere Autostart (/etc/rc.local) und Python-Brücke..."
+cp /etc/rc.local "$BACKUP_DIR/system_scripts/"
+[ -f /root/mqtt_bridge.py ] && cp /root/mqtt_bridge.py "$BACKUP_DIR/system_scripts/"
+
+echo "Sicherung abgeschlossen: $BACKUP_NAME"

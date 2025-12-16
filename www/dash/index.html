@@ -126,25 +126,25 @@
     </div>
 </div>
 
-<div class="data-item">
+<div class="data-item govee-card" id="goveeCard4">
     <h3><i class="fas fa-home"></i> Innenraum</h3>
-    <div class="position-group">
-        <div class="position-item">
-            <span class="label">Temperatur</span>
-            <div class="display-value large-value-small">
-                <span id="temperatureValue">N/A</span>
-                <span class="unit-label">°C</span>
+    <div class="govee-card-body">
+        <div class="govee-temp-hum-group">
+            <div class="govee-value-item">
+                <div class="large-value"><span id="goveeTempValue4">N/A</span>°C</div>
+                <span class="unit-label">Temperatur</span>
+            </div>
+            <div class="govee-value-item">
+                <div class="large-value"><span id="goveeHumValue4">N/A</span>%</div>
+                <span class="unit-label">Feuchte</span>
             </div>
         </div>
-        <div class="position-item">
-            <span class="label">Luftfeuchte</span>
-            <div class="display-value large-value-small">
-                <span id="humidityValue">N/A</span>
-                <span class="unit-label">%</span>
-            </div>
+        <div class="battery-display">
+            <i class="fas fa-battery-half"></i> <span id="goveeBattValue4">--</span>%
         </div>
     </div>
 </div>
+        
 
 <div class="data-item">
     <h3><i class="fas fa-fan"></i> MaxxFan</h3>
@@ -389,7 +389,7 @@ function updateTiltGauge(roll, pitch) {
 /**
  * Verarbeitet den JSON-Payload eines Govee-Sensors
  * @param {string} payload Die JSON-Nachricht
- * @param {string} index Index der Kachel (1, 2 oder 3)
+ * @param {string} index Index der Kachel (1, 2, 3 oder 4)
  */
 function processGoveeData(payload, index) {
     try {
@@ -436,8 +436,7 @@ function processGoveeData(payload, index) {
             }
             client.subscribe(HEATER_SETPOINT_TOPIC, { qos: 0 });
             client.subscribe(HEATER_CURRENT_TOPIC, { qos: 0 });
-            client.subscribe(GPS_TEMP_TOPIC, { qos: 0 });
-            client.subscribe(GPS_HUMIDITY_TOPIC, { qos: 0 });
+            
             client.subscribe(GPS_PITCH_TOPIC, { qos: 0 });
             client.subscribe(GPS_ROLL_TOPIC, { qos: 0 });
             client.subscribe(GPS_LAT_TOPIC, { qos: 0 });
@@ -456,10 +455,11 @@ function processGoveeData(payload, index) {
             client.subscribe(FRESH_WATER_VOLUME_TOPIC, { qos: 0 });
             client.subscribe(FRESH_WATER_ADC_TOPIC, { qos: 0 });
 
-            // NEU: ABONNEMENTS FÜR 3 GOVEE-SENSOREN (müssen in config.js definiert sein!)
+            // NEU: ABONNEMENTS FÜR 4 GOVEE-SENSOREN
             if (typeof GOVEE_TEMP_TOPIC_1 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_1, { qos: 0 });
             if (typeof GOVEE_TEMP_TOPIC_2 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_2, { qos: 0 });
             if (typeof GOVEE_TEMP_TOPIC_3 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_3, { qos: 0 });
+            if (typeof GOVEE_TEMP_TOPIC_4 !== 'undefined') client.subscribe(GOVEE_TEMP_TOPIC_4, { qos: 0 });
             
             console.log("Alle Topics abonniert.");
             
@@ -483,6 +483,10 @@ function processGoveeData(payload, index) {
                 processGoveeData(payloadToUse, 3);
                 return;
             }
+            if (topic === GOVEE_TEMP_TOPIC_4) {
+                processGoveeData(payloadToUse, 4); // Index 4 für Innenraum
+                return;
+            }
             
             // 2. --- Aktualisiere LEDs basierend auf LWT (Online/Offline) ---
             if (ledMap.hasOwnProperty(topic)) {
@@ -502,14 +506,14 @@ function processGoveeData(payload, index) {
 
         // 3. --- Aktualisiere Sensorwerte ---
             switch (topic) {
-                case GPS_TEMP_TOPIC: document.getElementById('temperatureValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
-                case GPS_HUMIDITY_TOPIC: document.getElementById('humidityValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
+                
                 case HEATER_SETPOINT_TOPIC: document.getElementById('setpointValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
                 case HEATER_CURRENT_TOPIC: document.getElementById('currentValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
                 case MAXXFAN_FAN_STATE_TOPIC: document.getElementById('fanStateValue').textContent = payloadToUse; break;
                 case MAXXFAN_LID_STATE_TOPIC: document.getElementById('lidStateValue').textContent = payloadToUse; break;
                 case MAXXFAN_DIRECTION_TOPIC: document.getElementById('directionValue').textContent = payloadToUse; break;
                 case MAXXFAN_AUTO_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break;
+                case MAXXFAN_CEILING_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break; // Hier muss man eventuell unterscheiden
                 case GPS_SPEED_TOPIC: document.getElementById('speedValue').textContent = parseFloat(payloadToUse).toFixed(0); break;
                 
                 case GPS_ALT_TOPIC: document.getElementById('altValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
@@ -544,7 +548,6 @@ function processGoveeData(payload, index) {
 
                 // --- WASSERSTAND LOGIK ---
                 
-                // 1. LevelPercent (Prozent und Balken)
                 case FRESH_WATER_PERCENT_TOPIC:
                     const levelPercent = parseFloat(payloadToUse);
                     const percentValueElement = document.getElementById('levelPercentValue');
@@ -555,7 +558,6 @@ function processGoveeData(payload, index) {
                         
                         if (percentValueElement) {
                             percentValueElement.textContent = levelFixed;
-                            // Farbe nur auf den Prozentwert anwenden
                             if (levelPercent < 15) {
                                 percentValueElement.style.color = 'red';
                             } else {
@@ -568,7 +570,6 @@ function processGoveeData(payload, index) {
                     }
                     break;
 
-                // 2. LevelVolume (Liter)
                 case FRESH_WATER_VOLUME_TOPIC:
                     const levelVolume = parseFloat(payloadToUse);
                     const volumeValueElement = document.getElementById('levelVolumeValue');
@@ -578,7 +579,6 @@ function processGoveeData(payload, index) {
                     }
                     break;
 
-                // 3. ADC Value (Volt)
                 case FRESH_WATER_ADC_TOPIC:
                     const adcValueRaw = parseFloat(payloadToUse);
                     const adcValueElement = document.getElementById('adcValue');
