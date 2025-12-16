@@ -1,35 +1,33 @@
 /* ========================================================= */
-/* --- 0. GRUNDDEFINITIONEN --- */
+/* --- 0. GRUNDDEFINITIONEN & VARIABLEN ---                  */
 /* ========================================================= */
 
 :root {
-    /* Light Mode Variablen */
-    --light-bg-main: #f9fafb;
-    --light-text-color: #333;
-    --light-label-color: #007bff;
-    --light-border-color: #ddd;
+    --bg-main: #f9fafb;
+    --text-color: #333;
+    --accent-blue: #007bff;
+    --border-color: #ddd;
+    --card-bg: #ffffff;
+    --status-bar-bg: #f0f0f0;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --light-bg-main: #1e1e1e;
-    --light-text-color: #e0e0e0;
-    --light-label-color: #66b2ff;
-    --light-border-color: #444;
+    --bg-main: #1e1e1e;
+    --text-color: #e0e0e0;
+    --accent-blue: #66b2ff;
+    --border-color: #444;
+    --card-bg: #2a2a2a;
+    --status-bar-bg: #333;
   }
 }
-
 
 body { 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     margin: 0; 
-    background-color: var(--light-bg-main); 
-    color: var(--light-text-color);
+    background-color: var(--bg-main); 
+    color: var(--text-color);
     line-height: 1.6;
-}
-
-h1, h2, h3 { 
-    color: var(--light-text-color); 
 }
 
 .container {
@@ -39,7 +37,7 @@ h1, h2, h3 {
 }
 
 /* ========================================================= */
-/* --- 1. NAVIGATIONSLEISTE --- */
+/* --- 1. NAVIGATIONSLEISTE ---                              */
 /* ========================================================= */
 
 .navbar {
@@ -49,40 +47,24 @@ h1, h2, h3 {
     display: flex;
     align-items: center;
     padding: 10px 20px;
-    background-color: #ffffff; 
-    border-bottom: 1px solid var(--light-border-color);
+    background-color: var(--card-bg); 
+    border-bottom: 1px solid var(--border-color);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.nav-logo {
-    height: 40px; 
-    margin-right: 15px;
-}
-
-.navbar h2 {
-    margin: 0;
-    flex-grow: 1; 
-    font-size: 1.5em;
-    color: #4a4a4a;
-}
-
+.nav-logo { height: 40px; margin-right: 15px; }
+.navbar h2 { margin: 0; flex-grow: 1; font-size: 1.5em; }
 .nav-button {
     padding: 8px 15px;
-    background-color: #007bff;
+    background-color: var(--accent-blue);
     color: white;
     text-decoration: none;
     border-radius: 5px;
     font-weight: 600;
-    transition: background-color 0.2s;
 }
-
-.nav-button:hover {
-    background-color: #0056b3;
-}
-
 
 /* ========================================================= */
-/* --- 2. LWT STATUSLEISTE (LEDs) --- */
+/* --- 2. STATUSLEISTE (LEDs) ---                            */
 /* ========================================================= */
 
 .system-status-container {
@@ -90,588 +72,112 @@ h1, h2, h3 {
     flex-wrap: wrap;
     align-items: center;
     padding: 10px 0; 
-    background-color: #f0f0f0; /* Leicht abgesetzter Hintergrund */
+    background-color: var(--status-bar-bg); 
     border-radius: 8px;
     margin-top: 15px;
     gap: 20px;
-    /* Zentriert für Statusseite, linksbündig auf Control-Seite (wenn nötig) */
     justify-content: center; 
 }
 
-.status-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
+.status-item { display: flex; flex-direction: column; align-items: center; }
 .status-led {
-    width: 18px; 
-    height: 18px;
-    border-radius: 50%;
-    background-color: #ccc; /* Default Grau */
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-    border: 1px solid #aaa;
-    transition: background-color 0.3s;
+    width: 18px; height: 18px; border-radius: 50%;
+    background-color: #ccc; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); border: 1px solid #aaa;
 }
-
-.status-led-online {
-    background-color: #28a745; /* Grün */
-    box-shadow: 0 0 12px rgba(40, 167, 69, 0.8); 
-}
-
-.status-led-offline {
-    background-color: #dc3545; /* Rot */
-    box-shadow: 0 0 12px rgba(220, 53, 69, 0.8);
-}
-
-.status-label {
-    font-size: 0.8em;
-    color: #555;
-    margin-top: 8px;
-    text-align: center;
-}
-
-/* MQTT Gruppe (Anpassung, da sie nur Text/LED hat) */
-.mqtt-status-group {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 1em;
-    font-weight: 600;
-    color: #333;
-}
-
+.status-led-online { background-color: #28a745; box-shadow: 0 0 12px rgba(40, 167, 69, 0.8); }
+.status-led-offline { background-color: #dc3545; box-shadow: 0 0 12px rgba(220, 53, 69, 0.8); }
+.status-label { font-size: 0.8em; margin-top: 8px; }
 
 /* ========================================================= */
-/* --- 3. DATEN- UND STEUERUNGS-LAYOUT (Kacheln) --- */
+/* --- 3. KACHEL-LAYOUT (GRID) ---                           */
 /* ========================================================= */
 
 .data-card { 
-    background-color: transparent; 
-    padding: 0;
-    box-shadow: none;
-    margin-top: 30px; 
-    
     display: grid; 
-    /* Responsives Grid: Mindestens 250px breit, füllt auf 1 Spalte auf kleinen Screens */
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
     gap: 20px; 
+    margin-top: 30px; 
 }
 
-/* Stil der einzelnen Kacheln (für Status- & Steuerungs-Items) */
 .data-item {
-    background-color: #fff;
-    border: 1px solid var(--light-border-color);
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
-    overflow: hidden; /* Sicherstellen, dass alles innerhalb bleibt */
-    
-    /* Padding auf 0 gesetzt und unten hinzugefügt, um Konflikte mit Akkordeon zu vermeiden */
-    padding: 0;
-    transition: transform 0.2s, box-shadow 0.2s;
-    text-align: center; 
+    overflow: hidden; padding: 0; text-align: center; 
 }
 
 .data-item h3 {
-    /* Basiseinstellungen für H3, die vom Akkordeon-Header überschrieben werden */
-    margin-top: 0; 
-    padding-bottom: 10px; 
-    border-bottom: none; 
+    margin: 0; 
+    padding: 20px 15px 12px 15px; 
+    border-bottom: 1px solid var(--border-color); 
     font-size: 1.1em;
-    color: #007bff; 
-    margin-bottom: 0; 
+    color: var(--accent-blue); 
+    font-weight: 700;
 }
 
-.data-item p {
-    font-size: 1.1em;
-    color: #555;
-    margin: 5px 0;
-}
-
-.data-item h3 i {
-  color: #007bff;   /* Akzentfarbe */
-  margin-right: 8px;
-  font-size: 1.2em;
-}
-
-/* Werte blau hervorheben */
-.value {
-  color: #007bff;
-  font-weight: 600;
-}
-
+/* --- KORREKTUR: Map-Link Farbe & Unterstreichung --- */
 .map-icon {
-  color: #007bff;             
-  text-decoration: none;      
-  font-weight: 600;           
+    color: inherit;            /* Übernimmt das Blau der H3 */
+    text-decoration: none;     /* Entfernt Unterstreichung */
+    display: inline-block;
 }
 
 .map-icon:hover {
-  color: #0056b3;             
-  text-decoration: underline; 
+    text-decoration: none;     /* Auch beim Drüberfahren sauber */
 }
 
-
-/* --- Wassertank Styling --- */
-.water-container {
-    display: flex;
-    justify-content: center; 
-    padding: 10px;
-}
-
-.water-tank {
-    text-align: center;
-    width: 90%; 
-}
-
-.water-bar-shell {
-    width: 60px; 
-    height: 150px; 
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    margin: 10px auto;
-    position: relative;
-    overflow: hidden;
-    background-color: #eee;
-}
-
-.water-bar {
-    width: 100%;
-    position: absolute;
-    bottom: 0;
-    transition: height 0.5s ease-out; 
-}
-
-.fresh-color {
-    background-color: #2a88d5; 
-}
-
-.value-label {
-    font-size: 1.2em;
-    font-weight: bold;
-    margin-top: 5px;
-}
-
-/* --- Neigungsindikator Styling (Tilt Gauge) --- */
-.tilt-gauge-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 10px;
-}
-
-.tilt-indicator-shell {
-    width: 120px;
-    height: 120px;
-    border: 3px solid #666;
-    border-radius: 50%; 
-    position: relative;
-    background-color: #f0f0f0;
-    overflow: hidden; 
-}
-
-/* Der bewegliche Marker (kleine Kugel) */
-.tilt-marker {
-    width: 15px;
-    height: 15px;
-    background-color: #e74c3c; 
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    /* Zentriert den Marker relativ zu seiner eigenen Größe */
-    transform: translate(-50%, -50%);
-    transition: transform 0.1s linear; 
-}
-
-/* Fügt ein einfaches Fadenkreuz in der Mitte hinzu */
-.tilt-indicator-shell::before,
-.tilt-indicator-shell::after {
-    content: '';
-    position: absolute;
-    background-color: #888;
-}
-
-/* Vertikale Linie */
-.tilt-indicator-shell::before {
-    width: 1px;
-    height: 100%;
-    top: 0;
-    left: 50%;
-}
-
-/* Horizontale Linie */
-.tilt-indicator-shell::after {
-    width: 100%;
-    height: 1px;
-    top: 50%;
-    left: 0;
-}
-
+.data-item h3 i { margin-right: 8px; }
 
 /* ========================================================= */
-/* --- NEU: ACCORDION / TOGGLE STYLING --- */
+/* --- 4. GOVEE SENSOR STYLING ---                           */
+/* ========================================================= */
+
+.govee-card-body { position: relative; padding: 20px 10px 45px 10px; }
+.govee-temp-hum-group { display: flex; justify-content: space-around; align-items: center; }
+.govee-value-item { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.large-value { font-size: 2.0em; font-weight: 700; color: var(--accent-blue); line-height: 1.1; }
+.unit-label { font-size: 0.85em; font-weight: 600; margin-top: 4px; }
+.battery-display { font-size: 0.75em; color: #888; position: absolute; bottom: 10px; left: 15px; }
+
+/* ========================================================= */
+/* --- 5. SPEZIAL-KOMPONENTEN ---                            */
+/* ========================================================= */
+
+/* Neigung */
+.tilt-gauge-container { padding: 10px; display: flex; justify-content: center; }
+.tilt-indicator-shell {
+    width: 120px; height: 120px; border: 3px solid #666; border-radius: 50%;
+    position: relative; background-color: #f0f0f0; overflow: hidden;
+}
+.tilt-marker { width: 15px; height: 15px; background-color: #e74c3c; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+/* Wassertank */
+.fresh-water-content { display: flex; align-items: flex-start; gap: 40px; padding: 20px; justify-content: center; }
+.water-bar-shell { width: 40px; height: 150px; border: 2px solid #ccc; border-radius: 8px; position: relative; overflow: hidden; background-color: #eee; }
+.water-bar { width: 100%; position: absolute; bottom: 0; background-color: #2a88d5; transition: height 0.5s ease; }
+
+/* Position */
+.position-group { display: flex; justify-content: space-around; padding: 10px; }
+.large-value-small { font-size: 1.6em; font-weight: 700; color: var(--accent-blue); }
+
+/* ========================================================= */
+/* --- 6. STEUERUNG (Buttons & Accordion) ---                */
 /* ========================================================= */
 
 .steuerelement-header {
-    cursor: pointer;
-    /* Übernimmt das ursprüngliche Padding (20px horizontal) */
-    padding: 20px 20px 15px 20px; 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    /* Übernahme des blauen Trennstrichs vom Original h3 */
-    border-bottom: 1px solid;
-    border-image: linear-gradient(to right, #007bff, transparent) 1;
+    cursor: pointer; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);
 }
+.steuerelement-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; padding: 0 20px; }
+.data-item:not(.collapsed) .steuerelement-body { max-height: 600px; padding: 20px; }
 
-/* Der umschaltbare Inhaltsbereich */
-.steuerelement-body {
-    max-height: 500px; 
-    overflow: hidden;
-    transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out; 
-    /* Padding wie im Original .data-item, aber oben kleiner (oder 0 im collapsed) */
-    padding: 5px 20px 20px 20px; 
-    text-align: center;
-}
-
-/* Zustand: GESCHLOSSEN (Klasse 'collapsed' auf .data-item) */
-.data-item.collapsed .steuerelement-body {
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-}
-
-/* Icon Styling */
-.toggle-icon {
-    font-size: 1.5em; 
-    color: #007bff;
-    transition: transform 0.3s ease-in-out;
-    line-height: 1; 
-    margin-left: 10px;
-}
-
-/* Icon drehen, wenn die Box geöffnet ist */
-.data-item:not(.collapsed) .toggle-icon {
-    transform: rotate(180deg);
-}
-
-/* === Abrundung Logik (Wichtig für die Beibehaltung der runden Ecken) === */
-
-/* Im geschlossenen Zustand: Header bekommt die Abrundung unten */
-.data-item.collapsed .steuerelement-header {
-    border-bottom-left-radius: 10px; 
-    border-bottom-right-radius: 10px; 
-    border-bottom: none; 
-}
-
-/* Im geöffneten Zustand: Header hat keine unteren Abrundungen (geht in den Body über) */
-.data-item:not(.collapsed) .steuerelement-header {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-}
-/* ========================================================= */
-/* --- 4. STEUERUNGS-ELEMENTE (Buttons & Inputs) --- */
-/* ========================================================= */
-
-/* Allgemeine Button-Styles (größer) */
-.btn {
-    padding: 12px 20px; 
-    margin: 8px 4px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 1.1em; 
-    transition: background-color 0.2s, transform 0.1s;
-    min-width: 100px; 
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    touch-action: manipulation;
-    /* Sicherstellen, dass die Buttons untereinander brechen, wenn wenig Platz ist */
-    display: inline-block; 
-}
-
-.btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Farb-Styles */
-.btn-on { background-color: #4CAF50; color: white; } 
-.btn-off { background-color: #f44336; color: white; } 
+.btn { padding: 12px 20px; margin: 8px 4px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; min-width: 100px; }
+.btn-on { background-color: #28a745; color: white; }
+.btn-off { background-color: #dc3545; color: white; }
 .btn-action { background-color: #007bff; color: white; }
 .btn-restart { background-color: #ff9800; color: white; }
 
-/* Input-Field Styling (größer) */
-.input-field {
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 1.2em; 
-    width: 80%; 
-    max-width: 250px;
-    margin-bottom: 15px;
-    text-align: center;
-    box-sizing: border-box; 
-}
+.toggle-icon { transition: transform 0.3s; }
+.data-item:not(.collapsed) .toggle-icon { transform: rotate(180deg); }
 
-/* Preset Button Gruppe (Heizung) */
-.temp-preset-buttons {
-    display: flex;
-    flex-wrap: wrap; 
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-    border-top: 1px solid var(--light-border-color); 
-    padding-top: 15px;
-}
-
-/* Runder Button Style für Presets */
-.btn-preset {
-    background-color: #607d8b; 
-    color: white;
-    border-radius: 50%; 
-    width: 65px; 
-    height: 65px;
-    line-height: 1;
-    padding: 0;
-    font-size: 1em;
-    font-weight: 600;
-    flex-shrink: 0;
-    display: flex; 
-    align-items: center;
-    justify-content: center;
-    min-width: 0; 
-}
-
-/* ========================================================= */
-/* --- 5. Toggle Switch Styling (Unverändert übernommen) --- */
-/* ========================================================= */
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
-    margin: 5px 0;
-}
-
-.switch-input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .4s;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
-    background-color: white;
-    transition: .4s;
-}
-
-.switch-input:checked + .slider {
-    background-color: #4CAF50;
-}
-
-.switch-input:focus + .slider {
-    box-shadow: 0 0 1px #4CAF50;
-}
-
-.switch-input:checked + .slider:before {
-    transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-    border-radius: 34px;
-}
-
-.slider.round:before {
-    border-radius: 50%;
-}
-
-/* ========================================================= */
-/* --- 6. Position & Frischwassertank Layout --- */
-/* ========================================================= */
-
-/* --- Styling für die Position Kachel --- */
-
-.position-group {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    margin: 10px 0;
-    padding: 5px 0;
-}
-
-.position-item {
-    text-align: center;
-    flex: 1;
-}
-
-.position-group .label {
-    font-size: 0.9em;
-    color: #666;
-    display: block;
-    margin-bottom: 2px;
-    font-weight: 600;
-}
-
-.display-value {
-    font-size: 1.4em; 
-    font-weight: 700;
-    color: var(--light-text-color);
-}
-
-.large-value-small {
-    font-size: 1.6em; 
-    color: #007bff; 
-}
-
-.unit-label {
-    font-size: 0.7em;
-    font-weight: normal;
-    color: #666;
-    margin-left: 2px;
-}
-
-.position-secondary {
-    border-top: 1px dashed #ddd;
-    padding-top: 15px;
-    margin-top: 15px;
-}
-
-/* --- Frischwassertank Layout (Bar links, Werte rechts) --- */
-
-.fresh-water-content {
-    display: flex;
-    align-items: flex-start; 
-    gap: 40px; 
-    padding: 10px 0;
-    margin-left: 50px; 
-}
-
-.water-tank-bar-container {
-    flex-shrink: 0;
-    width: 70px; 
-    text-align: center;
-}
-
-.water-bar-shell {
-    width: 40px; 
-    height: 150px; 
-    margin: 0 auto;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    position: relative;
-    overflow: hidden;
-    background-color: #eee;
-}
-
-/* Entferne das alte (nicht mehr verwendete) Wert-Label-Styling */
-.value-label {
-    display: none; 
-}
-
-.water-values-group {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 5px; 
-    text-align: left; 
-    padding-right: 10px; 
-}
-
-.water-values-group .position-item {
-    padding: 7px 0; 
-    border-bottom: 1px dotted #eee; 
-    text-align: left;
-    flex: none; 
-    width: 100%;
-}
-
-.water-values-group .position-item:last-child {
-    border-bottom: none;
-}
-
-.large-value-smaller {
-    font-size: 1.3em !important; 
-    font-weight: 700;
-}
-
-.water-values-group .label {
-    display: none; 
-}
-
-
-/* ========================================================= */
-/* --- 7. GOVEE SENSOR STYLING (Neu für 3 Kacheln) --- */
-/* ========================================================= */
-
-/* Styles für die Govee-Kachel */
-.govee-temp-hum-group {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-top: 10px;
-}
-.govee-value-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center; 
-    flex: 1; 
-}
-.large-value {
-    font-size: 2.2em;
-    font-weight: bold;
-    color: #333;
-    line-height: 1;
-}
-.unit-label {
-    font-size: 0.8em;
-    color: #6c757d;
-    margin-top: 5px;
-}
-/* Batterieanzeige (unten links, klein) */
-.battery-display {
-    font-size: 0.9em;
-    color: #6c757d;
-    position: absolute; 
-    bottom: 5px; /* Gewünschte tiefere Position */
-    left: 15px; /* Etwas von links eingerückt */
-}
-/* Stellt sicher, dass die Batterie-Anzeige Platz hat */
-.govee-card-body {
-    position: relative; 
-    padding-bottom: 25px; 
-    padding-top: 15px; 
-    text-align: center; 
-}
-
-/* Zusätzliches Styling für die Icons in der Govee-Kachel */
-.govee-card .data-item h3 i {
-    color: #007bff;
-    margin-right: 8px;
-}
-
-/* Anpassung der Breite der Werte, damit sie im Grid gut aussehen */
-.govee-value-item .large-value {
-    max-width: 120px; 
-}
+.input-field { padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1.2em; width: 80%; text-align: center; margin-bottom: 15px; }

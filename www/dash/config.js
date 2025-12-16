@@ -53,8 +53,6 @@ const HEATER_SETPOINT_TOPIC = `${ESPHOME_NODE_HEATER}/sensor/setpoint_temp/state
 const HEATER_CURRENT_TOPIC = `${ESPHOME_NODE_HEATER}/sensor/heater_current_temp/state`;
 
 // --- GPS/Lage ---
-const GPS_TEMP_TOPIC = `${ESPHOME_NODE_GPS}/sensor/temp_external/state`;
-const GPS_HUMIDITY_TOPIC = `${ESPHOME_NODE_GPS}/sensor/humidity_external/state`;
 const GPS_PITCH_TOPIC = `${ESPHOME_NODE_GPS}/sensor/pitch_sensor/state`;
 const GPS_ROLL_TOPIC = `${ESPHOME_NODE_GPS}/sensor/roll_sensor/state`;
 const GPS_LAT_TOPIC = `${ESPHOME_NODE_GPS}/sensor/latitude/state`;
@@ -75,6 +73,18 @@ const FRESH_WATER_PERCENT_TOPIC = `${WATER_MQTT_BASE}/levelPercent`;
 const FRESH_WATER_VOLUME_TOPIC  = `${WATER_MQTT_BASE}/levelVolume`;  
 const FRESH_WATER_ADC_TOPIC     = `${WATER_MQTT_BASE}/adc`;          
 
+
+// **********************************************
+// --- Topics für Goovee Sensoren (4 STÜCK) ---
+// **********************************************
+//const GOVEE_TEMP_TOPIC_1 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678_1"; 
+//const GOVEE_TEMP_TOPIC_2 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678_2"; 
+//const GOVEE_TEMP_TOPIC_3 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678_3";
+//const GOVEE_TEMP_TOPIC_4 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678_4"; 
+const GOVEE_TEMP_TOPIC_1 = "camper/status/govee/A4C1381EA678"; 
+const GOVEE_TEMP_TOPIC_2 = "camper/status/govee/A4C138C2EF51"; 
+const GOVEE_TEMP_TOPIC_3 = "camper/status/govee/880F10857644";
+const GOVEE_TEMP_TOPIC_4 = "camper/status/govee/45C888599618";
 
 // **********************************************
 // --- Topics für Steuerungs-Befehle (control.html) ---
@@ -113,11 +123,3 @@ const RESTART_FAN_TOPIC    = `${ESPHOME_NODE_FAN}/button/restart_switch/command`
 const RESTART_GPS_TOPIC    = `${ESPHOME_NODE_GPS}/button/restart_switch/command`;
 const RESTART_TEMP_TOPIC   = `${ESPHOME_NODE_TEMP}/button/restart_switch/command`;
 const RESTART_WATER_TOPIC  = `${ESPHOME_NODE_WATER}/button/restart_switch/command`;
-
-
-// **********************************************
-// --- Topics für Goovee Sensoren  ---
-// **********************************************
-const GOVEE_TEMP_TOPIC_1 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678"; 
-const GOVEE_TEMP_TOPIC_2 = "home/OMG_ATOM_L/BTtoMQTT/A4C138C2EF51"; 
-const GOVEE_TEMP_TOPIC_3 = "home/OMG_ATOM_L/BTtoMQTT/A4C1381EA678_3";
