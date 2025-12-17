@@ -115,15 +115,30 @@ body {
 .status-label { 
     font-size: 0.8em; 
     margin-top: 8px; 
-    color: #007bff; /* Das Blau deiner Überschriften */
+    color: var(--accent-blue); /* Das Blau deiner Überschriften */
     font-weight: bold; /* Damit es besser lesbar ist */
 }
 
 /* MQTT Status im Footer ebenfalls in Blau */
 .mqtt-info {
-    color: #007bff;
+    color: var(--accent-blue);
     font-weight: bold;
 }
+.mqttStatusLabel{
+ color: var(--accent-blue) !important ;
+ font-weight: normal;
+}
+
+.mqtt-status-group{ 
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+    margin-right: 30px; 
+    font-size: 1em; 
+    /* color: #333;  */
+    font-weight: 600;
+}
+
 
 /* ========================================================= */
 /* --- 3. KACHEL-LAYOUT (GRID) ---                           */
@@ -256,7 +271,7 @@ body {
 }
 
 .sat-header-info {
-    color: #007bff; /* Das gleiche Blau wie der Text "Position" */
+    color: var(--accent-blue); /* Das gleiche Blau wie der Text "Position" */
     opacity: 0.9;
     padding-left: 10px;
 }
