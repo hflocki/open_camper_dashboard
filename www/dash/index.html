@@ -273,7 +273,13 @@
                 </div>
                 <div class="data-item windy-card">
                     <h3><i class="fas fa-wind"></i> Wetterradar (Windy)</h3>
-                    <div class="map-container" style="width: 100%; height: 200px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color);">
+                    <div class="temp-preset-buttons" style="margin-top: 10px; display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
+                        <button class="btn-preset" onclick="changeWindyLayer('wind')" style="padding: 5px 10px; min-width: 60px;">Wind</button>
+                        <button class="btn-preset" onclick="changeWindyLayer('temp')" style="padding: 5px 10px; min-width: 60px;">Temp</button>
+                        <button class="btn-preset" onclick="changeWindyLayer('rain')" style="padding: 5px 10px; min-width: 60px;">Regen</button>
+                        <button class="btn-preset" onclick="changeWindyLayer('snow')" style="padding: 5px 10px; min-width: 60px;">Schnee</button>
+                    </div>
+                    <div class="map-container" >
                         <iframe
                         id="windyIframe"
                         width="99%"
@@ -282,12 +288,11 @@
                         src="about:blank">
                         </iframe>
                     </div>
-                    <div class="temp-preset-buttons" style="margin-top: 10px; display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;">
-                        <button class="btn-preset" onclick="changeWindyLayer('wind')" style="padding: 5px 10px; min-width: 60px;">Wind</button>
-                        <button class="btn-preset" onclick="changeWindyLayer('temp')" style="padding: 5px 10px; min-width: 60px;">Temp</button>
-                        <button class="btn-preset" onclick="changeWindyLayer('rain')" style="padding: 5px 10px; min-width: 60px;">Regen</button>
-                        <button class="btn-preset" onclick="changeWindyLayer('snow')" style="padding: 5px 10px; min-width: 60px;">Schnee</button>
-                    </div>
+                    
+                </div>
+                <div class="data-item govee-card" id="goveeCard2">
+                    <h3><i class="fas fa-box"></i> Leer</h3>
+                    
                 </div>
                 
             </div>
@@ -325,282 +330,243 @@
             </div>
             
         </div>
-<script>
-    /**
-     * =========================================================
-     * --- 0. GLOBALE VARIABLEN & KONFIGURATION ---
-     * =========================================================
-     */
-    let client;
-    let clientId = "webClient_" + Math.random().toString(16).substr(2, 8);
-
-    let currentLat = 'N/A';
-    let currentLon = 'N/A';
-    let currentRoll = 0;
-    let currentPitch = 0;
-    let currentWindyLayer = 'wind';
-
-    const mqttLedElement = document.getElementById('mqttLed');
-    const mqttStatusLabelElement = document.getElementById('mqttStatusLabel');
-    const mapLinkElement = document.getElementById('mapLink');
-
-    // Mapping der Status-Topics zu den LED-Elementen
-    const ledMap = {
+        <script>
+        /**
+        * =========================================================
+        * --- 0. GLOBALE VARIABLEN & KONFIGURATION ---
+        * =========================================================
+        */
+        let client;
+        let clientId = "webClient_" + Math.random().toString(16).substr(2, 8);
+        let currentLat = 'N/A';
+        let currentLon = 'N/A';
+        let currentRoll = 0;
+        let currentPitch = 0;
+        let currentWindyLayer = 'wind';
+        const mqttLedElement = document.getElementById('mqttLed');
+        const mqttStatusLabelElement = document.getElementById('mqttStatusLabel');
+        const mapLinkElement = document.getElementById('mapLink');
+        // Mapping der Status-Topics zu den LED-Elementen
+        const ledMap = {
         [HEATER_STATE_TOPIC]: 'heaterLed',
         [ESPGEOPOS_STATE_TOPIC]: 'gpsLed',
         [MAXXFAN_STATE_TOPIC]: 'maxxFanLed',
         [ESPTEMP_STATE_TOPIC]: 'tempLed',
         [WATERLEVEL_STATUS_TOPIC]: 'waterLed',
         [CP_PLUS_ALIVE_TOPIC]: 'cpLed'
-    };
-
-    /**
-     * =========================================================
-     * --- 1. HILFSFUNKTIONEN (UI & BERECHNUNGEN) ---
-     * =========================================================
-     */
-
-    // Aktualisiert den externen Google Maps Link
-    function updateMapLink() {
+        };
+        /**
+        * =========================================================
+        * --- 1. HILFSFUNKTIONEN (UI & BERECHNUNGEN) ---
+        * =========================================================
+        */
+        // Aktualisiert den externen Google Maps Link
+        function updateMapLink() {
         if (currentLat !== 'N/A' && currentLon !== 'N/A') {
-            mapLinkElement.href = `https://www.google.com/maps/search/?api=1&query=${currentLat},${currentLon}`;
-            mapLinkElement.style.display = 'inline-block';
+        mapLinkElement.href = `https://www.google.com/maps/search/?api=1&query=${currentLat},${currentLon}`;
+        mapLinkElement.style.display = 'inline-block';
         } else {
-            mapLinkElement.style.display = 'none';
+        mapLinkElement.style.display = 'none';
         }
-    }
-
-    // Aktualisiert die kleine OpenStreetMap-Vorschau
-    function updateMiniMap(lat, lon) {
+        }
+        // Aktualisiert die kleine OpenStreetMap-Vorschau
+        function updateMiniMap(lat, lon) {
         const mapIframe = document.getElementById('mapIframe');
         const mapStatus = document.getElementById('mapStatus');
         if (!mapIframe) return;
-
-        const zoom = 0.005; 
+        const zoom = 0.005;
         const latNum = parseFloat(lat);
         const lonNum = parseFloat(lon);
         
         if (!isNaN(latNum) && !isNaN(lonNum)) {
-            const url = `https://www.openstreetmap.org/export/embed.html?bbox=${lonNum-zoom},${latNum-zoom},${lonNum+zoom},${latNum+zoom}&layer=mapnik&marker=${latNum},${lonNum}`;
-            if (mapIframe.src !== url) {
-                mapIframe.src = url;
-                if (mapStatus) mapStatus.textContent = "Karte aktualisiert";
-            }
+        const url = `https://www.openstreetmap.org/export/embed.html?bbox=${lonNum-zoom},${latNum-zoom},${lonNum+zoom},${latNum+zoom}&layer=mapnik&marker=${latNum},${lonNum}`;
+        if (mapIframe.src !== url) {
+        mapIframe.src = url;
+        if (mapStatus) mapStatus.textContent = "Karte aktualisiert";
         }
-    }
-
-    // Aktualisiert die Windy Wetterkarte
-    function updateWindyMap(layer = currentWindyLayer) {
+        }
+        }
+        // Aktualisiert die Windy Wetterkarte
+        function updateWindyMap(layer = currentWindyLayer) {
         const windyIframe = document.getElementById('windyIframe');
         if (!windyIframe) return;
-
         if (currentLat !== 'N/A' && currentLon !== 'N/A') {
-            currentWindyLayer = layer;
-            const lat = parseFloat(currentLat);
-            const lon = parseFloat(currentLon);
-            const url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&detailLat=${lat}&detailLon=${lon}&width=650&height=450&zoom=6&level=surface&overlay=${currentWindyLayer}&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1`;
-
-            if (windyIframe.src !== url) {
-                windyIframe.src = url;
-            }
+        currentWindyLayer = layer;
+        const lat = parseFloat(currentLat);
+        const lon = parseFloat(currentLon);
+        const url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&detailLat=${lat}&detailLon=${lon}&width=650&height=450&zoom=6&level=surface&overlay=${currentWindyLayer}&product=ecmwf&menu=&message=&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1`;
+        if (windyIframe.src !== url) {
+        windyIframe.src = url;
         }
-    }
-
-    // Button-Funktion für Windy Layer-Wechsel
-    function changeWindyLayer(newLayer) {
+        }
+        }
+        // Button-Funktion für Windy Layer-Wechsel
+        function changeWindyLayer(newLayer) {
         updateWindyMap(newLayer);
-    }
-
-    // Steuert den roten Punkt im Fadenkreuz (Neigung)
-    function updateTiltGauge(roll, pitch) {
+        }
+        // Steuert den roten Punkt im Fadenkreuz (Neigung)
+        function updateTiltGauge(roll, pitch) {
         const marker = document.getElementById('tiltMarker');
         const rollValueElement = document.getElementById('rollValueGraph');
         const pitchValueElement = document.getElementById('pitchValueGraph');
         if (!marker) return;
-
         const MAX_DEGREES = 15;
         const SHELL_SIZE = 120;
         const maxPixelShift = SHELL_SIZE / 2;
-
         let shiftX = (roll / MAX_DEGREES) * maxPixelShift;
         let shiftY = (pitch / MAX_DEGREES) * maxPixelShift;
-
         shiftX = Math.max(-maxPixelShift, Math.min(maxPixelShift, shiftX));
         shiftY = Math.max(-maxPixelShift, Math.min(maxPixelShift, shiftY));
-
         marker.style.transform = `translate(calc(-50% - ${shiftX}px), calc(-50% + ${shiftY}px))`;
         if (rollValueElement) rollValueElement.textContent = `${roll.toFixed(1)} °`;
         if (pitchValueElement) pitchValueElement.textContent = `${pitch.toFixed(1)} °`;
-    } 
-
-    // Verarbeitet Govee JSON Daten von der Python-Brücke
-    function processGoveeData(payload, index) {
-        try {
-            const data = JSON.parse(payload);
-            const elements = {
-                temp: document.getElementById(`goveeTempValue${index}`),
-                hum: document.getElementById(`goveeHumValue${index}`),
-                batt: document.getElementById(`goveeBattValue${index}`),
-                time: document.getElementById(`goveeTimeValue${index}`)
-            };
-
-            if (elements.temp) elements.temp.textContent = data.tempc.toFixed(1);
-            if (elements.hum) elements.hum.textContent = data.hum.toFixed(1);
-            if (elements.batt) elements.batt.textContent = data.batt.toFixed(0);
-            if (elements.time && data.time) elements.time.textContent = data.time;
-        } catch (e) {
-            console.error(`Fehler beim Parsen der Govee Daten (Sensor ${index}):`, e);
         }
-    }
-
-    // Sende Authentifizierung an Wasser-Node (Falls nötig)
-    function sendAuthToWaterNode() {
+        // Verarbeitet Govee JSON Daten von der Python-Brücke
+        function processGoveeData(payload, index) {
+        try {
+        const data = JSON.parse(payload);
+        const elements = {
+        temp: document.getElementById(`goveeTempValue${index}`),
+        hum: document.getElementById(`goveeHumValue${index}`),
+        batt: document.getElementById(`goveeBattValue${index}`),
+        time: document.getElementById(`goveeTimeValue${index}`)
+        };
+        if (elements.temp) elements.temp.textContent = data.tempc.toFixed(1);
+        if (elements.hum) elements.hum.textContent = data.hum.toFixed(1);
+        if (elements.batt) elements.batt.textContent = data.batt.toFixed(0);
+        if (elements.time && data.time) elements.time.textContent = data.time;
+        } catch (e) {
+        console.error(`Fehler beim Parsen der Govee Daten (Sensor ${index}):`, e);
+        }
+        }
+        // Sende Authentifizierung an Wasser-Node (Falls nötig)
+        function sendAuthToWaterNode() {
         if (!client || !client.connected) return;
         if (typeof WATER_NODE_SEC === 'undefined' || WATER_NODE_SEC === "IHR_SEC_KEY_HIER") {
-            console.warn("Wassernode Sicherheitsschlüssel nicht konfiguriert.");
-            return;
+        console.warn("Wassernode Sicherheitsschlüssel nicht konfiguriert.");
+        return;
         }
-        const authTopic = `${MQTT_ROOT_ID}/toc/pipe`; 
-        const authPayload = `app:${WATER_NODE_ID}:auth:${WATER_NODE_SEC};`; 
+        const authTopic = `${MQTT_ROOT_ID}/toc/pipe`;
+        const authPayload = `app:${WATER_NODE_ID}:auth:${WATER_NODE_SEC};`;
         client.publish(authTopic, authPayload, { qos: 0 });
         
         const autoSendPayload = `app:${WATER_NODE_ID}:autosend:1;`;
         client.publish(authTopic, autoSendPayload, { qos: 0 });
-    }
-
-    /**
-     * =========================================================
-     * --- 2. MQTT VERBINDUNG & LOGIK ---
-     * =========================================================
-     */
-    function connectClient() {
+        }
+        /**
+        * =========================================================
+        * --- 2. MQTT VERBINDUNG & LOGIK ---
+        * =========================================================
+        */
+        function connectClient() {
         const connectUrl = `ws://${WS_HOST}:${WS_PORT}${WS_PATH}`;
         mqttStatusLabelElement.textContent = "Verbinden...";
         
         client = mqtt.connect(connectUrl, {
-            clientId: clientId,
-            username: MQTT_USERNAME,
-            password: MQTT_PASSWORD,
-            clean: true,
+        clientId: clientId,
+        username: MQTT_USERNAME,
+        password: MQTT_PASSWORD,
+        clean: true,
         });
-
         client.on('connect', function () {
-            console.log("MQTT Verbunden!");
-            mqttStatusLabelElement.textContent = "OK";
-            mqttLedElement.className = "status-led status-led-online"; 
-
-            const topicsToSubscribe = [
-                HEATER_STATE_TOPIC, ESPGEOPOS_STATE_TOPIC, MAXXFAN_STATE_TOPIC, 
-                ESPTEMP_STATE_TOPIC, WATERLEVEL_STATUS_TOPIC, CP_PLUS_ALIVE_TOPIC,
-                HEATER_SETPOINT_TOPIC, HEATER_CURRENT_TOPIC,
-                GPS_PITCH_TOPIC, GPS_ROLL_TOPIC, GPS_LAT_TOPIC, GPS_LON_TOPIC,
-                GPS_ALT_TOPIC, GPS_SPEED_TOPIC, GPS_SAT_TOPIC,
-                MAXXFAN_FAN_STATE_TOPIC, MAXXFAN_LID_STATE_TOPIC, MAXXFAN_DIRECTION_TOPIC,
-                MAXXFAN_AUTO_STATE_TOPIC, MAXXFAN_CEILING_STATE_TOPIC,
-                FRESH_WATER_PERCENT_TOPIC, FRESH_WATER_VOLUME_TOPIC, FRESH_WATER_ADC_TOPIC,
-                GOVEE_TEMP_TOPIC_1, GOVEE_TEMP_TOPIC_2, GOVEE_TEMP_TOPIC_3,
-                GEOPOS_TEMP_TOPIC, GEOPOS_HUM_TOPIC
-            ];
-
-            topicsToSubscribe.forEach(topic => {
-                if (topic) client.subscribe(topic, { qos: 0 });
-            });
-            
-            sendAuthToWaterNode();
+        console.log("MQTT Verbunden!");
+        mqttStatusLabelElement.textContent = "OK";
+        mqttLedElement.className = "status-led status-led-online";
+        const topicsToSubscribe = [
+        HEATER_STATE_TOPIC, ESPGEOPOS_STATE_TOPIC, MAXXFAN_STATE_TOPIC,
+        ESPTEMP_STATE_TOPIC, WATERLEVEL_STATUS_TOPIC, CP_PLUS_ALIVE_TOPIC,
+        HEATER_SETPOINT_TOPIC, HEATER_CURRENT_TOPIC,
+        GPS_PITCH_TOPIC, GPS_ROLL_TOPIC, GPS_LAT_TOPIC, GPS_LON_TOPIC,
+        GPS_ALT_TOPIC, GPS_SPEED_TOPIC, GPS_SAT_TOPIC,
+        MAXXFAN_FAN_STATE_TOPIC, MAXXFAN_LID_STATE_TOPIC, MAXXFAN_DIRECTION_TOPIC,
+        MAXXFAN_AUTO_STATE_TOPIC, MAXXFAN_CEILING_STATE_TOPIC,
+        FRESH_WATER_PERCENT_TOPIC, FRESH_WATER_VOLUME_TOPIC, FRESH_WATER_ADC_TOPIC,
+        GOVEE_TEMP_TOPIC_1, GOVEE_TEMP_TOPIC_2, GOVEE_TEMP_TOPIC_3,
+        GEOPOS_TEMP_TOPIC, GEOPOS_HUM_TOPIC
+        ];
+        topicsToSubscribe.forEach(topic => {
+        if (topic) client.subscribe(topic, { qos: 0 });
         });
-
+        
+        sendAuthToWaterNode();
+        });
         client.on('message', function (topic, message) {
-            const payloadToUse = message.toString();
-            const nowTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
-            // Govee Sensoren
-            if (topic === GOVEE_TEMP_TOPIC_1) { processGoveeData(payloadToUse, 1); return; }
-            if (topic === GOVEE_TEMP_TOPIC_2) { processGoveeData(payloadToUse, 2); return; }
-            if (topic === GOVEE_TEMP_TOPIC_3) { processGoveeData(payloadToUse, 3); return; }
-
-            // Status LEDs
-            if (ledMap.hasOwnProperty(topic)) {
-                const ledElement = document.getElementById(ledMap[topic]);
-                if (ledElement) {
-                    const val = payloadToUse.trim().toUpperCase();
-                    const isOnline = (val === '1' || val === 'ONLINE' || val === 'ON' || val === 'TRUE' || val === 'CONNECTED');
-                    ledElement.className = `status-led ${isOnline ? 'status-led-online' : 'status-led-offline'}`;
-                }
-            }
-
-            // Sensor-Handling per Switch
-            switch (topic) {
-                case FRESH_WATER_PERCENT_TOPIC:
-                    const percent = parseFloat(payloadToUse).toFixed(0);
-                    const pEl = document.getElementById('levelPercentValue');
-                    const bEl = document.getElementById('freshWaterBar');
-                    if (pEl) pEl.textContent = percent;
-                    if (bEl) {
-                        bEl.style.height = percent + "%";
-                        bEl.style.backgroundColor = percent >= 50 ? '#28a745' : (percent >= 30 ? '#ff9800' : '#dc3545');
-                    }
-                    break;
-
-                case FRESH_WATER_VOLUME_TOPIC:
-                    document.getElementById('levelVolumeValue').textContent = parseFloat(payloadToUse).toFixed(0);
-                    break;
-
-                case FRESH_WATER_ADC_TOPIC:
-                    const volt = (parseFloat(payloadToUse) / 1000).toFixed(2);
-                    document.getElementById('adcValue').textContent = volt;
-                    break;
-
-                case HEATER_SETPOINT_TOPIC: document.getElementById('setpointValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
-                case HEATER_CURRENT_TOPIC: document.getElementById('currentValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
-                case MAXXFAN_FAN_STATE_TOPIC: document.getElementById('fanStateValue').textContent = payloadToUse; break;
-                case MAXXFAN_LID_STATE_TOPIC: document.getElementById('lidStateValue').textContent = payloadToUse; break;
-                case MAXXFAN_DIRECTION_TOPIC: document.getElementById('directionValue').textContent = payloadToUse; break;
-                case MAXXFAN_AUTO_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break;
-
-                case GPS_SPEED_TOPIC: document.getElementById('speedValue').textContent = parseFloat(payloadToUse).toFixed(0); break;
-                case GPS_ALT_TOPIC: document.getElementById('altValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
-                case GPS_SAT_TOPIC: document.getElementById('satValue').textContent = parseFloat(payloadToUse).toFixed(0); break;
-
-                case GPS_LON_TOPIC:
-                    currentLon = parseFloat(payloadToUse).toFixed(4);
-                    document.getElementById('lonValue').textContent = currentLon;
-                    updateMapLink(); updateMiniMap(currentLat, currentLon); updateWindyMap();
-                    break;
-
-                case GPS_LAT_TOPIC:
-                    currentLat = parseFloat(payloadToUse).toFixed(4);
-                    document.getElementById('latValue').textContent = currentLat;
-                    updateMapLink(); updateMiniMap(currentLat, currentLon); updateWindyMap();
-                    break;
-
-                case GPS_ROLL_TOPIC:
-                    currentRoll = parseFloat(payloadToUse);
-                    updateTiltGauge(currentRoll, currentPitch);
-                    break;
-
-                case GPS_PITCH_TOPIC:
-                    currentPitch = parseFloat(payloadToUse);
-                    updateTiltGauge(currentRoll, currentPitch);
-                    break;
-
-                case GEOPOS_TEMP_TOPIC:
-                    document.getElementById('geoposTempValue').textContent = parseFloat(payloadToUse).toFixed(1);
-                    document.getElementById('geoposTimeValue').textContent = nowTime;
-                    break;
-
-                case GEOPOS_HUM_TOPIC:
-                    document.getElementById('geoposHumValue').textContent = parseFloat(payloadToUse).toFixed(1);
-                    break;
-            }
+        const payloadToUse = message.toString();
+        const nowTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        // Govee Sensoren
+        if (topic === GOVEE_TEMP_TOPIC_1) { processGoveeData(payloadToUse, 1); return; }
+        if (topic === GOVEE_TEMP_TOPIC_2) { processGoveeData(payloadToUse, 2); return; }
+        if (topic === GOVEE_TEMP_TOPIC_3) { processGoveeData(payloadToUse, 3); return; }
+        // Status LEDs
+        if (ledMap.hasOwnProperty(topic)) {
+        const ledElement = document.getElementById(ledMap[topic]);
+        if (ledElement) {
+        const val = payloadToUse.trim().toUpperCase();
+        const isOnline = (val === '1' || val === 'ONLINE' || val === 'ON' || val === 'TRUE' || val === 'CONNECTED');
+        ledElement.className = `status-led ${isOnline ? 'status-led-online' : 'status-led-offline'}`;
+        }
+        }
+        // Sensor-Handling per Switch
+        switch (topic) {
+        case FRESH_WATER_PERCENT_TOPIC:
+        const percent = parseFloat(payloadToUse).toFixed(0);
+        const pEl = document.getElementById('levelPercentValue');
+        const bEl = document.getElementById('freshWaterBar');
+        if (pEl) pEl.textContent = percent;
+        if (bEl) {
+        bEl.style.height = percent + "%";
+        bEl.style.backgroundColor = percent >= 50 ? '#28a745' : (percent >= 30 ? '#ff9800' : '#dc3545');
+        }
+        break;
+        case FRESH_WATER_VOLUME_TOPIC:
+        document.getElementById('levelVolumeValue').textContent = parseFloat(payloadToUse).toFixed(0);
+        break;
+        case FRESH_WATER_ADC_TOPIC:
+        const volt = (parseFloat(payloadToUse) / 1000).toFixed(2);
+        document.getElementById('adcValue').textContent = volt;
+        break;
+        case HEATER_SETPOINT_TOPIC: document.getElementById('setpointValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
+        case HEATER_CURRENT_TOPIC: document.getElementById('currentValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
+        case MAXXFAN_FAN_STATE_TOPIC: document.getElementById('fanStateValue').textContent = payloadToUse; break;
+        case MAXXFAN_LID_STATE_TOPIC: document.getElementById('lidStateValue').textContent = payloadToUse; break;
+        case MAXXFAN_DIRECTION_TOPIC: document.getElementById('directionValue').textContent = payloadToUse; break;
+        case MAXXFAN_AUTO_STATE_TOPIC: document.getElementById('autoStateValue').textContent = payloadToUse; break;
+        case GPS_SPEED_TOPIC: document.getElementById('speedValue').textContent = parseFloat(payloadToUse).toFixed(0); break;
+        case GPS_ALT_TOPIC: document.getElementById('altValue').textContent = parseFloat(payloadToUse).toFixed(1); break;
+        case GPS_SAT_TOPIC: document.getElementById('satValue').textContent = parseFloat(payloadToUse).toFixed(0); break;
+        case GPS_LON_TOPIC:
+        currentLon = parseFloat(payloadToUse).toFixed(4);
+        document.getElementById('lonValue').textContent = currentLon;
+        updateMapLink(); updateMiniMap(currentLat, currentLon); updateWindyMap();
+        break;
+        case GPS_LAT_TOPIC:
+        currentLat = parseFloat(payloadToUse).toFixed(4);
+        document.getElementById('latValue').textContent = currentLat;
+        updateMapLink(); updateMiniMap(currentLat, currentLon); updateWindyMap();
+        break;
+        case GPS_ROLL_TOPIC:
+        currentRoll = parseFloat(payloadToUse);
+        updateTiltGauge(currentRoll, currentPitch);
+        break;
+        case GPS_PITCH_TOPIC:
+        currentPitch = parseFloat(payloadToUse);
+        updateTiltGauge(currentRoll, currentPitch);
+        break;
+        case GEOPOS_TEMP_TOPIC:
+        document.getElementById('geoposTempValue').textContent = parseFloat(payloadToUse).toFixed(1);
+        document.getElementById('geoposTimeValue').textContent = nowTime;
+        break;
+        case GEOPOS_HUM_TOPIC:
+        document.getElementById('geoposHumValue').textContent = parseFloat(payloadToUse).toFixed(1);
+        break;
+        }
         });
-
         // Error Handling
         client.on('error', () => { mqttStatusLabelElement.textContent = "FEHLER"; mqttLedElement.className = "status-led status-led-offline"; });
         client.on('close', () => { mqttStatusLabelElement.textContent = "Verloren"; mqttLedElement.className = "status-led status-led-offline"; });
         client.on('offline', () => { mqttStatusLabelElement.textContent = "Offline"; mqttLedElement.className = "status-led status-led-offline"; });
-    }
-
-    document.addEventListener('DOMContentLoaded', connectClient);
-</script>
-</body>
+        }
+        document.addEventListener('DOMContentLoaded', connectClient);
+        </script>
+    </body>
 </html>
