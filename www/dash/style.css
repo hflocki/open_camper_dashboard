@@ -285,10 +285,39 @@ body {
 /* ========================================================= */
 
 .steuerelement-header {
-    cursor: pointer; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);
+    cursor: pointer; 
+    padding: 15px 20px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-bottom: none; 
 }
-.steuerelement-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; padding: 0 20px; }
-.data-item:not(.collapsed) .steuerelement-body { max-height: 600px; padding: 20px; }
+
+.steuerelement-body { 
+    max-height: 0; 
+    overflow: hidden; 
+    transition: max-height 0.4s ease-out, opacity 0.2s ease-out;
+    opacity: 0;
+}
+
+.data-item:not(.collapsed) .steuerelement-body { 
+    max-height: 2000px; /* Ein sehr hoher Puffer-Wert */
+    padding: 20px; 
+    opacity: 1;
+    transition: max-height 0.5s ease-in, opacity 0.3s ease-in;
+
+}
+
+/* Dreht den Pfeil um 180 Grad, wenn die Box offen ist */
+.data-item:not(.collapsed) .toggle-icon {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
 
 .btn { padding: 12px 20px; margin: 8px 4px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; min-width: 100px; }
 .btn-on { background-color: #28a745; color: white; }
@@ -300,3 +329,19 @@ body {
 .data-item:not(.collapsed) .toggle-icon { transform: rotate(180deg); }
 
 .input-field { padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1.2em; width: 80%; text-align: center; margin-bottom: 15px; }
+
+.map-card {
+    padding: 10px !important; /* Etwas weniger Padding für mehr Kartenplatz */
+}
+
+.map-container {
+    width: 100%;
+    height: 150px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+#mapIframe {
+    filter: grayscale(0.3) contrast(1.1); /* Optional: Passt die Karte optisch etwas an */
+}
