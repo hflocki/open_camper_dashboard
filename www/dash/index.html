@@ -46,40 +46,6 @@
 <p>R/L: <span id="rollValueGraph">-- °</span> | V/H: <span id="pitchValueGraph">-- °</span></p>
 </div>
 
-<div class="data-item gps-card">
-    <h3>
-        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <a href="#" id="mapLink" class="map-icon" target="_blank" title="Position auf Karte" style="color: inherit; text-decoration: none;">
-                <i class="fas fa-map-pin"></i> Position
-            </a>
-            <span class="sat-header-info" style="font-size: 0.7em; font-weight: normal; display: flex; align-items: center; gap: 4px;">
-                <i class="fas fa-satellite"></i> <span id="satValue">--</span>
-            </span>
-        </div>
-    </h3>
-
-    <div class="position-group">
-        <div class="position-item">
-            <span class="label">LON</span>
-            <div id="lonValue" class="display-value large-value-small">N/A</div>
-        </div>
-        <div class="position-item">
-            <span class="label">LAT</span>
-            <div id="latValue" class="display-value large-value-small">N/A</div>
-        </div>
-    </div>
-
-    <div class="position-group position-secondary">
-        <div class="position-item">
-            <span class="label">ALT</span>
-            <div class="display-value large-value-small">
-                <span id="altValue">N/A</span>
-                <span class="unit-label">m</span>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div class="data-item">
     <h3><i class="fas fa-tint"></i> Frischwassertank</h3>
 
@@ -109,52 +75,6 @@
                     <span class="unit-label">V</span>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="data-item">
-    <h3><i class="fas fa-fire"></i> Heizung</h3>
-    <div class="position-group">
-        <div class="position-item">
-            <span class="label">Sollwert</span>
-            <div class="display-value large-value-small">
-                <span id="setpointValue">N/A</span>
-                <span class="unit-label">°C</span>
-            </div>
-        </div>
-        <div class="position-item">
-            <span class="label">Istwert</span>
-            <div class="display-value large-value-small">
-                <span id="currentValue">N/A</span>
-                <span class="unit-label">°C</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="data-item">
-    <h3><i class="fas fa-fan"></i> MaxxFan</h3>
-
-    <div class="position-group">
-        <div class="position-item">
-            <span class="label">Lüfter Status</span>
-            <div id="fanStateValue" class="display-value large-value-small">N/A</div>
-        </div>
-        <div class="position-item">
-            <span class="label">Lid Status</span>
-            <div id="lidStateValue" class="display-value large-value-small">N/A</div>
-        </div>
-    </div>
-
-    <div class="position-group position-secondary">
-        <div class="position-item">
-            <span class="label">Richtung</span>
-            <div id="directionValue" class="display-value large-value-small">N/A</div>
-        </div>
-        <div class="position-item">
-            <span class="label">Auto-Modus</span>
-            <div id="autoStateValue" class="display-value large-value-small">N/A</div>
         </div>
     </div>
 </div>
@@ -271,6 +191,86 @@
         <div class="time-display">
         <span id="goveeTimeValue3">--:--</span>
     </div>
+    </div>
+</div>
+
+<div class="data-item">
+    <h3><i class="fas fa-fire"></i> Heizung</h3>
+    <div class="position-group">
+        <div class="position-item">
+            <span class="label">Sollwert</span>
+            <div class="display-value large-value-small">
+                <span id="setpointValue">N/A</span>
+                <span class="unit-label">°C</span>
+            </div>
+        </div>
+        <div class="position-item">
+            <span class="label">Istwert</span>
+            <div class="display-value large-value-small">
+                <span id="currentValue">N/A</span>
+                <span class="unit-label">°C</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="data-item">
+    <h3><i class="fas fa-fan"></i> MaxxFan</h3>
+
+    <div class="position-group">
+        <div class="position-item">
+            <span class="label">Lüfter Status</span>
+            <div id="fanStateValue" class="display-value large-value-small">N/A</div>
+        </div>
+        <div class="position-item">
+            <span class="label">Lid Status</span>
+            <div id="lidStateValue" class="display-value large-value-small">N/A</div>
+        </div>
+    </div>
+
+    <div class="position-group position-secondary">
+        <div class="position-item">
+            <span class="label">Richtung</span>
+            <div id="directionValue" class="display-value large-value-small">N/A</div>
+        </div>
+        <div class="position-item">
+            <span class="label">Auto-Modus</span>
+            <div id="autoStateValue" class="display-value large-value-small">N/A</div>
+        </div>
+    </div>
+</div>
+
+<div class="data-item gps-card">
+    <h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <a href="#" id="mapLink" class="map-icon" target="_blank" title="Position auf Karte" style="color: inherit; text-decoration: none;">
+                <i class="fas fa-map-pin"></i> Position
+            </a>
+            <span class="sat-header-info" style="font-size: 0.7em; font-weight: normal; display: flex; align-items: center; gap: 4px;">
+                <i class="fas fa-satellite"></i> <span id="satValue">--</span>
+            </span>
+        </div>
+    </h3>
+
+    <div class="position-group">
+        <div class="position-item">
+            <span class="label">LON</span>
+            <div id="lonValue" class="display-value large-value-small">N/A</div>
+        </div>
+        <div class="position-item">
+            <span class="label">LAT</span>
+            <div id="latValue" class="display-value large-value-small">N/A</div>
+        </div>
+    </div>
+
+    <div class="position-group position-secondary">
+        <div class="position-item">
+            <span class="label">ALT</span>
+            <div class="display-value large-value-small">
+                <span id="altValue">N/A</span>
+                <span class="unit-label">m</span>
+            </div>
+        </div>
     </div>
 </div>
   
