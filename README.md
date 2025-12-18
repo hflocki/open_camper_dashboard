@@ -30,7 +30,7 @@ Ein modernes, responsives Web-Dashboard zur Überwachung und Steuerung von Wohnm
 ![Statusscreen](dokumentation/images/img3.png)
 ![Controlscreen](dokumentation/images/img4.png)
 
-> _Hinweis: Die Screenshots zeigen das Dashboard im Hell-Mode-Design mit aktiven Live-Daten und Karten-Integration. Dark-Mode ist auch vorhanden.
+> _Hinweis: Die Screenshots zeigen das Dashboard im Hell und Dark-Mode-Design mit aktiven Live-Daten und Karten-Integration.
 
 ## 🛠 Installation & Setup
 
