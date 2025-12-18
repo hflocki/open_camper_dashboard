@@ -3,8 +3,8 @@
 const WS_HOST = window.location.hostname;
 const WS_PORT = 9001;
 const WS_PATH = "/";
-const MQTT_USERNAME = "mqttcaruser";
-const MQTT_PASSWORD = "eUZT2zR9VG4rJ3";
+const MQTT_USERNAME = "xxxxxxx";
+const MQTT_PASSWORD = "xxxxxxx";
 const APP_NAME = "Camper Dashboard";
 
 // --- ESPHome Node Namen ---
@@ -15,7 +15,7 @@ const ESPHOME_NODE_TEMP   = "esptemp";
 const ESPHOME_NODE_WATER  = "fuellstand";
 
 // Node ID und Basis-Topic für das Wassersystem
-const WATER_MQTT_BASE = "7fc5b1c2-70d0-4fe1-90a5-089e87aa316d/toc/nodes/2726";
+const WATER_MQTT_BASE = "xxxxxxxxx-xxxx-xxxx-xxxxxxxxxxxxxx/toc/nodes/2726";
 
 // --- Status Topics (LEDs) ---
 const HEATER_STATE_TOPIC = `${ESPHOME_NODE_HEATER}/status`;

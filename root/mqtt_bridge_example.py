@@ -5,8 +5,8 @@ from datetime import datetime
 # --- KONFIGURATION ---
 BROKER = "127.0.0.1"
 PORT = 1883
-USER = "mqttcaruser"
-PASS = "eUZT2zR9VG4rJ3"
+USER = "xxxxx" #MQTT User vom Broker hier eintragen
+PASS = "xxxxx" #MQTT Passwort vom Broker hier eintragen
 
 # Das Topic, auf dem das Gateway alle BT-Geräte meldet
 SOURCE_TOPIC = "home/OMG_ATOM_L/BTtoMQTT/+"
