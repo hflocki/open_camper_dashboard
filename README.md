@@ -50,15 +50,13 @@ Meine Vorlage basiert auf einem OpenWrt Router
 Wichtig: Der MQTT-Broker (z.B. Mosquitto) muss WebSockets auf einem eigenen Port (meist 9001) unterstützen.
 
 Struktur
-index.html: Das Haupt-Dashboard mit allen Anzeigen.
-
-control.html: Die Steuerungsseite für Heizung, Licht und Lüfter.
-
-style.css: Modernes Dark-Mode Design mit Glas-Effekt-Kacheln.
-
-sw.js: Service Worker für die PWA-Funktionalität.
-
-config.js: Zentrale Konfiguration (nicht im Git tracken!).
+- index.html: Das Haupt-Dashboard mit allen Anzeigen.
+- control.html: Die Steuerungsseite für Heizung, Licht und Lüfter.
+- style.css: Modernes Dark-Mode Design mit Glas-Effekt-Kacheln.
+- sw.js: Service Worker für die PWA-Funktionalität.
+- config.js: Zentrale Konfiguration (nicht im Git tracken!).
+- mqtt.min.js  Original ist hier https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.14.1/mqtt.min.js
+- all.min.css Original von https://fontawesome.com/ version 7
 
 
 MQTT Bridge (Python)
