@@ -2,7 +2,7 @@
 
 Ein modernes, responsives Web-Dashboard zur Überwachung und Steuerung von Wohnmobil-Komponenten über MQTT. Optimiert für die Nutzung auf Tablets (z.B. iPad) oder Smartphones im Camper-Netzwerk.
 
-![Dashboard Preview](https://via.placeholder.com/800x400?text=Camper+Dashboard+Preview) ## ✨ Features
+## ✨ Features
 
 - **📍 GPS & Standort:** Live-Anzeige von LAT/LON, Höhe und Satellitenanzahl. Inklusive interaktiver OpenStreetMap-MiniMap und direktem Google Maps Link.
 - **☁️ Wetterradar:** Integriertes Windy-Radar für Wind, Regen, Temperatur und Schnee (automatisch auf den aktuellen Standort zentriert).
