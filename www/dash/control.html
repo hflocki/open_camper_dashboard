@@ -510,17 +510,26 @@
 
       function sendWledCommand(type, value) {
         if (type === "farbe") {
-          const colors = {
-            f1: "#ff0000",
-            f2: "#08ff00",
-            f3: "#0000ff",
-            f4: "#ffffff",
-            f5: "#ff8c00",
-            f6: "#00ffff",
-            f7: "#ff00ff",
-            f8: "#ffcc44",
+          // Wir nutzen hier direkt die API-Befehle für "Solid" (FX=0) + Farbe
+          const colorCommands = {
+            f1: "FX=0&R=255&G=0&B=0", // Rot
+            f2: "FX=0&R=8&G=255&B=0", // Grün
+            f3: "FX=0&R=0&G=0&B=255", // Blau
+            f4: "FX=0&R=255&G=255&B=255", // Weiß
+            f5: "FX=0&R=255&G=140&B=0", // Orange
+            f6: "FX=0&R=0&G=255&B=255", // Cyan
+            f7: "FX=0&R=255&G=0&B=255", // Pink
+            f8: "FX=0&R=255&G=204&B=68", // Warmgold
           };
-          if (colors[value]) publishMQTT(WLED_BASE + "/c", colors[value]);
+
+          const apiCommand = colorCommands[value];
+          if (apiCommand) {
+            // Wir senden an das API Topic, genau wie bei den Effekten
+            // Das sorgt dafür, dass der Effekt sofort stoppt (FX=0) und die Farbe kommt
+            const apiTopic = WLED_BASE + "/api";
+            publishMQTT(apiTopic, apiCommand);
+            console.log("WLED Farbe via API gesetzt: " + apiCommand);
+          }
         }
       }
 
