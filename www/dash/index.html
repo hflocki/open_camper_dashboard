@@ -480,6 +480,10 @@
           <div id="cpLed" class="status-led"></div>
           <div class="status-label">CP Plus</div>
         </div>
+        <div class="status-item">
+          <div id="wledLed" class="status-led"></div>
+          <div class="status-label">WLED</div>
+        </div>
       </div>
     </div>
     <script>
@@ -504,8 +508,9 @@
         [ESPGEOPOS_STATE_TOPIC]: "gpsLed",
         [MAXXFAN_STATE_TOPIC]: "maxxFanLed",
         [ESPTEMP_STATE_TOPIC]: "tempLed",
-        [WATERLEVEL_STATUS_TOPIC]: "waterLed",
+        [WATERLEVEL_STATE_TOPIC]: "waterLed",
         [CP_PLUS_ALIVE_TOPIC]: "cpLed",
+        [WLED_STATUS_TOPIC]: "wledLed",
       };
       /**
        * =========================================================
@@ -597,22 +602,28 @@
           );
         }
       }
-      // Sende Authentifizierung an Wasser-Node (Falls nötig)
       function sendAuthToWaterNode() {
         if (!client || !client.connected) return;
+
+        // Prüfen, ob die Variablen existieren und NICHT mehr der Standard-Text sind
         if (
           typeof WATER_NODE_SEC === "undefined" ||
+          WATER_NODE_SEC === "" ||
           WATER_NODE_SEC === "IHR_SEC_KEY_HIER"
         ) {
-          console.warn("Wassernode Sicherheitsschlüssel nicht konfiguriert.");
+          // Wir loggen nur kurz, dass nichts zu tun ist, ohne "Warnung"
+          console.log("Wassersensor: Keine Authentifizierung konfiguriert.");
           return;
         }
+
         const authTopic = `${MQTT_ROOT_ID}/toc/pipe`;
         const authPayload = `app:${WATER_NODE_ID}:auth:${WATER_NODE_SEC};`;
         client.publish(authTopic, authPayload, { qos: 0 });
 
         const autoSendPayload = `app:${WATER_NODE_ID}:autosend:1;`;
         client.publish(authTopic, autoSendPayload, { qos: 0 });
+
+        console.log("Wassersensor: Authentifizierung erfolgreich gesendet.");
       }
       /**
        * =========================================================
@@ -638,7 +649,8 @@
             ESPGEOPOS_STATE_TOPIC,
             MAXXFAN_STATE_TOPIC,
             ESPTEMP_STATE_TOPIC,
-            WATERLEVEL_STATUS_TOPIC,
+            WATERLEVEL_STATE_TOPIC,
+            WLED_STATUS_TOPIC,
             CP_PLUS_ALIVE_TOPIC,
             HEATER_SETPOINT_TOPIC,
             HEATER_CURRENT_TOPIC,
@@ -688,18 +700,32 @@
             processGoveeData(payloadToUse, 3);
             return;
           }
-          // Status LEDs
+          // Status LEDs Update
           if (ledMap.hasOwnProperty(topic)) {
             const ledElement = document.getElementById(ledMap[topic]);
             if (ledElement) {
-              const val = payloadToUse.trim().toUpperCase();
-              const isOnline =
-                val === "1" ||
-                val === "ONLINE" ||
-                val === "ON" ||
-                val === "TRUE" ||
-                val === "CONNECTED";
+              // Wir trimmen Leerzeichen und wandeln alles in Kleinbuchstaben um
+              const val = payloadToUse.trim().toLowerCase();
+
+              // Liste aller Werte, die als "Online" gewertet werden sollen
+              const onlineValues = [
+                "1",
+                "online",
+                "on",
+                "true",
+                "an",
+                "connected",
+                "active",
+              ];
+
+              const isOnline = onlineValues.includes(val);
+
               ledElement.className = `status-led ${isOnline ? "status-led-online" : "status-led-offline"}`;
+
+              // Kleiner Debug-Log für dich in der Konsole:
+              console.log(
+                `LED Update für ${topic}: Wert ist "${val}" -> Online: ${isOnline}`,
+              );
             }
           }
           // Sensor-Handling per Switch

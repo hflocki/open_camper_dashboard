@@ -24,6 +24,7 @@ const MAXXFAN_STATE_TOPIC = `${ESPHOME_NODE_FAN}/status`;
 const ESPTEMP_STATE_TOPIC = `${ESPHOME_NODE_TEMP}/status`;
 const CP_PLUS_ALIVE_TOPIC = `truma/cp_plus/alive`;
 const WATERLEVEL_STATUS_TOPIC = `${WATER_MQTT_BASE}/mqttconnected`;
+const WLED_BASE = "wled/xxxx";
 
 // --- Heizung / CP Plus ---
 const HEATER_SETPOINT_TOPIC = `${ESPHOME_NODE_HEATER}/sensor/setpoint_temp/state`;
@@ -76,3 +77,33 @@ const RESTART_FAN_TOPIC    = `${ESPHOME_NODE_FAN}/button/restart_switch/command`
 const RESTART_GPS_TOPIC    = `${ESPHOME_NODE_GPS}/button/restart_switch/command`;
 const RESTART_TEMP_TOPIC   = `${ESPHOME_NODE_TEMP}/button/restart_switch/command`;
 const RESTART_WATER_TOPIC  = `${ESPHOME_NODE_WATER}/button/restart_switch/command`;
+
+// --- WLED ---
+const WLED_BRIGHTNESS_TOPIC = WLED_BASE + "/g";
+const WLED_API_TOPIC = WLED_BASE + "/api";
+const wledConfig = {
+  mqttTopic: WLED_API_TOPIC,
+  // Feste Farben (Solid)
+  farben: {
+    f1: "FX=0&R=255&G=0&B=0", // Rot
+    f2: "FX=0&R=0&G=255&B=0", // Grün
+    f3: "FX=0&R=0&G=0&B=255", // Blau
+    f4: "FX=0&R=255&G=255&B=255", // Weiß
+    f5: "FX=0&R=255&G=100&B=0", // Orange
+    f6: "FX=0&R=0&G=255&B=255", // Cyan
+    f7: "FX=0&R=255&G=0&B=255", // Pink
+    f8: "FX=0&R=255&G=200&B=50", // Warmgold
+  },
+
+  // Effekte (Animationen)
+  effekte: {
+    eff1: "FX=9&SX=128&IX=128", // Rainbow
+    eff2: "FX=1&SX=100&IX=200", // Blink
+    eff3: "FX=66&SX=160&IX=255", // Fire 2012
+    eff4: "FX=43&SX=40&IX=120", // Scan (Kitt-Style)
+    eff5: "FX=2&SX=50&IX=255", // Breath
+    eff6: "FX=38&SX=100&IX=100", // Color Loop
+    eff7: "FX=82&SX=40&IX=200", // Aurora
+    eff8: "FX=45&SX=150&IX=255", // Cinema
+  },
+};

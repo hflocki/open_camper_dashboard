@@ -1,400 +1,580 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Camper Dashboard - Steuerung</title>
-        <link rel="icon" type="image/png" href="./imag/felix.png">
-        <link rel="apple-touch-icon" href="./imag/felix.png">
-        <link rel="stylesheet" href="./fonts/css/all.min.css">
-        <link rel="stylesheet" href="./style.css">
-        <script src="./mqtt.min.js"></script>
-        <script src="./config.js"></script>
-        <link rel="manifest" href="./manifest.json">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <script>
-        if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(registration => {
-        console.log('Service Worker registriert: ', registration.scope);
-        }).catch(err => {
-        console.log('Service Worker Registrierung fehlgeschlagen: ', err);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Camper Dashboard - Steuerung</title>
+    <link rel="icon" type="image/png" href="./imag/felix.png" />
+    <link rel="apple-touch-icon" href="./imag/felix.png" />
+    <link rel="stylesheet" href="./fonts/css/all.min.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./config.js"></script>
+    <script src="./mqtt.min.js"></script>
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./sw.js")
+            .then((registration) => {
+              console.log("Service Worker registriert: ", registration.scope);
+            })
+            .catch((err) => {
+              console.log("Service Worker Registrierung fehlgeschlagen: ", err);
+            });
         });
-        });
-        }
-        
-        // NEUE Funktion für das Akkordeon
-        function toggleBox(headerElement) {
-        const box = headerElement.closest('.data-item');
-        box.classList.toggle('collapsed');
-        }
-        </script>
-    </head>
-    <body>
-        <nav class="navbar">
-            <img id="navLogo" src="./imag/felix.png" alt="Logo" class="nav-logo">
-            
-            <h2 id="appTitle">Camper Steuerung</h2>
-            <a href="index.html" class="nav-button"><i class="fa-solid fa-signal"></i></a>
-        </nav>
-        <div class="container">
-            
-            <div class="data-card">
-                
-                <div class="data-item collapsed">
-                    <div class="steuerelement-header" onclick="toggleBox(this)">
-                        <h3><i class="fas fa-lightbulb"></i> Beleuchtung</h3>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="steuerelement-body">
-                        <p>Hauptlicht:</p>
-                        <button class="btn btn-on" id="btnMainLightOn">AN</button>
-                        <button class="btn btn-off" id="btnMainLightOff">AUS</button>
-                    </div>
-                </div>
-                <div class="data-item collapsed">
-                    <div class="steuerelement-header" onclick="toggleBox(this)">
-                        <h3><i class="fas fa-fire-flame-curved"></i> Truma</h3>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="steuerelement-body">
-                        <p>Zieltemperatur (&deg;C):</p>
-                        <input type="number" id="tempSetpoint" value="20.0" step="0.5" min="10" max="30" class="input-field">
-                        <button class="btn btn-action" id="btnSetTemp">Setzen</button>
-                        
-                        <div class="temp-preset-buttons">
-                            <button class="btn btn-preset" data-temp="17">17&deg;C</button>
-                            <button class="btn btn-preset" data-temp="19">19&deg;C</button>
-                            <button class="btn btn-preset" data-temp="21">21&deg;C</button>
-                            <button class="btn btn-preset" data-temp="23">23&deg;C</button>
-                            <button class="btn btn-preset" data-temp="26">26&deg;C</button>
-                            <button class="btn btn-preset" data-temp="28">28&deg;C</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="data-item collapsed">
-                    <div class="steuerelement-header" onclick="toggleBox(this)">
-                        <h3><i class="fas fa-fan"></i> MaxxFan</h3>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="steuerelement-body">
-                        
-                        <h4><i class="fas fa-door-open"></i> Deckel</h4>
-                        <button class="btn btn-on" id="btnLidOpen">Öffnen</button>
-                        <button class="btn btn-off" id="btnLidClose">Schließen</button>
-                        
-                        <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;"></p>
-                        <h4><i class="fas fa-tachometer-alt"></i> Lüftergeschwindigkeit (%)</h4>
-                        <input type="number" id="fanSpeedInput" value="50" step="1" min="0" max="100" class="input-field">
-                        <button class="btn btn-action" id="btnSetFanSpeed">Setzen</button>
-                        
-                        <div class="temp-preset-buttons">
-                            <button class="btn btn-preset fan-preset" data-speed="10">10%</button>
-                            <button class="btn btn-preset fan-preset" data-speed="30">30%</button>
-                            <button class="btn btn-preset fan-preset" data-speed="50">50%</button>
-                            <button class="btn btn-preset fan-preset" data-speed="70">70%</button>
-                            <button class="btn btn-preset fan-preset" data-speed="100">100%</button>
-                        </div>
-                        
-                        <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;"></p>
-                        <h4><i class="fas fa-sync-alt"></i> Lüfterrichtung</h4>
-                        <div style="display: flex; justify-content: space-between; align-items: center; width: 80%; max-width: 300px; margin: 15px auto;">
-                            <span>Absaugen (FORWARD)</span>
-                            <span>Einblasen (REVERSE)</span>
-                        </div>
-                        <input type="range" id="fanDirectionSlider" min="0" max="1" step="1" value="0" style="width: 80%; max-width: 300px;">
-                        <p class="control-info">Aktuelle Richtung: <span id="fanDirectionValue">Absaugen (FORWARD)</span></p>
-                        <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;"></p>
-                        
-                        <h4><i class="fas fa-toggle-on"></i> Spezialmodi</h4>
-                        <div style="display: flex; flex-direction: column; align-items: center;">
-                            <div class="control-group switch-group" style="display: flex; justify-content: space-between; width: 80%; max-width: 300px; margin-bottom: 10px;">
-                                <p class="control-label">Auto-Modus</p>
-                                <label class="switch">
-                                    <input type="checkbox" id="switchAutoFan" class="switch-input">
-                                    <span class="slider round"></span>
-                                </label>
-                            </div>
-                            <div class="control-group switch-group" style="display: flex; justify-content: space-between; width: 80%; max-width: 300px;">
-                                <p class="control-label">Decken-Lüfter Modus</p>
-                                <label class="switch">
-                                    <input type="checkbox" id="switchCeilingMode" class="switch-input">
-                                    <span class="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="data-item collapsed">
-                    <div class="steuerelement-header" onclick="toggleBox(this)">
-                        <h3><i class="fas fa-wrench"></i> Kalibrierung</h3>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="steuerelement-body">
-                        
-                        <h4><i class="fas fa-compass"></i> Lage-Sensor Nullpunkt</h4>
-                        
-                        <button class="btn btn-action" id="btnCalibrateRoll">Roll (Links/Rechts)</button>
-                        <button class="btn btn-action" id="btnCalibratePitch">Pitch (Vorne/Hinten)</button>
-                        <p style="margin-top: 25px; padding-top: 15px; border-top: 1px solid #ddd;"></p>
-                        
-                        <h4><i class="fas fa-tint"></i> Wassertank Kalibrierung</h4>
-                        
-                        <button class="btn btn-action" id="btnCalibrateWaterFull">100% (Tank Voll)</button>
-                        <button class="btn btn-action" id="btnCalibrateWaterEmpty">0% (Tank Leer)</button>
-                    </div>
-                </div>
-                <div class="data-item system-restart-box collapsed">
-                    <div class="steuerelement-header" onclick="toggleBox(this)">
-                        <h3><i class="fas fa-redo"></i> Neustart</h3>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="steuerelement-body">
-                        
-                        <button class="btn btn-restart" id="btnRestartHeater">Heizung</button>
-                        <button class="btn btn-restart" id="btnRestartFan">MaxxFan</button>
-                        <button class="btn btn-restart" id="btnRestartGps">GPS/Lage</button>
-                        <button class="btn btn-restart" id="btnRestartTemp">Temp/Licht</button>
-                        <button class="btn btn-restart" id="btnRestartWater">Wasser</button>
-                    </div>
-                </div>
+      }
+
+      // NEUE Funktion für das Akkordeon
+      function toggleBox(headerElement) {
+        const box = headerElement.closest(".data-item");
+        box.classList.toggle("collapsed");
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <img id="navLogo" src="./imag/felix.png" alt="Logo" class="nav-logo" />
+
+      <h2 id="appTitle">Camper Steuerung</h2>
+      <a href="index.html" class="nav-button"
+        ><i class="fa-solid fa-signal"></i
+      ></a>
+    </nav>
+    <div class="container">
+      <div class="data-card">
+        <div class="data-item collapsed">
+          <div class="steuerelement-header" onclick="toggleBox(this)">
+            <h3><i class="fas fa-lightbulb"></i> Beleuchtung</h3>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="steuerelement-body" style="text-align: center">
+            <p>WLED Ambiente:</p>
+            <div
+              style="
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+                margin-bottom: 15px;
+              "
+            >
+              <button
+                class="btn btn-on"
+                onclick="publishMQTT('wled/f49991', 'ON')"
+              >
+                AN
+              </button>
+              <button
+                class="btn btn-off"
+                onclick="publishMQTT('wled/f49991', 'OFF')"
+              >
+                AUS
+              </button>
             </div>
-            <div class="system-status-container">
-                <div class="mqtt-status-group">
-                    <div id="mqttLed" class="status-led" style="margin-top: 0;"></div>
-                    <div class="mqtt-info">MQTT:</div>
-                    <span id="mqttStatusLabel" >Verbinden...</span>
-                </div>
-                
-                <div class="status-item">
-                    <div id="heaterLed" class="status-led"></div>
-                    <div class="status-label">Heizung</div>
-                </div>
-                <div class="status-item">
-                    <div id="gpsLed" class="status-led"></div>
-                    <div class="status-label">GPS/Lage</div>
-                </div>
-                <div class="status-item">
-                    <div id="maxxFanLed" class="status-led"></div>
-                    <div class="status-label">MaxxFan</div>
-                </div>
-                <div class="status-item">
-                    <div id="tempLed" class="status-led"></div>
-                    <div class="status-label">Temperatur</div>
-                </div>
-                <div class="status-item">
-                    <div id="waterLed" class="status-led"></div>
-                    <div class="status-label">Wasserstand</div>
-                </div>
-                <div class="status-item">
-                    <div id="cpLed" class="status-led"></div>
-                    <div class="status-label">CP Plus</div>
-                </div>
+
+            <p>Effekte:</p>
+            <div class="effect-grid">
+              <button
+                class="btn-eff e-rainbow"
+                onclick="publishMQTT('wled/f49991/api', 'FX=9&SX=128&IX=128')"
+              >
+                <i class="fas fa-rainbow"></i><span>Rainbow</span>
+              </button>
+              <button
+                class="btn-eff e-blink"
+                onclick="publishMQTT('wled/f49991/api', 'FX=1&SX=100&IX=200')"
+              >
+                <i class="fas fa-bolt"></i><span>Blink</span>
+              </button>
+              <button
+                class="btn-eff e-fire"
+                onclick="publishMQTT('wled/f49991/api', 'FX=66&SX=160&IX=255')"
+              >
+                <i class="fas fa-fire"></i><span>Fire</span>
+              </button>
+              <button
+                class="btn-eff e-scan"
+                onclick="publishMQTT('wled/f49991/api', 'FX=43&SX=40&IX=120')"
+              >
+                <i class="fas fa-arrows-left-right"></i><span>Scan</span>
+              </button>
+              <button
+                class="btn-eff e-breath"
+                onclick="publishMQTT('wled/f49991/api', 'FX=2&SX=50&IX=255')"
+              >
+                <i class="fas fa-wind"></i><span>Breath</span>
+              </button>
+              <button
+                class="btn-eff e-loop"
+                onclick="publishMQTT('wled/f49991/api', 'FX=38&SX=100&IX=100')"
+              >
+                <i class="fas fa-sync"></i><span>Loop</span>
+              </button>
+              <button
+                class="btn-eff e-aurora"
+                onclick="publishMQTT('wled/f49991/api', 'FX=137&SX=40&IX=200')"
+              >
+                <i class="fas fa-magic"></i><span>Aurora</span>
+              </button>
+              <button
+                class="btn-eff e-cinema"
+                onclick="publishMQTT('wled/f49991/api', 'FX=45&SX=150&IX=255')"
+              >
+                <i class="fas fa-film"></i><span>Cinema</span>
+              </button>
             </div>
-            
+
+            <p>Farbauswahl:</p>
+            <div class="color-dot-container">
+              <button
+                onclick="sendWledCommand('farbe', 'f1')"
+                class="color-dot"
+                style="background-color: #ff0000"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f2')"
+                class="color-dot"
+                style="background-color: #08ff00"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f3')"
+                class="color-dot"
+                style="background-color: #0000ff"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f4')"
+                class="color-dot"
+                style="background-color: #ffffff; border: 1px solid #ccc"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f5')"
+                class="color-dot"
+                style="background-color: #ff8c00"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f6')"
+                class="color-dot"
+                style="background-color: #00ffff"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f7')"
+                class="color-dot"
+                style="background-color: #ff00ff"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f8')"
+                class="color-dot"
+                style="background-color: #ffcc44"
+              ></button>
+            </div>
+
+            <button
+              class="btn btn-off"
+              style="width: 100%; margin-top: 10px"
+              onclick="publishMQTT('wled/f49991/api', 'FX=0')"
+            >
+              <i class="fas fa-stop"></i> Effekt beenden (Solid)
+            </button>
+          </div>
         </div>
 
-<script>
-    /**
-     * =========================================================
-     * --- 0. KONFIGURATION & ELEMENTE ---
-     * =========================================================
-     */
-    let client;
-    const mqttLedElement = document.getElementById('mqttLed');
-    const mqttStatusLabelElement = document.getElementById('mqttStatusLabel');
-    const switchAutoFan = document.getElementById('switchAutoFan');
-    const switchCeilingMode = document.getElementById('switchCeilingMode');
+        <div class="data-item collapsed">
+          <div class="steuerelement-header" onclick="toggleBox(this)">
+            <h3><i class="fas fa-fire-flame-curved"></i> Truma</h3>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="steuerelement-body">
+            <p>Zieltemperatur (&deg;C):</p>
+            <input
+              type="number"
+              id="tempSetpoint"
+              value="20.0"
+              step="0.5"
+              min="10"
+              max="30"
+              class="input-field"
+            />
+            <button class="btn btn-action" id="btnSetTemp">Setzen</button>
 
-    // Zuordnung von Topics zu LED-Elementen
-    const ledMap = {
-        [HEATER_STATE_TOPIC]: 'heaterLed',
-        [ESPGEOPOS_STATE_TOPIC]: 'gpsLed',
-        [MAXXFAN_STATE_TOPIC]: 'maxxFanLed',
-        [ESPTEMP_STATE_TOPIC]: 'tempLed',
-        [WATERLEVEL_STATUS_TOPIC]: 'waterLed',
-        [CP_PLUS_ALIVE_TOPIC]: 'cpLed'
-    };
+            <div class="temp-preset-buttons">
+              <button class="btn btn-preset" data-temp="17">17&deg;C</button>
+              <button class="btn btn-preset" data-temp="19">19&deg;C</button>
+              <button class="btn btn-preset" data-temp="21">21&deg;C</button>
+              <button class="btn btn-preset" data-temp="23">23&deg;C</button>
+              <button class="btn btn-preset" data-temp="26">26&deg;C</button>
+              <button class="btn btn-preset" data-temp="28">28&deg;C</button>
+            </div>
+          </div>
+        </div>
+        <div class="data-item collapsed">
+          <div class="steuerelement-header" onclick="toggleBox(this)">
+            <h3><i class="fas fa-fan"></i> MaxxFan</h3>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="steuerelement-body">
+            <h4><i class="fas fa-door-open"></i> Deckel</h4>
+            <button class="btn btn-on" id="btnLidOpen">Öffnen</button>
+            <button class="btn btn-off" id="btnLidClose">Schließen</button>
 
-    /**
-     * =========================================================
-     * --- 1. MQTT KERNFUNKTIONEN ---
-     * =========================================================
-     */
+            <p
+              style="
+                margin-top: 25px;
+                padding-top: 15px;
+                border-top: 1px solid #ddd;
+              "
+            ></p>
+            <h4>
+              <i class="fas fa-tachometer-alt"></i> Lüftergeschwindigkeit (%)
+            </h4>
+            <input
+              type="number"
+              id="fanSpeedInput"
+              value="50"
+              step="1"
+              min="0"
+              max="100"
+              class="input-field"
+            />
+            <button class="btn btn-action" id="btnSetFanSpeed">Setzen</button>
 
-    function connectClient() {
-        const clientId = "webClient_control_" + Math.random().toString(16).substr(2, 8);
-        const connectUrl = `ws://${WS_HOST}:${WS_PORT}${WS_PATH}`;
+            <div class="temp-preset-buttons">
+              <button class="btn btn-preset fan-preset" data-speed="10">
+                10%
+              </button>
+              <button class="btn btn-preset fan-preset" data-speed="30">
+                30%
+              </button>
+              <button class="btn btn-preset fan-preset" data-speed="50">
+                50%
+              </button>
+              <button class="btn btn-preset fan-preset" data-speed="70">
+                70%
+              </button>
+              <button class="btn btn-preset fan-preset" data-speed="100">
+                100%
+              </button>
+            </div>
 
-        client = mqtt.connect(connectUrl, {
-            clientId: clientId,
-            username: MQTT_USERNAME,
-            password: MQTT_PASSWORD,
-            clean: true,
+            <p
+              style="
+                margin-top: 25px;
+                padding-top: 15px;
+                border-top: 1px solid #ddd;
+              "
+            ></p>
+            <h4><i class="fas fa-sync-alt"></i> Lüfterrichtung</h4>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 80%;
+                max-width: 300px;
+                margin: 15px auto;
+              "
+            >
+              <span>Absaugen (FORWARD)</span>
+              <span>Einblasen (REVERSE)</span>
+            </div>
+            <input
+              type="range"
+              id="fanDirectionSlider"
+              min="0"
+              max="1"
+              step="1"
+              value="0"
+              style="width: 80%; max-width: 300px"
+            />
+            <p class="control-info">
+              Aktuelle Richtung:
+              <span id="fanDirectionValue">Absaugen (FORWARD)</span>
+            </p>
+            <p
+              style="
+                margin-top: 25px;
+                padding-top: 15px;
+                border-top: 1px solid #ddd;
+              "
+            ></p>
+
+            <h4><i class="fas fa-toggle-on"></i> Spezialmodi</h4>
+            <div
+              style="display: flex; flex-direction: column; align-items: center"
+            >
+              <div
+                class="control-group switch-group"
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  width: 80%;
+                  max-width: 300px;
+                  margin-bottom: 10px;
+                "
+              >
+                <p class="control-label">Auto-Modus</p>
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    id="switchAutoFan"
+                    class="switch-input"
+                  />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div
+                class="control-group switch-group"
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  width: 80%;
+                  max-width: 300px;
+                "
+              >
+                <p class="control-label">Decken-Lüfter Modus</p>
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    id="switchCeilingMode"
+                    class="switch-input"
+                  />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="data-item collapsed">
+          <div class="steuerelement-header" onclick="toggleBox(this)">
+            <h3><i class="fas fa-wrench"></i> Kalibrierung</h3>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="steuerelement-body">
+            <h4><i class="fas fa-compass"></i> Lage-Sensor Nullpunkt</h4>
+
+            <button class="btn btn-action" id="btnCalibrateRoll">
+              Roll (Links/Rechts)
+            </button>
+            <button class="btn btn-action" id="btnCalibratePitch">
+              Pitch (Vorne/Hinten)
+            </button>
+            <p
+              style="
+                margin-top: 25px;
+                padding-top: 15px;
+                border-top: 1px solid #ddd;
+              "
+            ></p>
+
+            <h4><i class="fas fa-tint"></i> Wassertank Kalibrierung</h4>
+
+            <button class="btn btn-action" id="btnCalibrateWaterFull">
+              100% (Tank Voll)
+            </button>
+            <button class="btn btn-action" id="btnCalibrateWaterEmpty">
+              0% (Tank Leer)
+            </button>
+          </div>
+        </div>
+        <div class="data-item system-restart-box collapsed">
+          <div class="steuerelement-header" onclick="toggleBox(this)">
+            <h3><i class="fas fa-redo"></i> Neustart</h3>
+            <span class="toggle-icon">▼</span>
+          </div>
+          <div class="steuerelement-body">
+            <button class="btn btn-restart" id="btnRestartHeater">
+              Heizung
+            </button>
+            <button class="btn btn-restart" id="btnRestartFan">MaxxFan</button>
+            <button class="btn btn-restart" id="btnRestartGps">GPS/Lage</button>
+            <button class="btn btn-restart" id="btnRestartTemp">
+              Temp/Licht
+            </button>
+            <button class="btn btn-restart" id="btnRestartWater">Wasser</button>
+          </div>
+        </div>
+      </div>
+      <div class="system-status-container">
+        <div class="mqtt-status-group">
+          <div id="mqttLed" class="status-led" style="margin-top: 0"></div>
+          <div class="mqtt-info">MQTT:</div>
+          <span id="mqttStatusLabel">Verbinden...</span>
+        </div>
+
+        <div class="status-item">
+          <div id="heaterLed" class="status-led"></div>
+          <div class="status-label">Heizung</div>
+        </div>
+        <div class="status-item">
+          <div id="gpsLed" class="status-led"></div>
+          <div class="status-label">GPS/Lage</div>
+        </div>
+        <div class="status-item">
+          <div id="maxxFanLed" class="status-led"></div>
+          <div class="status-label">MaxxFan</div>
+        </div>
+        <div class="status-item">
+          <div id="tempLed" class="status-led"></div>
+          <div class="status-label">Temperatur</div>
+        </div>
+        <div class="status-item">
+          <div id="waterLed" class="status-led"></div>
+          <div class="status-label">Wasserstand</div>
+        </div>
+        <div class="status-item">
+          <div id="cpLed" class="status-led"></div>
+          <div class="status-label">CP Plus</div>
+        </div>
+        <div class="status-item">
+          <div id="wledLed" class="status-led"></div>
+          <div class="status-label">WLED</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // --- 1. MQTT KONFIGURATION & LED-MAP (Namen aus deiner config.js) ---
+      const ledMap = {
+        [HEATER_STATE_TOPIC]: "heaterLed",
+        [ESPGEOPOS_STATE_TOPIC]: "gpsLed",
+        [MAXXFAN_STATE_TOPIC]: "maxxFanLed",
+        [ESPTEMP_STATE_TOPIC]: "tempLed",
+        [WATERLEVEL_STATE_TOPIC]: "waterLed",
+        "wled/f49991/status": "wledLed",
+      };
+
+      let client;
+
+      // --- 2. MQTT VERBINDUNG AUFBAUEN ---
+      function connectMQTT() {
+        const clientId =
+          "mqttjs_control_" + Math.random().toString(16).substr(2, 8);
+        const options = {
+          keepalive: 30,
+          clientId: clientId,
+          clean: true,
+          reconnectPeriod: 5000,
+          connectTimeout: 30 * 1000,
+          username: MQTT_USERNAME, // Heißt bei dir MQTT_USERNAME
+          password: MQTT_PASSWORD, // Heißt bei dir MQTT_PASSWORD
+        };
+
+        console.log("Verbinde mit MQTT Broker...");
+        client = mqtt.connect(`ws://${WS_HOST}:${WS_PORT}`, options); // Nutzt WS_HOST und WS_PORT aus deiner config
+
+        client.on("connect", () => {
+          console.log("MQTT Control verbunden!");
+          updateMqttStatus(true);
+          Object.keys(ledMap).forEach((topic) => client.subscribe(topic));
         });
 
-        client.on('connect', () => {
-            console.log("MQTT Control verbunden!");
-            mqttStatusLabelElement.textContent = "OK";
-            mqttLedElement.className = "status-led status-led-online";
+        client.on("message", (topic, payload) => {
+          const payloadToUse = payload.toString();
 
-            // Alle notwendigen Topics abonnieren
-            const topics = [
-                HEATER_STATE_TOPIC, ESPGEOPOS_STATE_TOPIC, MAXXFAN_STATE_TOPIC,
-                ESPTEMP_STATE_TOPIC, WATERLEVEL_STATUS_TOPIC, CP_PLUS_ALIVE_TOPIC,
-                MAXXFAN_AUTO_STATE_TOPIC, MAXXFAN_CEILING_STATE_TOPIC,
-                LIGHT_SET_TOPIC, HEATER_SETPOINT_TOPIC
-            ];
-            client.subscribe(topics, { qos: 0 });
-            sendAuthToWaterNode();
-        });
-
-        client.on('message', onMessage);
-        client.on('error', () => { mqttStatusLabelElement.textContent = "FEHLER"; });
-        client.on('close', () => { mqttStatusLabelElement.textContent = "Verloren"; });
-    }
-
-    function sendCommand(topic, payload) {
-        if (client && client.connected) {
-            client.publish(topic, payload.toString(), { qos: 0, retain: false });
-        } else {
-            console.warn("MQTT nicht verbunden!");
-        }
-    }
-
-    function onMessage(topic, message) {
-        const payload = message.toString();
-        const val = payload.trim().toUpperCase();
-
-        // LED Status Update
-        if (ledMap[topic]) {
-            const led = document.getElementById(ledMap[topic]);
-            if (led) {
-                const isOnline = ["1", "ONLINE", "ON", "TRUE", "AN", "CONNECTED"].includes(val);
-                led.className = `status-led ${isOnline ? 'status-led-online' : 'status-led-offline'}`;
+          if (ledMap.hasOwnProperty(topic)) {
+            const ledElement = document.getElementById(ledMap[topic]);
+            if (ledElement) {
+              const val = payloadToUse.trim().toLowerCase();
+              const onlineValues = [
+                "1",
+                "online",
+                "on",
+                "true",
+                "an",
+                "connected",
+                "active",
+              ];
+              const isOnline = onlineValues.includes(val);
+              ledElement.className = `status-led ${isOnline ? "status-led-online" : "status-led-offline"}`;
             }
-        }
-
-        // UI Feedback für Switches
-        switch (topic) {
-            case MAXXFAN_AUTO_STATE_TOPIC: 
-                if (switchAutoFan) switchAutoFan.checked = (val === 'ON' || val === 'TRUE'); 
-                break;
-            case MAXXFAN_CEILING_STATE_TOPIC: 
-                if (switchCeilingMode) switchCeilingMode.checked = (val === 'ON' || val === 'TRUE'); 
-                break;
-        }
-    }
-
-    /**
-     * =========================================================
-     * --- 2. SPEZIAL-FUNKTIONEN (AUTH, RESTART, CALIB) ---
-     * =========================================================
-     */
-
-    function sendAuthToWaterNode() {
-        if (!client || !client.connected || WATER_NODE_SEC === "IHR_SEC_KEY_HIER") return;
-        const authTopic = `${MQTT_ROOT_ID}/toc/pipe`;
-        sendCommand(authTopic, `app:${WATER_NODE_ID}:auth:${WATER_NODE_SEC};`);
-    }
-
-    function setupRestartButton(id, topic, name) {
-        const btn = document.getElementById(id);
-        if (btn) btn.onclick = () => sendCommand(topic, "ON");
-    }
-
-    function setupCalibrateButton(id, topic, sensor) {
-        const btn = document.getElementById(id);
-        if (btn) {
-            btn.onclick = function() {
-                sendCommand(topic, "ON");
-                const originalText = this.textContent;
-                this.textContent = "Gesendet...";
-                setTimeout(() => { this.textContent = originalText; }, 2000);
-            };
-        }
-    }
-
-    /**
-     * =========================================================
-     * --- 3. INITIALISIERUNG (EVENT HANDLER) ---
-     * =========================================================
-     */
-
-    document.addEventListener('DOMContentLoaded', () => {
-        connectClient();
-
-        // MaxxFan Deckel & Speed
-        document.getElementById('btnLidOpen').onclick = () => sendCommand(MAXXFAN_LID_COMMAND_TOPIC, 'OPEN');
-        document.getElementById('btnLidClose').onclick = () => sendCommand(MAXXFAN_LID_COMMAND_TOPIC, 'CLOSE');
-        document.getElementById('btnSetFanSpeed').onclick = () => sendCommand(MAXXFAN_SPEED_SET_TOPIC, document.getElementById('fanSpeedInput').value);
-
-        // MaxxFan Speed Presets
-        document.querySelectorAll('.fan-preset').forEach(btn => {
-            btn.onclick = function() {
-                const speed = this.getAttribute('data-speed');
-                document.getElementById('fanSpeedInput').value = speed;
-                sendCommand(MAXXFAN_SPEED_SET_TOPIC, speed);
-            };
+          }
+          console.log(`Empfang [${topic}]: ${payloadToUse}`);
         });
 
-        // MaxxFan Richtung (Slider)
-        const dirSlider = document.getElementById('fanDirectionSlider');
-        if (dirSlider) {
-            dirSlider.oninput = function() {
-                const dir = this.value === "0" ? "FORWARD" : "REVERSE";
-                document.getElementById('fanDirectionValue').textContent = this.value === "0" ? "Absaugen (FORWARD)" : "Einblasen (REVERSE)";
-                sendCommand(MAXXFAN_DIRECTION_SET_TOPIC, dir);
-            };
+        client.on("error", () => updateMqttStatus(false));
+        client.on("close", () => updateMqttStatus(false));
+      }
+
+      // --- 3. STEUERUNGS-FUNKTIONEN ---
+      function publishMQTT(topic, payload) {
+        if (client && client.connected) {
+          client.publish(topic, payload.toString(), { qos: 0, retain: false });
+        } else {
+          console.error("Nicht verbunden!");
         }
+      }
 
-        // MaxxFan Modi (Auto/Ceiling mit gegenseitiger Sperre)
-        if (switchAutoFan) {
-            switchAutoFan.onchange = function() {
-                sendCommand(MAXXFAN_AUTO_COMMAND_TOPIC, this.checked ? "ON" : "OFF");
-                if (this.checked && switchCeilingMode?.checked) {
-                    sendCommand(MAXXFAN_CEILING_COMMAND_TOPIC, "OFF");
-                    switchCeilingMode.checked = false;
-                }
-            };
+      function sendCommand(topic, value) {
+        publishMQTT(topic, value);
+      }
+
+      function sendWledCommand(type, value) {
+        if (type === "farbe") {
+          const colors = {
+            f1: "#ff0000",
+            f2: "#08ff00",
+            f3: "#0000ff",
+            f4: "#ffffff",
+            f5: "#ff8c00",
+            f6: "#00ffff",
+            f7: "#ff00ff",
+            f8: "#ffcc44",
+          };
+          if (colors[value]) publishMQTT(WLED_BASE + "/c", colors[value]);
         }
+      }
 
-        if (switchCeilingMode) {
-            switchCeilingMode.onchange = function() {
-                sendCommand(MAXXFAN_CEILING_COMMAND_TOPIC, this.checked ? "ON" : "OFF");
-                if (this.checked && switchAutoFan?.checked) {
-                    sendCommand(MAXXFAN_AUTO_COMMAND_TOPIC, "OFF");
-                    switchAutoFan.checked = false;
-                }
-            };
-        }
+      function toggleBox(header) {
+        header.parentElement.classList.toggle("collapsed");
+      }
 
-        // Licht & Truma
-        document.getElementById("btnMainLightOn").onclick = () => sendCommand(LIGHT_SET_TOPIC, "ON");
-        document.getElementById("btnMainLightOff").onclick = () => sendCommand(LIGHT_SET_TOPIC, "OFF");
-        document.getElementById("btnSetTemp").onclick = () => sendCommand(SETPOINT_SET_TOPIC, document.getElementById("tempSetpoint").value);
+      function updateMqttStatus(online) {
+        const led = document.getElementById("mqttLed");
+        const label = document.getElementById("mqttStatusLabel");
+        if (led)
+          led.className = `status-led ${online ? "status-led-online" : "status-led-offline"}`;
+        if (label) label.innerText = online ? "Verbunden" : "Getrennt";
+      }
 
-        document.querySelectorAll('.btn-preset[data-temp]').forEach(btn => {
-            btn.onclick = function() {
-                const temp = this.getAttribute('data-temp');
-                document.getElementById("tempSetpoint").value = temp;
-                sendCommand(SETPOINT_SET_TOPIC, temp);
-            };
+      // --- 4. EVENT LISTENER ---
+      document.addEventListener("DOMContentLoaded", () => {
+        connectMQTT();
+
+        const bindClick = (id, fn) => {
+          const el = document.getElementById(id);
+          if (el) el.onclick = fn;
+        };
+
+        // Heizung (Nutzt SETPOINT_SET_TOPIC aus config.js)
+        bindClick("btnSetTemp", () => {
+          const val = document.getElementById("tempSetpoint").value;
+          sendCommand(SETPOINT_SET_TOPIC, val);
         });
 
-        // Zuweisung Kalibrierung & Restart
-        setupCalibrateButton("btnCalibrateRoll", GPS_CALIBRATE_ROLL_TOPIC, "Roll");
-        setupCalibrateButton("btnCalibratePitch", GPS_CALIBRATE_PITCH_TOPIC, "Pitch");
-        setupCalibrateButton("btnCalibrateWaterFull", CALIBRATE_WATER_FULL_TOPIC, "Wasser Voll");
-        setupCalibrateButton("btnCalibrateWaterEmpty", CALIBRATE_WATER_EMPTY_TOPIC, "Wasser Leer");
+        // MaxxFan (Nutzt LID_COMMAND_TOPIC und SPEED_COMMAND_TOPIC)
+        bindClick("btnLidOpen", () => sendCommand(LID_COMMAND_TOPIC, "OPEN"));
+        bindClick("btnLidClose", () => sendCommand(LID_COMMAND_TOPIC, "CLOSE"));
+        bindClick("btnSetFanSpeed", () => {
+          const val = document.getElementById("fanSpeedInput").value;
+          sendCommand(SPEED_COMMAND_TOPIC, val);
+        });
 
-        setupRestartButton("btnRestartHeater", RESTART_HEATER_TOPIC, "Heizung");
-        setupRestartButton("btnRestartFan", RESTART_FAN_TOPIC, "MaxxFan");
-        setupRestartButton("btnRestartGps", RESTART_GPS_TOPIC, "GPS/Lage");
-        setupRestartButton("btnRestartTemp", RESTART_TEMP_TOPIC, "Temp/Licht");
-        setupRestartButton("btnRestartWater", RESTART_WATER_TOPIC, "Wasser");
-    });
-</script>
-</body>
+        // Restarts (Nutzt RESTART_..._TOPIC)
+        bindClick("btnRestartHeater", () =>
+          sendCommand(RESTART_HEATER_TOPIC, "1"),
+        );
+        bindClick("btnRestartFan", () => sendCommand(RESTART_FAN_TOPIC, "1"));
+        bindClick("btnRestartGps", () => sendCommand(RESTART_GPS_TOPIC, "1"));
+
+        // Temperatur Presets
+        document.querySelectorAll(".btn-preset[data-temp]").forEach((btn) => {
+          btn.onclick = () => {
+            const temp = btn.getAttribute("data-temp");
+            document.getElementById("tempSetpoint").value = temp;
+            sendCommand(SETPOINT_SET_TOPIC, temp);
+          };
+        });
+      });
+    </script>
+  </body>
 </html>

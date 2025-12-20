@@ -491,3 +491,140 @@ body {
 #mapIframe {
   filter: grayscale(0.3) contrast(1.1); /* Optional: Passt die Karte optisch etwas an */
 }
+
+/* ========================================================= */
+/* --- 7. STEUERUNG (WLED & ZENTRIERUNG) ---                 */
+/* ========================================================= */
+
+/* Generelle Zentrierung für alle Steuerungs-Elemente */
+.steuerelement-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Zentriert horizontal */
+  text-align: center;
+  max-height: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.4s ease-out,
+    opacity 0.2s ease-out;
+  opacity: 0;
+  padding: 10px !important;
+}
+
+.steuerelement-body p {
+  margin: 8px 0 4px 0;
+  font-size: 0.9em;
+}
+
+/* Quadratisches Effekt-Grid */
+.effect-grid {
+  display: grid;
+  /* 4 Spalten auf Desktop, wechselt per Media Query unten */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 10px 0;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Basis-Design für quadratische Effekt-Buttons */
+.btn-eff {
+  aspect-ratio: 1 / 1; /* Zwingt den Button ins Quadrat */
+  border: none;
+  border-radius: 10px; /* Schöne abgerundete Ecken */
+  color: white;
+  font-weight: bold;
+  font-size: 0.65rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  transition:
+    transform 0.1s,
+    filter 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  padding: 5px;
+}
+
+.btn-eff i {
+  font-size: 1.1em; /* Icons etwas größer für die Quadrate */
+}
+
+.btn-eff span {
+  display: block;
+  line-height: 1.1;
+}
+
+.btn-eff:active {
+  transform: scale(0.9);
+}
+
+/* Farbpunkte Container zentrieren */
+.color-dot-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center; /* Zentriert die Punkte */
+  padding: 5px 0 15px 0;
+  width: 100%;
+}
+
+.color-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.color-dot:active {
+  transform: scale(0.85);
+}
+
+/* Media Query für mobile Endgeräte (Zentrierung & Grid-Anpassung) */
+@media (max-width: 360px) {
+  .effect-grid {
+    grid-template-columns: repeat(3, 1fr); /* 3 Spalten auf dem Handy */
+    gap: 8px;
+  }
+
+  .btn-eff {
+    font-size: 0.7em;
+  }
+}
+
+/* Individuelle Styles für die Effekte (Verläufe beibehalten) */
+.e-rainbow {
+  background: linear-gradient(135deg, #ff0000, #ffea00, #00ff00, #0000ff);
+}
+.e-blink {
+  background: #444;
+  border: 1px dashed #fff;
+}
+.e-fire {
+  background: linear-gradient(135deg, #ff5f6d, #ffc371);
+}
+.e-scan {
+  background: #000;
+  border-left: 3px solid #f00;
+  border-right: 3px solid #f00;
+}
+.e-breath {
+  background: linear-gradient(135deg, #2193b0, #6dd5ed);
+}
+.e-loop {
+  background: linear-gradient(135deg, #8e2de2, #4a00e0);
+}
+.e-aurora {
+  background: linear-gradient(135deg, #00ff87, #60efff);
+  color: #222;
+}
+.e-cinema {
+  background: #222;
+  box-shadow: inset 0 0 10px #666;
+}
