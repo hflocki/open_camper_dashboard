@@ -49,68 +49,74 @@
             <span id="pitchValueGraph">-- °</span>
           </p>
         </div>
-        <div class="data-item">
-          <h3><i class="fas fa-tint"></i> Frischwassertank</h3>
-          <div class="fresh-water-content">
-            <div class="water-tank-bar-container">
-              <div class="water-bar-shell">
-                <div
-                  id="freshWaterBar"
-                  class="water-bar fresh-color"
-                  style="height: 0%"
-                ></div>
-              </div>
-            </div>
-            <div class="water-values-group">
-              <div class="position-item">
-                <div
-                  class="display-value large-value-small large-value-smaller"
-                >
-                  <span id="levelPercentValue">N/A</span>
-                  <span class="unit-label">%</span>
-                </div>
-              </div>
-              <div class="position-item">
-                <div
-                  class="display-value large-value-small large-value-smaller"
-                >
-                  <span id="levelVolumeValue">N/A</span>
-                  <span class="unit-label">L</span>
-                </div>
-              </div>
-              <div class="position-item">
-                <div
-                  class="display-value large-value-small large-value-smaller"
-                >
-                  <span id="adcValue">N/A</span>
-                  <span class="unit-label">V</span>
-                </div>
-              </div>
-            </div>
-          </div>
+       <div class="data-item">
+  <h3><i class="fas fa-tint"></i> Frischwassertank</h3>
+  <div class="fresh-water-content">
+    
+    <div class="water-tank-visual">
+      <div class="water-bar-shell">
+        <div id="freshWaterBar" class="water-bar" style="height: 0%"></div>
+        <div class="water-glass-shine"></div> </div>
+      <div class="water-label-pct"><span id="levelPercentValue">N/A</span>%</div>
+    </div>
+
+    <div class="water-details-group">
+      <div class="water-detail-item">
+        <i class="fas fa-fill-drip"></i>
+        <div class="value-box">
+          <span id="levelVolumeValue" class="val">N/A</span>
+          <span class="unit">Liter</span>
         </div>
+      </div>
+
+      <div class="water-detail-item">
+        <i class="fas fa-bolt"></i>
+        <div class="value-box">
+          <span id="adcValue" class="val">N/A</span>
+          <span class="unit">Volt (Sensor)</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
         <div class="data-item govee-card" id="geoposCard">
-          <h3><i class="fas fa-home"></i> Innenraum</h3>
-          <div class="govee-card-body">
-            <div class="govee-temp-hum-group">
-              <div class="govee-value-item">
-                <div class="large-value">
-                  <span id="geoposTempValue">N/A</span>°C
-                </div>
-                <span class="unit-label">Temperatur</span>
-              </div>
-              <div class="govee-value-item">
-                <div class="large-value">
-                  <span id="geoposHumValue">N/A</span>%
-                </div>
-                <span class="unit-label">Feuchte</span>
-              </div>
-            </div>
-            <div class="time-display">
-              <span id="geoposTimeValue">--:--</span>
-            </div>
-          </div>
+  <h3><i class="fas fa-home"></i> Klima</h3>
+  <div class="govee-card-body" style="position: relative; padding-bottom: 10px;">
+    
+    <div class="time-display" style="text-align: right; margin-right: 15px; margin-bottom: 10px;">
+      <small>Innen: </small><span id="geoposTimeValue">--:--</span>
+    </div>
+
+    <div class="govee-temp-hum-group">
+      <div class="govee-value-item">
+        <div class="large-value">
+          <span id="geoposTempValue">N/A</span>°C
         </div>
+        <span class="unit-label">Temp Innen</span>
+      </div>
+      <div class="govee-value-item">
+        <div class="large-value">
+          <span id="geoposHumValue">N/A</span>%
+        </div>
+        <span class="unit-label">Feuchte Innen</span>
+      </div>
+    </div>
+
+    <div class="govee-temp-outdoor-row" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+      <div class="govee-value-item">
+        <div class="large-value outdoor">
+          <span id="geoposOTValue">N/A</span>°C
+        </div>
+        <span class="unit-label">Temp Außen</span>
+      </div>
+    </div>
+
+    <div class="time-display" style="text-align: right; margin-right: 15px; margin-top: 10px;">
+      <small>Außen: </small><span id="geoposOTTimeValue">--:--</span>
+    </div>
+  </div>
+</div>
 
         <div class="data-item govee-card" id="goveeCard1">
           <h3><i class="fas fa-thermometer-half"></i> Außentemperatur</h3>
@@ -674,6 +680,7 @@
             GOVEE_TEMP_TOPIC_3,
             GEOPOS_TEMP_TOPIC,
             GEOPOS_HUM_TOPIC,
+            GEOPOS_TEMPOUT_TOPIC,
           ];
           topicsToSubscribe.forEach((topic) => {
             if (topic) client.subscribe(topic, { qos: 0 });
@@ -731,18 +738,29 @@
           // Sensor-Handling per Switch
           switch (topic) {
             case FRESH_WATER_PERCENT_TOPIC:
-              const percent = parseFloat(payloadToUse).toFixed(0);
+              const percent = parseFloat(payloadToUse);
               const pEl = document.getElementById("levelPercentValue");
               const bEl = document.getElementById("freshWaterBar");
-              if (pEl) pEl.textContent = percent;
+              
+              if (pEl) pEl.textContent = percent.toFixed(0);
+              
               if (bEl) {
                 bEl.style.height = percent + "%";
-                bEl.style.backgroundColor =
-                  percent >= 50
-                    ? "#28a745"
-                    : percent >= 30
-                      ? "#ff9800"
-                      : "#dc3545";
+                
+                // Dynamische Farblogik
+                if (percent <= 20) {
+                  // KRITISCH: Rot
+                  bEl.style.background = "linear-gradient(to top, #d32f2f, #ff5252)";
+                  bEl.style.boxShadow = "0 0 15px rgba(211, 47, 47, 0.5)";
+                } else if (percent <= 40) {
+                  // WARNUNG: Gelb/Orange
+                  bEl.style.background = "linear-gradient(to top, #f57c00, #ffb74d)";
+                  bEl.style.boxShadow = "0 0 15px rgba(245, 124, 0, 0.5)";
+                } else {
+                  // OK: Blau
+                  bEl.style.background = "linear-gradient(to top, #1a73e8, #6dd5ed)";
+                  bEl.style.boxShadow = "0 0 15px rgba(26, 115, 232, 0.5)";
+                }
               }
               break;
             case FRESH_WATER_VOLUME_TOPIC:
@@ -820,6 +838,15 @@
               document.getElementById("geoposHumValue").textContent =
                 parseFloat(payloadToUse).toFixed(1);
               break;
+            case GEOPOS_TEMPOUT_TOPIC:
+            if (document.getElementById("geoposOTValue")) {
+              document.getElementById("geoposOTValue").textContent = parseFloat(payloadToUse).toFixed(1);
+            }
+            // Zeit Außen aktualisieren
+            if (document.getElementById("geoposOTTimeValue")) {
+              document.getElementById("geoposOTTimeValue").textContent = nowTime;
+            }
+            break;
           }
         });
         // Error Handling

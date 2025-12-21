@@ -236,6 +236,41 @@ body {
   right: 15px; /* Rechtsbündig gegenüber der Batterie */
 }
 
+/* Container für die obere Zeile */
+.govee-temp-hum-group {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 5px; /* Kleinerer Abstand nach unten zum Rand */
+}
+
+/* Die zweite Zeile für Außen mit mehr Abstand */
+.govee-temp-outdoor-row {
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid var(--border-color); /* Die Trennlinie */
+  
+  /* HIER DER ABSTAND */
+  margin-top: 25px;   /* Erhöhter Abstand nach oben zur ersten Zeile */
+  padding-top: 15px;  /* Abstand von der Linie zum Text */
+}
+
+/* Optische Anpassung für den Außenwert */
+.large-value.outdoor {
+  color: var(--accent-blue); /* Nutzt dein Standard-Blau */
+  filter: brightness(1.2);    /* Macht es für "Außen" etwas heller/frischer */
+}
+
+/* Sicherstellen, dass die Karte nach unten genug Platz hat */
+.govee-card-body {
+  padding-bottom: 50px !important;
+}
+
+.time-display {
+  font-size: 0.75em;
+  color: #888;
+  font-family: monospace; /* Optional für gleichmäßige Ziffern */
+}
 /* ========================================================= */
 /* --- 5. SPEZIAL-KOMPONENTEN ---                            */
 /* ========================================================= */
@@ -287,36 +322,66 @@ body {
   background: rgba(0, 0, 0, 0.8); /* Kräftigeres Schwarz */
   box-shadow: 0.5px 0 0.5px rgba(255, 255, 255, 0.1); /* Hauchdünne Lichtkante */
 }
-/* Wassertank */
-.water-values-group {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding-top: 5px;
-  gap: 8px;
-}
+/* Hauptcontainer für den Tank-Inhalt */
 .fresh-water-content {
   display: flex;
-  align-items: flex-start;
-  gap: 15px;
-  padding: 20px;
+  align-items: center; /* Zentriert Tank und Werte vertikal zueinander */
   justify-content: center;
+  gap: 30px; /* Mehr Platz zwischen Tank und Text */
+  padding: 25px 15px;
 }
+
+/* Die äußere Hülle des Tanks */
 .water-bar-shell {
-  width: 40px;
-  height: 130px;
-  border: 2px solid #ccc;
-  border-radius: 8px;
+  width: 50px; /* Etwas breiter für bessere Optik */
+  height: 140px;
+  border: 3px solid #444; /* Dunklerer, kräftigerer Rahmen */
+  border-radius: 12px;
   position: relative;
   overflow: hidden;
-  background-color: #eee;
+  background-color: #222; /* Dunkler Hintergrund lässt das Blau leuchten */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 0 10px rgba(0,0,0,0.5);
 }
+
+/* Das eigentliche Wasser (der Balken) */
 .water-bar {
   width: 100%;
   position: absolute;
   bottom: 0;
-  background-color: #2a88d5;
-  transition: height 0.5s ease;
+  /* Ein schöner Verlauf von Dunkelblau zu Hellblau */
+  background: linear-gradient(to top, #1a73e8, #6dd5ed); 
+  transition: height 1.0s cubic-bezier(0.4, 0, 0.2, 1); /* Sanftes "Füllen" */
+  box-shadow: 0 0 15px rgba(109, 213, 237, 0.5); /* Leuchteffekt */
+}
+
+/* Glanzeffekt auf dem Glas (optional, macht es sehr edel) */
+.water-bar-shell::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 6px;
+  width: 10px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0.15), transparent);
+  pointer-events: none;
+}
+
+/* Die Gruppe der Textwerte rechts */
+.water-values-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Einzelne Wert-Zeile */
+.position-item {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 8px 12px;
+  border-radius: 8px;
+  min-width: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 /* Position */
