@@ -7,103 +7,89 @@ const MQTT_USERNAME = "xxxxxxxxxxxx";
 const MQTT_PASSWORD = "xxxxxxxxxxxx";
 const APP_NAME = "Camper Dashboard";
 
+
+/* topics.js - Definition aller MQTT Topics */
+
 // --- ESPHome Node Namen ---
 const ESPHOME_NODE_HEATER = "smartavan-heater";
-const ESPHOME_NODE_FAN    = "maxxfan";
-const ESPHOME_NODE_GPS    = "espgeopos";
-const ESPHOME_NODE_TEMP   = "esptemp";
-const ESPHOME_NODE_WATER  = "fuellstand";
+const ESPHOME_NODE_FAN = "maxxfan";
+const ESPHOME_NODE_GPS = "espgeopos";
+const ESPHOME_NODE_TEMP = "esptemp";
+const ESPHOME_NODE_WATER = "fuellstand";
 
 // Node ID und Basis-Topic für das Wassersystem
-const WATER_MQTT_BASE = "xxxxxxxxxxx-xxxxxxx-xxxxx-xxxx-xxxxxxxxxxxxxx/toc/nodes/xxxxxx";
+const WATER_MQTT_BASE = "7fc5b1c2-70d0-4fe1-90a5-089e87aa316d/toc/nodes/2726";
+const WATER_NODE_SEC = "1712";
+const WATER_NODE_ID = "2726";
+const MQTT_ROOT_ID = "7fc5b1c2-70d0-4fe1-90a5-089e87aa316d";
 
 // --- Status Topics (LEDs) ---
 const HEATER_STATE_TOPIC = `${ESPHOME_NODE_HEATER}/status`;
 const ESPGEOPOS_STATE_TOPIC = `${ESPHOME_NODE_GPS}/status`;
 const MAXXFAN_STATE_TOPIC = `${ESPHOME_NODE_FAN}/status`;
 const ESPTEMP_STATE_TOPIC = `${ESPHOME_NODE_TEMP}/status`;
-const CP_PLUS_ALIVE_TOPIC = `truma/cp_plus/alive`;
-const WATERLEVEL_STATUS_TOPIC = `${WATER_MQTT_BASE}/mqttconnected`;
-const WLED_BASE = "wled/xxxx";
+const WATERLEVEL_STATE_TOPIC = `${ESPHOME_NODE_WATER}/status`;
+const CP_PLUS_ALIVE_TOPIC = "truma/alive";
+const WLED_STATUS_TOPIC = "wled/f49991/status";
 
-// --- Heizung / CP Plus ---
-const HEATER_SETPOINT_TOPIC = `${ESPHOME_NODE_HEATER}/sensor/setpoint_temp/state`;
-const HEATER_CURRENT_TOPIC = `${ESPHOME_NODE_HEATER}/sensor/heater_current_temp/state`;
+// --- Heizung / Truma ---
+const HEATER_SETPOINT_TOPIC = "truma/setpoint_temp";
+const HEATER_CURRENT_TOPIC = "truma/current_temp";
+const SETPOINT_SET_TOPIC = "truma/set/setpoint_temp";
 
-// --- GPS / Lage ---
-const GPS_PITCH_TOPIC = `${ESPHOME_NODE_GPS}/sensor/pitch_sensor/state`;
-const GPS_ROLL_TOPIC = `${ESPHOME_NODE_GPS}/sensor/roll_sensor/state`;
+// --- MaxxFan ---
+const MAXXFAN_FAN_STATE_TOPIC = `${ESPHOME_NODE_FAN}/sensor/fan_state/state`;
+const MAXXFAN_LID_STATE_TOPIC = `${ESPHOME_NODE_FAN}/sensor/lid_state/state`;
+const MAXXFAN_DIRECTION_TOPIC = `${ESPHOME_NODE_FAN}/sensor/fan_direction/state`;
+const MAXXFAN_AUTO_STATE_TOPIC = `${ESPHOME_NODE_FAN}/binary_sensor/auto_mode/state`;
+const MAXXFAN_CEILING_STATE_TOPIC = `${ESPHOME_NODE_FAN}/binary_sensor/ceiling_fan_mode/state`;
+
+const LID_COMMAND_TOPIC = `${ESPHOME_NODE_FAN}/select/lid_control/command`;
+const SPEED_COMMAND_TOPIC = `${ESPHOME_NODE_FAN}/number/fan_speed/command`;
+
+// --- GPS & Neigung ---
 const GPS_LAT_TOPIC = `${ESPHOME_NODE_GPS}/sensor/latitude/state`;
 const GPS_LON_TOPIC = `${ESPHOME_NODE_GPS}/sensor/longitude/state`;
 const GPS_ALT_TOPIC = `${ESPHOME_NODE_GPS}/sensor/altitude/state`;
-const GPS_SPEED_TOPIC = `${ESPHOME_NODE_GPS}/sensor/speed_kph/state`;
+const GPS_SPEED_TOPIC = `${ESPHOME_NODE_GPS}/sensor/speed/state`;
 const GPS_SAT_TOPIC = `${ESPHOME_NODE_GPS}/sensor/satellites/state`;
+const GPS_ROLL_TOPIC = `${ESPHOME_NODE_GPS}/sensor/roll/state`;
+const GPS_PITCH_TOPIC = `${ESPHOME_NODE_GPS}/sensor/pitch/state`;
 
-// --- MaxxFan ---
-const MAXXFAN_FAN_STATE_TOPIC = `${ESPHOME_NODE_FAN}/fan/maxxair_fan_id/state`;
-const MAXXFAN_LID_STATE_TOPIC = `${ESPHOME_NODE_FAN}/cover/maxxair_lid/state`;
-const MAXXFAN_DIRECTION_TOPIC = `${ESPHOME_NODE_FAN}/select/maxxair_direction/state`;
-const MAXXFAN_AUTO_STATE_TOPIC = `${ESPHOME_NODE_FAN}/switch/auto_mode/state`;
-const MAXXFAN_CEILING_STATE_TOPIC = `${ESPHOME_NODE_FAN}/switch/ceiling_fan_mode/state`;
+// --- Wasserstand ---
+const FRESH_WATER_PERCENT_TOPIC = `${WATER_MQTT_BASE}/sensor/fuellstand_prozent/state`;
+const FRESH_WATER_VOLUME_TOPIC = `${WATER_MQTT_BASE}/sensor/fuellstand_liter/state`;
+const FRESH_WATER_ADC_TOPIC = `${WATER_MQTT_BASE}/sensor/adc_wert/state`;
 
-// --- WasserLevel Direkt-Topics (Wieder aktiviert) ---
-const FRESH_WATER_PERCENT_TOPIC = `${WATER_MQTT_BASE}/levelPercent`; 
-const FRESH_WATER_VOLUME_TOPIC  = `${WATER_MQTT_BASE}/levelVolume`;  
-const FRESH_WATER_ADC_TOPIC     = `${WATER_MQTT_BASE}/adc`;     
-
-// --- Govee Sensoren (3 Stück + 1 Innenraum) ---
-const GOVEE_TEMP_TOPIC_1 = "camper/status/govee/A4C1381EA678"; 
-const GOVEE_TEMP_TOPIC_2 = "camper/status/govee/A4C138C2EF51"; 
-const GOVEE_TEMP_TOPIC_3 = "camper/status/govee/880F10857644";
-const GEOPOS_TEMP_TOPIC = "espgeopos/sensor/temperature/state";
-const GEOPOS_HUM_TOPIC  = "espgeopos/sensor/humidity/state";
-
-// --- STEUERUNGS-BEFEHLE (Sehr wichtig für control.html) ---
-const MAXXFAN_LID_COMMAND_TOPIC = `${ESPHOME_NODE_FAN}/cover/maxxair_lid/command`;
-const MAXXFAN_SPEED_SET_TOPIC = `${ESPHOME_NODE_FAN}/number/speed/command`;
-const MAXXFAN_DIRECTION_SET_TOPIC = `${ESPHOME_NODE_FAN}/select/maxxair_direction/command`;
-const MAXXFAN_AUTO_COMMAND_TOPIC = `${ESPHOME_NODE_FAN}/switch/auto_mode/command`;
-const MAXXFAN_CEILING_COMMAND_TOPIC = `${ESPHOME_NODE_FAN}/switch/ceiling_fan_mode/command`;
-const SETPOINT_SET_TOPIC = `${ESPHOME_NODE_HEATER}/number/set_temp/command`;
-const LIGHT_SET_TOPIC    = `${ESPHOME_NODE_HEATER}/switch/main_light/command`;
-
-// --- Kalibrierung & System ---
-const GPS_CALIBRATE_ROLL_TOPIC = `${ESPHOME_NODE_GPS}/button/calibrate_roll/command`;
-const GPS_CALIBRATE_PITCH_TOPIC = `${ESPHOME_NODE_GPS}/button/calibrate_pitch/command`;
-const CALIBRATE_WATER_FULL_TOPIC = `${WATER_MQTT_BASE}/button/wasser_voll_kalibrieren/command`; 
+const CALIBRATE_WATER_FULL_TOPIC = `${WATER_MQTT_BASE}/button/wasser_voll_kalibrieren/command`;
 const CALIBRATE_WATER_EMPTY_TOPIC = `${WATER_MQTT_BASE}/button/wasser_leer_kalibrieren/command`;
+
+// --- Govee Sensoren ---
+const GOVEE_TEMP_TOPIC_1 = "govee/sensor1";
+const GOVEE_TEMP_TOPIC_2 = "govee/sensor2";
+const GOVEE_TEMP_TOPIC_3 = "govee/sensor3";
+
+const GEOPOS_TEMP_TOPIC = `${ESPHOME_NODE_GPS}/sensor/temp/state`;
+const GEOPOS_HUM_TOPIC = `${ESPHOME_NODE_GPS}/sensor/hum/state`;
+const GEOPOS_TEMPOUT_TOPIC = `${ESPHOME_NODE_GPS}/sensor/tempout/state`;
+
+// --- Restarts ---
 const RESTART_HEATER_TOPIC = `${ESPHOME_NODE_HEATER}/button/restart_switch/command`;
-const RESTART_FAN_TOPIC    = `${ESPHOME_NODE_FAN}/button/restart_switch/command`;
-const RESTART_GPS_TOPIC    = `${ESPHOME_NODE_GPS}/button/restart_switch/command`;
-const RESTART_TEMP_TOPIC   = `${ESPHOME_NODE_TEMP}/button/restart_switch/command`;
-const RESTART_WATER_TOPIC  = `${ESPHOME_NODE_WATER}/button/restart_switch/command`;
+const RESTART_FAN_TOPIC = `${ESPHOME_NODE_FAN}/button/restart_switch/command`;
+const RESTART_GPS_TOPIC = `${ESPHOME_NODE_GPS}/button/restart_switch/command`;
+const RESTART_TEMP_TOPIC = `${ESPHOME_NODE_TEMP}/button/restart_switch/command`;
+const RESTART_WATER_TOPIC = `${ESPHOME_NODE_WATER}/button/restart_switch/command`;
 
 // --- WLED ---
+const WLED_BASE = "wled/f49991";
 const WLED_BRIGHTNESS_TOPIC = WLED_BASE + "/g";
 const WLED_API_TOPIC = WLED_BASE + "/api";
 const wledConfig = {
   mqttTopic: WLED_API_TOPIC,
-  // Feste Farben (Solid)
   farben: {
-    f1: "FX=0&R=255&G=0&B=0", // Rot
-    f2: "FX=0&R=0&G=255&B=0", // Grün
-    f3: "FX=0&R=0&G=0&B=255", // Blau
-    f4: "FX=0&R=255&G=255&B=255", // Weiß
-    f5: "FX=0&R=255&G=100&B=0", // Orange
-    f6: "FX=0&R=0&G=255&B=255", // Cyan
-    f7: "FX=0&R=255&G=0&B=255", // Pink
-    f8: "FX=0&R=255&G=200&B=50", // Warmgold
-  },
-
-  // Effekte (Animationen)
-  effekte: {
-    eff1: "FX=9&SX=128&IX=128", // Rainbow
-    eff2: "FX=1&SX=100&IX=200", // Blink
-    eff3: "FX=66&SX=160&IX=255", // Fire 2012
-    eff4: "FX=43&SX=40&IX=120", // Scan (Kitt-Style)
-    eff5: "FX=2&SX=50&IX=255", // Breath
-    eff6: "FX=38&SX=100&IX=100", // Color Loop
-    eff7: "FX=82&SX=40&IX=200", // Aurora
-    eff8: "FX=45&SX=150&IX=255", // Cinema
+    f1: "FX=0&R=255&G=0&B=0",
+    f2: "FX=0&R=0&G=255&B=0",
+    f3: "FX=0&R=0&G=0&B=255",
+    f4: "FX=0&R=255&G=255&B=255",
   },
 };

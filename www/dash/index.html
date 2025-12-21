@@ -8,8 +8,8 @@
     <link rel="apple-touch-icon" href="./imag/felix.png" />
     <link rel="stylesheet" href="./fonts/css/all.min.css" />
     <link rel="stylesheet" href="./style.css" />
-    <script src="./mqtt.min.js"></script>
     <script src="./config.js"></script>
+    <script src="./mqtt.min.js"></script>
     <link rel="manifest" href="./manifest.json" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <script>
@@ -35,88 +35,111 @@
         ><i class="fa-solid fa-gear"></i
       ></a>
     </nav>
+
     <div class="container">
       <div class="data-card">
         <div class="data-item">
-          <h3><i class="fas fa-compass"></i> Orientierung</h3>
-          <div class="tilt-gauge-container">
-            <div id="tiltIndicatorShell" class="tilt-indicator-shell">
-              <div id="tiltMarker" class="tilt-marker"></div>
+          <h3><i class="fas fa-balance-scale"></i> Wasserwaage</h3>
+          <div class="bubble-level-container">
+            <div class="level-shell">
+              <div class="level-liquid"></div>
+              <div class="level-target-ring ring-small"></div>
+              <div class="level-target-ring ring-large"></div>
+              <div id="spiritBubble" class="bubble"></div>
             </div>
           </div>
-          <p>
-            R/L: <span id="rollValueGraph">-- °</span> | V/H:
-            <span id="pitchValueGraph">-- °</span>
-          </p>
+          <div class="custom-grid">
+            <div class="custom-grid-item">
+              <span class="custom-label">Roll (L/R)</span>
+              <div class="custom-value">
+                <span id="rollValueGraph">0.0</span>°
+              </div>
+            </div>
+            <div class="custom-grid-item">
+              <span class="custom-label">Pitch (V/H)</span>
+              <div class="custom-value">
+                <span id="pitchValueGraph">0.0</span>°
+              </div>
+            </div>
+          </div>
         </div>
-       <div class="data-item">
-  <h3><i class="fas fa-tint"></i> Frischwassertank</h3>
-  <div class="fresh-water-content">
-    
-    <div class="water-tank-visual">
-      <div class="water-bar-shell">
-        <div id="freshWaterBar" class="water-bar" style="height: 0%"></div>
-        <div class="water-glass-shine"></div> </div>
-      <div class="water-label-pct"><span id="levelPercentValue">N/A</span>%</div>
-    </div>
 
-    <div class="water-details-group">
-      <div class="water-detail-item">
-        <i class="fas fa-fill-drip"></i>
-        <div class="value-box">
-          <span id="levelVolumeValue" class="val">N/A</span>
-          <span class="unit">Liter</span>
+        <div class="data-item">
+          <h3><i class="fas fa-tint"></i> Frischwassertank</h3>
+          <div class="fresh-water-content">
+            <div class="water-tank-visual">
+              <div class="water-bar-shell">
+                <div
+                  id="freshWaterBar"
+                  class="water-bar"
+                  style="height: 0%"
+                ></div>
+                <div class="water-glass-shine"></div>
+              </div>
+              <div class="water-label-pct">
+                <span id="levelPercentValue">N/A</span>%
+              </div>
+            </div>
+            <div class="water-details-group">
+              <div class="water-detail-item">
+                <i class="fas fa-fill-drip"></i>
+                <div class="value-box">
+                  <span id="levelVolumeValue" class="val">N/A</span
+                  ><span class="unit">Liter</span>
+                </div>
+              </div>
+              <div class="water-detail-item">
+                <i class="fas fa-bolt"></i>
+                <div class="value-box">
+                  <span id="adcValue" class="val">N/A</span
+                  ><span class="unit">Volt</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div class="water-detail-item">
-        <i class="fas fa-bolt"></i>
-        <div class="value-box">
-          <span id="adcValue" class="val">N/A</span>
-          <span class="unit">Volt (Sensor)</span>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</div>
         <div class="data-item govee-card" id="geoposCard">
-  <h3><i class="fas fa-home"></i> Klima</h3>
-  <div class="govee-card-body" style="position: relative; padding-bottom: 10px;">
-    
-    <div class="time-display" style="text-align: right; margin-right: 15px; margin-bottom: 10px;">
-      <small>Innen: </small><span id="geoposTimeValue">--:--</span>
-    </div>
-
-    <div class="govee-temp-hum-group">
-      <div class="govee-value-item">
-        <div class="large-value">
-          <span id="geoposTempValue">N/A</span>°C
+          <h3><i class="fas fa-home"></i> Klima</h3>
+          <div class="govee-card-body">
+            <div class="govee-temp-hum-group">
+              <div class="govee-value-item">
+                <div class="large-value">
+                  <span id="geoposTempValue">N/A</span>°C
+                </div>
+                <span class="unit-label">Temp Innen</span>
+              </div>
+              <div class="govee-value-item">
+                <div class="large-value">
+                  <span id="geoposHumValue">N/A</span>%
+                </div>
+                <span class="unit-label">Feuchte Innen</span>
+              </div>
+            </div>
+            <div
+              class="govee-temp-outdoor-row"
+              style="
+                border-top: 1px solid var(--border-color);
+                margin-top: 20px;
+                padding-top: 15px;
+              "
+            >
+              <div class="govee-value-item">
+                <div class="large-value">
+                  <span id="geoposOTValue">N/A</span>°C
+                </div>
+                <span class="unit-label">Temp Außen</span>
+              </div>
+            </div>
+            <div
+              class="time-display"
+              style="text-align: right; margin-top: 10px"
+            >
+              <span id="geoposTimeValue">--:--</span> |
+              <span id="geoposOTTimeValue">--:--</span>
+            </div>
+          </div>
         </div>
-        <span class="unit-label">Temp Innen</span>
-      </div>
-      <div class="govee-value-item">
-        <div class="large-value">
-          <span id="geoposHumValue">N/A</span>%
-        </div>
-        <span class="unit-label">Feuchte Innen</span>
-      </div>
-    </div>
-
-    <div class="govee-temp-outdoor-row" style="margin-top: 25px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-      <div class="govee-value-item">
-        <div class="large-value outdoor">
-          <span id="geoposOTValue">N/A</span>°C
-        </div>
-        <span class="unit-label">Temp Außen</span>
-      </div>
-    </div>
-
-    <div class="time-display" style="text-align: right; margin-right: 15px; margin-top: 10px;">
-      <small>Außen: </small><span id="geoposOTTimeValue">--:--</span>
-    </div>
-  </div>
-</div>
 
         <div class="data-item govee-card" id="goveeCard1">
           <h3><i class="fas fa-thermometer-half"></i> Außentemperatur</h3>
@@ -125,29 +148,21 @@
               <div class="govee-value-item">
                 <span class="unit-label">Temperatur</span>
                 <div class="large-value">
-                  <span id="goveeTempValue1">N/A</span>
-                  <span style="font-size: 0.6em; vertical-align: top">°C</span>
+                  <span id="goveeTempValue1">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">°C</span>
                 </div>
               </div>
-
               <div class="govee-value-item">
                 <span class="unit-label">Luftfeuchte</span>
                 <div class="large-value">
-                  <span id="goveeHumValue1">N/A</span>
-                  <span style="font-size: 0.6em; vertical-align: top">%</span>
+                  <span id="goveeHumValue1">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">%</span>
                 </div>
               </div>
             </div>
-
-            <div class="battery-display">
-              <i class="fas fa-battery-full"></i> Batt:
-              <span id="goveeBattValue1">N/A</span> %
-            </div>
-            <div class="time-display">
-              <span id="goveeTimeValue1">--:--</span>
-            </div>
           </div>
         </div>
+
         <div class="data-item govee-card" id="goveeCard2">
           <h3><i class="fas fa-box"></i> Kühlschrank</h3>
           <div class="govee-card-body">
@@ -155,20 +170,18 @@
               <div class="govee-value-item">
                 <span class="unit-label">Temperatur</span>
                 <div class="large-value">
-                  <span id="goveeTempValue2">N/A</span>
-                  <span style="font-size: 0.6em; vertical-align: top">°C</span>
+                  <span id="goveeTempValue2">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">°C</span>
                 </div>
               </div>
-
               <div class="govee-value-item">
                 <span class="unit-label">Luftfeuchte</span>
                 <div class="large-value">
-                  <span id="goveeHumValue2">N/A</span>
-                  <span style="font-size: 0.6em; vertical-align: top">%</span>
+                  <span id="goveeHumValue2">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">%</span>
                 </div>
               </div>
             </div>
-
             <div class="battery-display">
               <i class="fas fa-battery-full"></i> Batt:
               <span id="goveeBattValue2">N/A</span> %
@@ -178,6 +191,7 @@
             </div>
           </div>
         </div>
+
         <div class="data-item govee-card" id="goveeCard3">
           <h3><i class="fas fa-bed"></i> Schlafbereich</h3>
           <div class="govee-card-body">
@@ -185,20 +199,18 @@
               <div class="govee-value-item">
                 <span class="unit-label">Temperatur</span>
                 <div class="large-value">
-                  <span id="goveeTempValue3">N/A</span>
-                  <span style="font-size: 0.6em; vertical-align: top">°C</span>
+                  <span id="goveeTempValue3">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">°C</span>
                 </div>
               </div>
-
               <div class="govee-value-item">
                 <span class="unit-label">Luftfeuchte</span>
                 <div class="large-value">
-                  <span id="goveeHumValue3">N/A</span>
-                  <span style="font-size: 0.6em; vertical-align: top">%</span>
+                  <span id="goveeHumValue3">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">%</span>
                 </div>
               </div>
             </div>
-
             <div class="battery-display">
               <i class="fas fa-battery-full"></i> Batt:
               <span id="goveeBattValue3">N/A</span> %
@@ -208,106 +220,82 @@
             </div>
           </div>
         </div>
+
         <div class="data-item">
           <h3><i class="fas fa-fire-flame-curved"></i> Truma</h3>
-          <div class="position-group">
-            <div class="position-item">
-              <span class="label">Sollwert</span>
-              <div class="display-value large-value-small">
-                <span id="setpointValue">N/A</span>
-                <span class="unit-label">°C</span>
+          <div class="custom-grid">
+            <div class="custom-grid-item">
+              <span class="custom-label">Sollwert</span>
+              <div class="custom-value">
+                <span id="setpointValue">N/A</span>°C
               </div>
             </div>
-            <div class="position-item">
-              <span class="label">Istwert</span>
-              <div class="display-value large-value-small">
-                <span id="currentValue">N/A</span>
-                <span class="unit-label">°C</span>
+            <div class="custom-grid-item">
+              <span class="custom-label">Istwert</span>
+              <div class="custom-value">
+                <span id="currentValue">N/A</span>°C
               </div>
             </div>
           </div>
         </div>
+
         <div class="data-item">
           <h3><i class="fas fa-fan"></i> MaxxFan</h3>
-          <div class="position-group">
-            <div class="position-item">
-              <span class="label">Lüfter Status</span>
-              <div id="fanStateValue" class="display-value large-value-small">
-                N/A
-              </div>
+          <div class="custom-grid">
+            <div class="custom-grid-item">
+              <span class="custom-label">Lüfter</span>
+              <div id="fanStateValue" class="custom-value">N/A</div>
             </div>
-            <div class="position-item">
-              <span class="label">Lid Status</span>
-              <div id="lidStateValue" class="display-value large-value-small">
-                N/A
-              </div>
+            <div class="custom-grid-item">
+              <span class="custom-label">Deckel</span>
+              <div id="lidStateValue" class="custom-value">N/A</div>
             </div>
           </div>
-          <div class="position-group position-secondary">
-            <div class="position-item">
-              <span class="label">Richtung</span>
-              <div id="directionValue" class="display-value large-value-small">
-                N/A
-              </div>
+          <div class="custom-grid" style="margin-top: 5px">
+            <div class="custom-grid-item">
+              <span class="custom-label">Richtung</span>
+              <div id="directionValue" class="custom-value">N/A</div>
             </div>
-            <div class="position-item">
-              <span class="label">Auto-Modus</span>
-              <div id="autoStateValue" class="display-value large-value-small">
-                N/A
-              </div>
+            <div class="custom-grid-item">
+              <span class="custom-label">Auto</span>
+              <div id="autoStateValue" class="custom-value">N/A</div>
             </div>
           </div>
         </div>
+
         <div class="data-item gps-card">
           <h3>
             <div
               style="
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
                 width: 100%;
+                align-items: center;
               "
             >
               <span><i class="fas fa-location-arrow"></i> Position</span>
-              <span
-                class="sat-header-info"
-                style="
-                  font-size: 0.7em;
-                  font-weight: normal;
-                  display: flex;
-                  align-items: center;
-                  gap: 4px;
-                "
+              <span class="sat-header-info" style="font-size: 0.7em"
+                ><i class="fas fa-satellite"></i>
+                <span id="satValue">--</span></span
               >
-                <i class="fas fa-satellite"></i> <span id="satValue">--</span>
-              </span>
             </div>
           </h3>
-
-          <div class="position-group">
-            <div class="position-item">
-              <span class="label">LON</span>
-              <div id="lonValue" class="display-value large-value-small">
-                N/A
-              </div>
+          <div class="custom-grid">
+            <div class="custom-grid-item">
+              <span class="custom-label">LON</span>
+              <div id="lonValue" class="custom-value">N/A</div>
             </div>
-            <div class="position-item">
-              <span class="label">LAT</span>
-              <div id="latValue" class="display-value large-value-small">
-                N/A
-              </div>
+            <div class="custom-grid-item">
+              <span class="custom-label">LAT</span>
+              <div id="latValue" class="custom-value">N/A</div>
             </div>
           </div>
-
-          <div class="position-group position-secondary">
-            <div class="position-item">
-              <span class="label">ALT</span>
-              <div class="display-value large-value-small">
-                <span id="altValue">N/A</span><span class="unit-label">m</span>
-              </div>
+          <div class="custom-grid" style="margin-top: 5px">
+            <div class="custom-grid-item">
+              <span class="custom-label">ALT</span>
+              <div class="custom-value"><span id="altValue">N/A</span>m</div>
             </div>
           </div>
-
           <div
             id="mapLinkContainer"
             style="
@@ -335,6 +323,7 @@
             </a>
           </div>
         </div>
+
         <div class="data-item map-card">
           <h3><i class="fas fa-map"></i> Standort</h3>
           <div
@@ -355,8 +344,7 @@
               frameborder="0"
               src="about:blank"
               style="position: absolute; top: 0; left: 0"
-            >
-            </iframe>
+            ></iframe>
           </div>
           <div class="time-display" style="text-align: center; margin-top: 5px">
             <small id="mapStatus">Warte auf GPS...</small>
@@ -376,12 +364,10 @@
               <span><i class="fas fa-wind"></i> Wetterradar</span>
               <div id="windIndicatorBox">
                 <i class="fas fa-flag" id="windIndicatorIcon"></i>
-                <span id="windIndicatorValue">--</span>
-                <small>km/h</small>
+                <span id="windIndicatorValue">--</span> <small>km/h</small>
               </div>
             </div>
           </h3>
-
           <div class="temp-preset-buttons">
             <button
               class="btn-preset active"
@@ -399,7 +385,6 @@
               Gewitter
             </button>
           </div>
-
           <div
             class="map-container"
             style="height: 220px; overflow: hidden; position: relative"
@@ -454,14 +439,12 @@
           </div>
         </div>
       </div>
-
       <div class="system-status-container">
         <div class="mqtt-status-group">
           <div id="mqttLed" class="status-led" style="margin-top: 0"></div>
           <div class="mqtt-info">MQTT:</div>
           <span id="mqttStatusLabel">Verbinden...</span>
         </div>
-
         <div class="status-item">
           <div id="heaterLed" class="status-led"></div>
           <div class="status-label">Heizung</div>
@@ -631,6 +614,31 @@
 
         console.log("Wassersensor: Authentifizierung erfolgreich gesendet.");
       }
+      function updateBubblePosition() {
+        const bubble = document.getElementById("spiritBubble");
+        if (!bubble) return;
+
+        // Empfindlichkeit einstellen (höherer Wert = mehr Bewegung)
+        const sensitivity = 3.5;
+        const maxOffset = 55; // Maximaler Versatz in Pixeln zum Rand
+
+        // Berechnung des Versatzes
+        let xOffset = currentRoll * sensitivity;
+        let yOffset = currentPitch * sensitivity;
+
+        // Begrenzung (damit die Blase im Kreis bleibt)
+        const distance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
+        if (distance > maxOffset) {
+          const ratio = maxOffset / distance;
+          xOffset *= ratio;
+          yOffset *= ratio;
+        }
+
+        // Blase verschieben (transform: translate Mitte + Offset)
+        bubble.style.left = `calc(50% + ${xOffset}px)`;
+        bubble.style.top = `calc(50% + ${yOffset}px)`;
+      }
+
       /**
        * =========================================================
        * --- 2. MQTT VERBINDUNG & LOGIK ---
@@ -741,35 +749,44 @@
               const percent = parseFloat(payloadToUse);
               const pEl = document.getElementById("levelPercentValue");
               const bEl = document.getElementById("freshWaterBar");
-              
+
               if (pEl) pEl.textContent = percent.toFixed(0);
-              
+
               if (bEl) {
                 bEl.style.height = percent + "%";
-                
-                // Dynamische Farblogik
+
+                // Deine dynamische Farblogik
                 if (percent <= 20) {
                   // KRITISCH: Rot
-                  bEl.style.background = "linear-gradient(to top, #d32f2f, #ff5252)";
+                  bEl.style.background =
+                    "linear-gradient(to top, #d32f2f, #ff5252)";
                   bEl.style.boxShadow = "0 0 15px rgba(211, 47, 47, 0.5)";
                 } else if (percent <= 40) {
                   // WARNUNG: Gelb/Orange
-                  bEl.style.background = "linear-gradient(to top, #f57c00, #ffb74d)";
+                  bEl.style.background =
+                    "linear-gradient(to top, #f57c00, #ffb74d)";
                   bEl.style.boxShadow = "0 0 15px rgba(245, 124, 0, 0.5)";
                 } else {
                   // OK: Blau
-                  bEl.style.background = "linear-gradient(to top, #1a73e8, #6dd5ed)";
+                  bEl.style.background =
+                    "linear-gradient(to top, #1a73e8, #6dd5ed)";
                   bEl.style.boxShadow = "0 0 15px rgba(26, 115, 232, 0.5)";
                 }
               }
               break;
+
             case FRESH_WATER_VOLUME_TOPIC:
-              document.getElementById("levelVolumeValue").textContent =
-                parseFloat(payloadToUse).toFixed(0);
+              const volEl = document.getElementById("levelVolumeValue");
+              if (volEl)
+                volEl.textContent = parseFloat(payloadToUse).toFixed(0);
               break;
+
             case FRESH_WATER_ADC_TOPIC:
-              const volt = (parseFloat(payloadToUse) / 1000).toFixed(2);
-              document.getElementById("adcValue").textContent = volt;
+              const adcEl = document.getElementById("adcValue");
+              if (adcEl)
+                adcEl.textContent = (parseFloat(payloadToUse) / 1000).toFixed(
+                  2,
+                );
               break;
             case HEATER_SETPOINT_TOPIC:
               document.getElementById("setpointValue").textContent =
@@ -796,38 +813,52 @@
                 payloadToUse;
               break;
             case GPS_SPEED_TOPIC:
-              document.getElementById("speedValue").textContent =
-                parseFloat(payloadToUse).toFixed(0);
+              const speedEl = document.getElementById("speedValue");
+              if (speedEl)
+                speedEl.textContent = parseFloat(payloadToUse).toFixed(0);
               break;
+
             case GPS_ALT_TOPIC:
-              document.getElementById("altValue").textContent =
-                parseFloat(payloadToUse).toFixed(1);
+              const altEl = document.getElementById("altValue");
+              if (altEl)
+                altEl.textContent = parseFloat(payloadToUse).toFixed(1);
               break;
+
             case GPS_SAT_TOPIC:
-              document.getElementById("satValue").textContent =
-                parseFloat(payloadToUse).toFixed(0);
+              const satEl = document.getElementById("satValue");
+              if (satEl)
+                satEl.textContent = parseFloat(payloadToUse).toFixed(0);
               break;
+
             case GPS_LON_TOPIC:
               currentLon = parseFloat(payloadToUse).toFixed(4);
-              document.getElementById("lonValue").textContent = currentLon;
+              const lonEl = document.getElementById("lonValue");
+              if (lonEl) lonEl.textContent = currentLon;
               updateMapLink();
               updateMiniMap(currentLat, currentLon);
               updateWindyMap();
               break;
+
             case GPS_LAT_TOPIC:
               currentLat = parseFloat(payloadToUse).toFixed(4);
-              document.getElementById("latValue").textContent = currentLat;
+              const latEl = document.getElementById("latValue");
+              if (latEl) latEl.textContent = currentLat;
               updateMapLink();
               updateMiniMap(currentLat, currentLon);
               updateWindyMap();
               break;
             case GPS_ROLL_TOPIC:
               currentRoll = parseFloat(payloadToUse);
-              updateTiltGauge(currentRoll, currentPitch);
+              const rollEl = document.getElementById("rollValueGraph");
+              if (rollEl) rollEl.textContent = currentRoll.toFixed(1);
+              updateBubblePosition();
               break;
+
             case GPS_PITCH_TOPIC:
               currentPitch = parseFloat(payloadToUse);
-              updateTiltGauge(currentRoll, currentPitch);
+              const pitchEl = document.getElementById("pitchValueGraph");
+              if (pitchEl) pitchEl.textContent = currentPitch.toFixed(1);
+              updateBubblePosition();
               break;
             case GEOPOS_TEMP_TOPIC:
               document.getElementById("geoposTempValue").textContent =
@@ -839,14 +870,16 @@
                 parseFloat(payloadToUse).toFixed(1);
               break;
             case GEOPOS_TEMPOUT_TOPIC:
-            if (document.getElementById("geoposOTValue")) {
-              document.getElementById("geoposOTValue").textContent = parseFloat(payloadToUse).toFixed(1);
-            }
-            // Zeit Außen aktualisieren
-            if (document.getElementById("geoposOTTimeValue")) {
-              document.getElementById("geoposOTTimeValue").textContent = nowTime;
-            }
-            break;
+              const tempOutEl = document.getElementById("geoposOTValue");
+              const timeOutEl = document.getElementById("geoposOTTimeValue");
+
+              if (tempOutEl) {
+                tempOutEl.textContent = parseFloat(payloadToUse).toFixed(1);
+              }
+              if (timeOutEl) {
+                timeOutEl.textContent = nowTime;
+              }
+              break;
           }
         });
         // Error Handling

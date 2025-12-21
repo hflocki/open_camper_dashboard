@@ -136,6 +136,11 @@ body {
   font-weight: normal;
 }
 
+#mqttStatusLabel {
+  color: var(--accent-blue) !important;
+  font-weight: normal;
+}
+
 .mqtt-status-group {
   display: flex;
   align-items: center;
@@ -189,6 +194,38 @@ body {
 
 .data-item h3 i {
   margin-right: 8px;
+}
+
+/* Eigene Regeln für Truma, MaxxFan und Position */
+.custom-grid {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px;
+}
+
+.custom-grid-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.05); /* Dezenter Hintergrund wie im Original */
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.custom-label {
+  font-size: 0.75em;
+  color: #888;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.custom-value {
+  font-size: 1.2em;
+  font-weight: bold;
 }
 
 /* ========================================================= */
@@ -249,16 +286,16 @@ body {
   display: flex;
   justify-content: center;
   border-top: 1px solid var(--border-color); /* Die Trennlinie */
-  
+
   /* HIER DER ABSTAND */
-  margin-top: 25px;   /* Erhöhter Abstand nach oben zur ersten Zeile */
-  padding-top: 15px;  /* Abstand von der Linie zum Text */
+  margin-top: 25px; /* Erhöhter Abstand nach oben zur ersten Zeile */
+  padding-top: 15px; /* Abstand von der Linie zum Text */
 }
 
 /* Optische Anpassung für den Außenwert */
 .large-value.outdoor {
   color: var(--accent-blue); /* Nutzt dein Standard-Blau */
-  filter: brightness(1.2);    /* Macht es für "Außen" etwas heller/frischer */
+  filter: brightness(1.2); /* Macht es für "Außen" etwas heller/frischer */
 }
 
 /* Sicherstellen, dass die Karte nach unten genug Platz hat */
@@ -340,7 +377,9 @@ body {
   position: relative;
   overflow: hidden;
   background-color: #222; /* Dunkler Hintergrund lässt das Blau leuchten */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 0 10px rgba(0,0,0,0.5);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.3),
+    inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 /* Das eigentliche Wasser (der Balken) */
@@ -349,8 +388,8 @@ body {
   position: absolute;
   bottom: 0;
   /* Ein schöner Verlauf von Dunkelblau zu Hellblau */
-  background: linear-gradient(to top, #1a73e8, #6dd5ed); 
-  transition: height 1.0s cubic-bezier(0.4, 0, 0.2, 1); /* Sanftes "Füllen" */
+  background: linear-gradient(to top, #1a73e8, #6dd5ed);
+  transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); /* Sanftes "Füllen" */
   box-shadow: 0 0 15px rgba(109, 213, 237, 0.5); /* Leuchteffekt */
 }
 
@@ -362,7 +401,7 @@ body {
   left: 6px;
   width: 10px;
   height: 100%;
-  background: linear-gradient(to right, rgba(255,255,255,0.15), transparent);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.15), transparent);
   pointer-events: none;
 }
 
@@ -454,6 +493,112 @@ body {
   padding: 5px 10px;
   min-width: 60px;
   font-size: 0.85rem;
+}
+
+/* --- RUNDE WASSERWAAGE (LIBELLE) --- */
+.bubble-level-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.level-shell {
+  width: 140px;
+  height: 140px;
+  border: 4px solid #555;
+  border-radius: 50%;
+  position: relative;
+  /* Glas-Effekt Hintergrund */
+  background: radial-gradient(
+    circle at 30% 30%,
+    #ffffff 0%,
+    #e0e0e0 20%,
+    #888 100%
+  );
+  box-shadow:
+    inset 0 5px 15px rgba(0, 0, 0, 0.4),
+    0 5px 10px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Die grüne Flüssigkeit */
+.level-liquid {
+  width: 90%;
+  height: 90%;
+  background: radial-gradient(circle, #ccff00 0%, #7cba00 70%, #4e7a00 100%);
+  border-radius: 50%;
+  position: absolute;
+  z-index: 1;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Das Fadenkreuz auf dem Glas */
+.level-shell::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 3;
+}
+.level-shell::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 3;
+}
+
+/* Die Zielkreise (Toleranzbereiche) */
+.level-target-ring {
+  position: absolute;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  z-index: 3;
+}
+.ring-small {
+  width: 30px;
+  height: 30px;
+}
+.ring-large {
+  width: 70px;
+  height: 70px;
+}
+
+/* Die Luftblase */
+.bubble {
+  width: 28px;
+  height: 28px;
+  /* Kräftigerer Glas-Glow Effekt */
+  background: radial-gradient(
+    circle at 35% 35%,
+    rgba(255, 255, 255, 1) 0%,
+    /* Heller Kern */ rgba(255, 255, 255, 0.6) 40%,
+    /* Lichtreflexion */ rgba(255, 255, 255, 0.2) 70%,
+    /* Transparenter Rand */ rgba(0, 0, 0, 0.1) 100% /* Leichte Außenkante */
+  );
+  border-radius: 50%;
+  position: absolute;
+  z-index: 10;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+
+  transition: all 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 /* ========================================================= */
