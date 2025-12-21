@@ -35,7 +35,9 @@
   </head>
   <body>
     <nav class="navbar">
-      <img id="navLogo" src="./imag/felix.png" alt="Logo" class="nav-logo" />
+      <a href="index.html"
+        ><img id="navLogo" src="./imag/felix.png" alt="Logo" class="nav-logo"
+      /></a>
 
       <h2 id="appTitle">Camper Steuerung</h2>
       <a href="index.html" class="nav-button"
@@ -72,59 +74,8 @@
                 AUS
               </button>
             </div>
-           <p>Farbauswahl:</p>
-            <button
-              class="btn btn-off"
-              style="width: 100%; margin-top: 10px"
-              onclick="publishMQTT('wled/f49991/api', 'FX=0')"
-            >
-              <i class="fas fa-stop"></i> Effekt beenden (Solid)
-            </button>
 
-            <div class="color-dot-container">
-              <button
-                onclick="sendWledCommand('farbe', 'f1')"
-                class="color-dot"
-                style="background-color: #ff0000"
-              ></button>
-              <button
-                onclick="sendWledCommand('farbe', 'f2')"
-                class="color-dot"
-                style="background-color: #08ff00"
-              ></button>
-              <button
-                onclick="sendWledCommand('farbe', 'f3')"
-                class="color-dot"
-                style="background-color: #0000ff"
-              ></button>
-              <button
-                onclick="sendWledCommand('farbe', 'f4')"
-                class="color-dot"
-                style="background-color: #ffffff; border: 1px solid #ccc"
-              ></button>
-              <button
-                onclick="sendWledCommand('farbe', 'f5')"
-                class="color-dot"
-                style="background-color: #ff8c00"
-              ></button>
-              <button
-                onclick="sendWledCommand('farbe', 'f6')"
-                class="color-dot"
-                style="background-color: #00ffff"
-              ></button>
-              <button
-                onclick="sendWledCommand('farbe', 'f7')"
-                class="color-dot"
-                style="background-color: #ff00ff"
-              ></button>
-              <button
-                onclick="sendWledCommand('farbe', 'f8')"
-                class="color-dot"
-                style="background-color: #ffcc44"
-              ></button>
-            </div>
             <p>Effekte:</p>
-
             <div class="effect-grid">
               <button
                 class="btn-eff e-rainbow"
@@ -175,6 +126,58 @@
                 <i class="fas fa-film"></i><span>Cinema</span>
               </button>
             </div>
+
+            <p>Farbauswahl:</p>
+            <div class="color-dot-container">
+              <button
+                onclick="sendWledCommand('farbe', 'f1')"
+                class="color-dot"
+                style="background-color: #ff0000"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f2')"
+                class="color-dot"
+                style="background-color: #08ff00"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f3')"
+                class="color-dot"
+                style="background-color: #0000ff"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f4')"
+                class="color-dot"
+                style="background-color: #ffffff; border: 1px solid #ccc"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f5')"
+                class="color-dot"
+                style="background-color: #ff8c00"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f6')"
+                class="color-dot"
+                style="background-color: #00ffff"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f7')"
+                class="color-dot"
+                style="background-color: #ff00ff"
+              ></button>
+              <button
+                onclick="sendWledCommand('farbe', 'f8')"
+                class="color-dot"
+                style="background-color: #ffcc44"
+              ></button>
+            </div>
+
+            <button
+              class="btn btn-off"
+              style="width: 100%; margin-top: 10px"
+              onclick="publishMQTT('wled/f49991/api', 'FX=0')"
+            >
+              <i class="fas fa-stop"></i> Effekt beenden (Solid)
+            </button>
           </div>
         </div>
 
