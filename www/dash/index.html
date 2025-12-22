@@ -62,6 +62,11 @@
               </div>
             </div>
           </div>
+          <div style="padding: 5px 15px 15px;">
+            <button onclick="calibrateLevel()" class="btn-preset" style="width:100%; background:var(--accent-blue); color:white; border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer;">
+              <i class="fas fa-sync-alt"></i> Auf Null setzen
+            </button>
+          </div>
         </div>
 
         <div class="data-item">
@@ -351,55 +356,28 @@
           </div>
         </div>
 
-        <div class="data-item windy-card">
-          <h3>
-            <div
-              style="
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                width: 100%;
-              "
-            >
-              <span><i class="fas fa-wind"></i> Wetterradar</span>
-              <div id="windIndicatorBox">
-                <i class="fas fa-flag" id="windIndicatorIcon"></i>
-                <span id="windIndicatorValue">--</span> <small>km/h</small>
-              </div>
-            </div>
-          </h3>
-          <div class="temp-preset-buttons">
-            <button
-              class="btn-preset active"
-              onclick="changeWindyLayer('wind')"
-            >
-              Wind
-            </button>
-            <button class="btn-preset" onclick="changeWindyLayer('temp')">
-              Temp
-            </button>
-            <button class="btn-preset" onclick="changeWindyLayer('rain')">
-              Regen
-            </button>
-            <button class="btn-preset" onclick="changeWindyLayer('thunder')">
-              Gewitter
-            </button>
-          </div>
-          <div
-            class="map-container"
-            style="height: 220px; overflow: hidden; position: relative"
-          >
-            <iframe
-              id="windyIframe"
-              width="100%"
-              height="280"
-              frameborder="0"
-              src="about:blank"
-              style="position: absolute; top: -45px; left: 0"
-            ></iframe>
-          </div>
-        </div>
-
+   <div class="data-item info-card">
+  <h3><i class="fas fa-clock"></i> System Info</h3>
+  <div class="govee-card-body" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
+    <div id="bigClock" style="font-size: 3em; font-weight: bold; color: var(--accent-blue); line-height: 1;">
+      00:00
+    </div>
+    <div id="bigDate" style="font-size: 1.1em; color: #888; margin-bottom: 15px;">
+      Montag, 01. Januar
+    </div>
+    
+    <div style="width: 100%; border-top: 1px solid var(--border-color); padding-top: 15px; display: flex; justify-content: space-around;">
+      <div class="govee-value-item">
+        <span class="unit-label">Dashboard</span>
+        <div style="font-weight: bold; color: #28a745;">ONLINE</div>
+      </div>
+      <div class="govee-value-item">
+        <span class="unit-label">Browser</span>
+        <div id="browserStatus" style="font-size: 0.9em; font-weight: bold;">Stabil</div>
+      </div>
+    </div>
+  </div>
+</div>
         <div class="data-item battery-card">
           <h3><i class="fas fa-bolt"></i> Energie & BMS</h3>
           <div class="govee-card-body">
@@ -487,7 +465,8 @@
       let currentLon = "N/A";
       let currentRoll = 0;
       let currentPitch = 0;
-      let currentWindyLayer = "wind";
+      let rollOffset = parseFloat(localStorage.getItem("rollOffset")) || 0;
+      let pitchOffset = parseFloat(localStorage.getItem("pitchOffset")) || 0;
       const mqttLedElement = document.getElementById("mqttLed");
       const mqttStatusLabelElement = document.getElementById("mqttStatusLabel");
       const mapLinkElement = document.getElementById("mapLink");
@@ -532,44 +511,24 @@
           }
         }
       }
-      // Aktualisiert die Windy Wetterkarte
-      function updateWindyMap(layer = currentWindyLayer) {
-        const windyIframe = document.getElementById("windyIframe");
-        if (!windyIframe) return;
-        if (currentLat !== "N/A" && currentLon !== "N/A") {
-          currentWindyLayer = layer;
-          const lat = parseFloat(currentLat);
-          const lon = parseFloat(currentLon);
-          const url = `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&detailLat=${lat}&detailLon=${lon}&width=650&height=450&zoom=6&level=surface&overlay=${currentWindyLayer}&product=ecmwf&menu=0&message=0&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=false&metricWind=default&metricTemp=default&radarRange=-1`;
+     function updateClock() {
+  const now = new Date();
+  const options = { weekday: 'long', day: '2-digit', month: 'long' };
+  
+  const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  const dateStr = now.toLocaleDateString('de-DE', options);
 
-          if (windyIframe.src !== url) {
-            windyIframe.src = url;
-          }
-        }
-      }
-      // Button-Funktion für Windy Layer-Wechsel
-      function changeWindyLayer(newLayer) {
-        updateWindyMap(newLayer);
-      }
-      // Steuert den roten Punkt im Fadenkreuz (Neigung)
-      function updateTiltGauge(roll, pitch) {
-        const marker = document.getElementById("tiltMarker");
-        const rollValueElement = document.getElementById("rollValueGraph");
-        const pitchValueElement = document.getElementById("pitchValueGraph");
-        if (!marker) return;
-        const MAX_DEGREES = 15;
-        const SHELL_SIZE = 120;
-        const maxPixelShift = SHELL_SIZE / 2;
-        let shiftX = (roll / MAX_DEGREES) * maxPixelShift;
-        let shiftY = (pitch / MAX_DEGREES) * maxPixelShift;
-        shiftX = Math.max(-maxPixelShift, Math.min(maxPixelShift, shiftX));
-        shiftY = Math.max(-maxPixelShift, Math.min(maxPixelShift, shiftY));
-        marker.style.transform = `translate(calc(-50% - ${shiftX}px), calc(-50% + ${shiftY}px))`;
-        if (rollValueElement)
-          rollValueElement.textContent = `${roll.toFixed(1)} °`;
-        if (pitchValueElement)
-          pitchValueElement.textContent = `${pitch.toFixed(1)} °`;
-      }
+  if (document.getElementById('bigClock')) {
+    document.getElementById('bigClock').textContent = timeStr;
+  }
+  if (document.getElementById('bigDate')) {
+    document.getElementById('bigDate').textContent = dateStr;
+  }
+}
+
+// Uhr alle 10 Sekunden aktualisieren
+setInterval(updateClock, 10000);
+updateClock(); // Sofortiger Aufruf beim Laden
       // Verarbeitet Govee JSON Daten von der Python-Brücke
       function processGoveeData(payload, index) {
         try {
@@ -591,7 +550,8 @@
           );
         }
       }
-      function sendAuthToWaterNode() {
+
+       function sendAuthToWaterNode() {
         if (!client || !client.connected) return;
 
         // Prüfen, ob die Variablen existieren und NICHT mehr der Standard-Text sind
@@ -614,31 +574,60 @@
 
         console.log("Wassersensor: Authentifizierung erfolgreich gesendet.");
       }
-      function updateBubblePosition() {
-        const bubble = document.getElementById("spiritBubble");
-        if (!bubble) return;
 
-        // Empfindlichkeit einstellen (höherer Wert = mehr Bewegung)
-        const sensitivity = 3.5;
-        const maxOffset = 55; // Maximaler Versatz in Pixeln zum Rand
+        function calibrateLevel() {
+            // Die aktuellen Roh-Werte werden zum neuen Nullpunkt addiert
+            // absoluten Offset relativ zum Sensor-Nullwert speichern
+            rollOffset = currentRoll + rollOffset;
+            pitchOffset = currentPitch + pitchOffset;
 
-        // Berechnung des Versatzes
-        let xOffset = currentRoll * sensitivity;
-        let yOffset = currentPitch * sensitivity;
+            localStorage.setItem("rollOffset", rollOffset);
+            localStorage.setItem("pitchOffset", pitchOffset);
 
-        // Begrenzung (damit die Blase im Kreis bleibt)
-        const distance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
-        if (distance > maxOffset) {
-          const ratio = maxOffset / distance;
-          xOffset *= ratio;
-          yOffset *= ratio;
+            console.log("Kalibriert: Roll Offset " + rollOffset + ", Pitch Offset " + pitchOffset);
+            
+            // Anzeige sofort aktualisieren
+            updateBubblePosition();
         }
 
-        // Blase verschieben (transform: translate Mitte + Offset)
-        bubble.style.left = `calc(50% + ${xOffset}px)`;
-        bubble.style.top = `calc(50% + ${yOffset}px)`;
-      }
+        // Diese Funktion wird von MQTT aufgerufen
+        function updateTiltGauge(roll, pitch) {
+          currentRoll = roll;
+          currentPitch = pitch;
+          updateBubblePosition();
+        }
 
+        function updateBubblePosition() {
+            const bubble = document.getElementById("spiritBubble");
+            if (!bubble) return;
+
+            // --- Abzug des Offsets ---
+            const correctedRoll = currentRoll - rollOffset;
+            const correctedPitch = currentPitch - pitchOffset;
+
+            const sensitivity = 3.5;
+            const maxOffset = 55;
+
+            // Berechnung des Versatzes mit korrigierten Werten
+            let xOffset = correctedRoll * sensitivity;
+            let yOffset = correctedPitch * sensitivity;
+
+            const distance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
+            if (distance > maxOffset) {
+                const ratio = maxOffset / distance;
+                xOffset *= ratio;
+                yOffset *= ratio;
+            }
+
+            bubble.style.left = `calc(50% + ${xOffset}px)`;
+            bubble.style.top = `calc(50% + ${yOffset}px)`;
+
+            // Optional: Falls du Textwerte anzeigst, diese auch korrigieren
+            const rollText = document.getElementById("rollValueGraph");
+            const pitchText = document.getElementById("pitchValueGraph");
+            if (rollText) rollText.textContent = correctedRoll.toFixed(1);
+            if (pitchText) pitchText.textContent = correctedPitch.toFixed(1);
+        }
       /**
        * =========================================================
        * --- 2. MQTT VERBINDUNG & LOGIK ---
@@ -836,7 +825,6 @@
               if (lonEl) lonEl.textContent = currentLon;
               updateMapLink();
               updateMiniMap(currentLat, currentLon);
-              updateWindyMap();
               break;
 
             case GPS_LAT_TOPIC:
@@ -845,21 +833,15 @@
               if (latEl) latEl.textContent = currentLat;
               updateMapLink();
               updateMiniMap(currentLat, currentLon);
-              updateWindyMap();
               break;
             case GPS_ROLL_TOPIC:
-              currentRoll = parseFloat(payloadToUse);
-              const rollEl = document.getElementById("rollValueGraph");
-              if (rollEl) rollEl.textContent = currentRoll.toFixed(1);
-              updateBubblePosition();
-              break;
-
+            currentRoll = parseFloat(payloadToUse);
+            updateBubblePosition();
+            break;
             case GPS_PITCH_TOPIC:
-              currentPitch = parseFloat(payloadToUse);
-              const pitchEl = document.getElementById("pitchValueGraph");
-              if (pitchEl) pitchEl.textContent = currentPitch.toFixed(1);
-              updateBubblePosition();
-              break;
+            currentPitch = parseFloat(payloadToUse);
+            updateBubblePosition();
+            break;
             case GEOPOS_TEMP_TOPIC:
               document.getElementById("geoposTempValue").textContent =
                 parseFloat(payloadToUse).toFixed(1);
