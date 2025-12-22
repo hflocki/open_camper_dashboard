@@ -7,7 +7,7 @@ const MQTT_USERNAME = "xxxxxxxxxxxx";
 const MQTT_PASSWORD = "xxxxxxxxxxxx";
 const APP_NAME = "Camper Dashboard";
 
-
+const weatherApiKey = "DEIN_API_KEY_HIER";
 /* topics.js - Definition aller MQTT Topics */
 
 // --- ESPHome Node Namen ---

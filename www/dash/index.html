@@ -356,25 +356,31 @@
           </div>
         </div>
 
-   <div class="data-item info-card">
-  <h3><i class="fas fa-clock"></i> System Info</h3>
-  <div class="govee-card-body" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px;">
-    <div id="bigClock" style="font-size: 3em; font-weight: bold; color: var(--accent-blue); line-height: 1;">
-      00:00
-    </div>
-    <div id="bigDate" style="font-size: 1.1em; color: #888; margin-bottom: 15px;">
-      Montag, 01. Januar
-    </div>
-    
-    <div style="width: 100%; border-top: 1px solid var(--border-color); padding-top: 15px; display: flex; justify-content: space-around;">
+<div class="data-item weather-card">
+  <h3><i class="fas fa-cloud-showers-heavy"></i> Wetter & Warnungen</h3>
+  <div class="govee-card-body" id="weatherWidget" style="padding-bottom: 20px !important;">
+    <div class="govee-temp-hum-group">
       <div class="govee-value-item">
-        <span class="unit-label">Dashboard</span>
-        <div style="font-weight: bold; color: #28a745;">ONLINE</div>
+        <div class="large-value"><span id="liveWindSpeed">--</span><span style="font-size: 0.5em"> km/h</span></div>
+        <span class="unit-label"><i class="fas fa-wind"></i> Wind</span>
       </div>
       <div class="govee-value-item">
-        <span class="unit-label">Browser</span>
-        <div id="browserStatus" style="font-size: 0.9em; font-weight: bold;">Stabil</div>
+        <div class="large-value" id="windDirIcon" style="display: inline-block;">
+          <i class="fas fa-location-arrow"></i>
+        </div>
+        <span class="unit-label" id="windDirText">Richtung</span>
       </div>
+    </div>
+
+    <div id="weatherAlertBox" style="margin: 15px 10px 0; padding: 10px; border-radius: 8px; background: rgba(211, 47, 47, 0.1); display: none; border: 1px solid rgba(211, 47, 47, 0.2);">
+      <div style="color: #d32f2f; font-weight: bold; font-size: 0.85em; margin-bottom: 4px;">
+        <i class="fas fa-exclamation-triangle"></i> WETTERWARNUNG:
+      </div>
+      <div id="weatherAlertText" style="font-size: 0.8em; line-height: 1.2; color: var(--text-color);">Keine Warnungen</div>
+    </div>
+
+    <div class="time-display" style="bottom: 8px; font-size: 0.7em;">
+      Update: <span id="weatherUpdateTime">--:--</span>
     </div>
   </div>
 </div>
@@ -511,24 +517,52 @@
           }
         }
       }
-     function updateClock() {
-  const now = new Date();
-  const options = { weekday: 'long', day: '2-digit', month: 'long' };
-  
-  const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-  const dateStr = now.toLocaleDateString('de-DE', options);
+   
+async function updateWeatherData() {
+  // Nur abfragen, wenn wir Koordinaten haben
+  if (currentLat === "N/A" || currentLon === "N/A") return;
 
-  if (document.getElementById('bigClock')) {
-    document.getElementById('bigClock').textContent = timeStr;
-  }
-  if (document.getElementById('bigDate')) {
-    document.getElementById('bigDate').textContent = dateStr;
+  try {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${currentLat}&lon=${currentLon}&appid=${weatherApiKey}&units=metric&lang=de`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    // 1. Windgeschwindigkeit (m/s zu km/h)
+    const windSpeedKmH = (data.wind.speed * 3.6).toFixed(1);
+    document.getElementById("liveWindSpeed").textContent = windSpeedKmH;
+    
+    // 2. Windrichtung Icon drehen
+    const windDeg = data.wind.deg;
+    const dirIcon = document.getElementById("windDirIcon");
+    if (dirIcon) {
+        // Wir addieren -45 Grad, weil das location-arrow Icon standardmäßig schräg steht
+        dirIcon.style.transform = `rotate(${windDeg - 45}deg)`; 
+        dirIcon.style.transition = "transform 1s ease";
+    }
+
+    // 3. Warn-Logik
+    const alertBox = document.getElementById("weatherAlertBox");
+    const alertText = document.getElementById("weatherAlertText");
+    
+    // Prüfen auf Unwetter (Thunderstorm) oder starken Wind (> 40 km/h)
+    if (data.wind.speed > 11.1 || data.weather[0].main === "Thunderstorm" || data.weather[0].main === "Snow") {
+        alertBox.style.display = "block";
+        alertText.textContent = data.weather[0].description + " bei " + windSpeedKmH + " km/h Wind.";
+    } else {
+        alertBox.style.display = "none";
+    }
+
+    document.getElementById("weatherUpdateTime").textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+  } catch (error) {
+    console.error("Wetter-Fehler:", error);
   }
 }
 
-// Uhr alle 10 Sekunden aktualisieren
-setInterval(updateClock, 10000);
-updateClock(); // Sofortiger Aufruf beim Laden
+// Nur ein Intervall für das Wetter (alle 10 Minuten)
+setInterval(updateWeatherData, 600000);
+
+
       // Verarbeitet Govee JSON Daten von der Python-Brücke
       function processGoveeData(payload, index) {
         try {
@@ -825,6 +859,7 @@ updateClock(); // Sofortiger Aufruf beim Laden
               if (lonEl) lonEl.textContent = currentLon;
               updateMapLink();
               updateMiniMap(currentLat, currentLon);
+              updateWeatherData();
               break;
 
             case GPS_LAT_TOPIC:
@@ -833,6 +868,7 @@ updateClock(); // Sofortiger Aufruf beim Laden
               if (latEl) latEl.textContent = currentLat;
               updateMapLink();
               updateMiniMap(currentLat, currentLon);
+              updateWeatherData();
               break;
             case GPS_ROLL_TOPIC:
             currentRoll = parseFloat(payloadToUse);
