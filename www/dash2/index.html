@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Camper Dashboard - Status</title>
+    <link rel="icon" type="image/png" href="./imag/felix.png" />
+    <link rel="apple-touch-icon" href="./imag/felix.png" />
+    <link rel="stylesheet" href="./fonts/css/all.min.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./config.js"></script>
+    <script src="./mqtt.min.js"></script>
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./sw.js")
+            .then((registration) => {
+              console.log("Service Worker registriert: ", registration.scope);
+            })
+            .catch((err) => {
+              console.log("Service Worker Registrierung fehlgeschlagen: ", err);
+            });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <img id="navLogo" src="./imag/felix.png" alt="Logo" class="nav-logo" />
+      <h2 id="appTitle">Camper Status</h2>
+    </nav>
+
+   <div class="container">
+  <div class="data-card">
+    
+    <div class="data-item collapsed">
+      <div class="steuerelement-header" onclick="toggleBox(this)">
+        <h3><i class="fas fa-balance-scale"></i> Lagesensor</h3>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="bubble-level-container">
+        <div class="level-shell">
+          <div class="level-liquid"></div>
+          <div class="level-target-ring ring-small"></div>
+          <div class="level-target-ring ring-large"></div>
+          <div id="spiritBubble" class="bubble"></div>
+        </div>
+      </div>
+      <div class="custom-grid">
+        <div class="custom-grid-item">
+          <span class="custom-label">Roll (L/R)</span>
+          <div class="custom-value"><span id="rollValueGraph">0.0</span>°</div>
+        </div>
+        <div class="custom-grid-item">
+          <span class="custom-label">Pitch (V/H)</span>
+          <div class="custom-value"><span id="pitchValueGraph">0.0</span>°</div>
+        </div>
+      </div>
+      <div class="steuerelement-body">
+        <div style="padding: 5px 15px 15px;">
+          <button onclick="calibrateLevel()" class="btn-preset-main" style="width:100%;">
+            <i class="fas fa-sync-alt"></i> Auf Null setzen
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-item">
+      <h3><i class="fas fa-tint"></i> Frischwassertank</h3>
+      <div class="fresh-water-content">
+        <div class="water-tank-visual">
+          <div class="water-bar-shell">
+            <div id="freshWaterBar" class="water-bar" style="height: 0%"></div>
+            <div class="water-glass-shine"></div>
+          </div>
+          <div class="water-label-pct"><span id="levelPercentValue">N/A</span>%</div>
+        </div>
+        <div class="water-details-group">
+          <div class="water-detail-item">
+            <i class="fas fa-fill-drip"></i>
+            <div class="value-box"><span id="levelVolumeValue" class="val">N/A</span><span class="unit">Liter</span></div>
+          </div>
+          <div class="water-detail-item">
+            <i class="fas fa-bolt"></i>
+            <div class="value-box"><span id="adcValue" class="val">N/A</span><span class="unit">Volt</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-item collapsed">
+      <div class="steuerelement-header" onclick="toggleBox(this)">
+        <h3><i class="fas fa-fire-flame-curved"></i> Truma</h3>
+        <span class="toggle-icon">▼</span>
+      </div>
+      <div class="custom-grid">
+        <div class="custom-grid-item">
+          <span class="custom-label">Sollwert</span>
+          <div class="custom-value"><span id="setpointValue">N/A</span>°C</div>
+        </div>
+        <div class="custom-grid-item">
+          <span class="custom-label">Istwert</span>
+          <div class="custom-value"><span id="currentValue">N/A</span>°C</div>
+        </div>
+      </div>
+      <div class="steuerelement-body">
+        <div class="control-inner" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 10px;">
+          <div class="control-row">
+            <input type="number" id="trumaInput" value="20" step="0.5" class="steuer-input">
+            <button class="btn-preset-main" onclick="sendCommand(SETPOINT_SET_TOPIC, document.getElementById('trumaInput').value)">Setzen</button>
+          </div>
+          <div class="preset-row" style="margin-top:10px; display:flex; gap:5px; justify-content:center;">
+            <button class="btn-small" onclick="sendCommand(SETPOINT_SET_TOPIC, '18')">18°</button>
+            <button class="btn-small" onclick="sendCommand(SETPOINT_SET_TOPIC, '21')">21°</button>
+            <button class="btn-small" onclick="sendCommand(SETPOINT_SET_TOPIC, '23')">23°</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-item collapsed">
+  <div class="steuerelement-header" onclick="toggleBox(this)">
+    <h3><i class="fas fa-fan"></i> MaxxFan</h3>
+    <span class="toggle-icon">▼</span>
+  </div>
+  <div class="custom-grid">
+    <div class="custom-grid-item">
+      <span class="custom-label">Status</span>
+      <div id="fanStateValue" class="custom-value">N/A</div>
+    </div>
+    <div class="custom-grid-item">
+      <span class="custom-label">Deckel</span>
+      <div id="lidStateValue" class="custom-value">N/A</div>
+    </div>
+  </div>
+  <div class="steuerelement-body">
+    <div class="control-inner" style="border-top: 1px solid var(--border-color); padding-top: 15px; margin-top: 10px;">
+      <div class="control-row-dual">
+        <button class="btn-preset-main" onclick="sendCommand(LID_COMMAND_TOPIC, 'OPEN')">Deckel Auf</button>
+        <button class="btn-preset-main btn-danger" onclick="sendCommand(LID_COMMAND_TOPIC, 'CLOSE')">Deckel Zu</button>
+      </div>
+      <div class="control-row-dual" style="margin-top:10px;">
+        <button class="btn-small" style="flex:1" onclick="sendCommand(DIRECTION_COMMAND_TOPIC, 'IN')">Einzug</button>
+        <button class="btn-small" style="flex:1" onclick="sendCommand(DIRECTION_COMMAND_TOPIC, 'OUT')">Auszug</button>
+      </div>
+      <div class="control-row" style="margin-top:15px;">
+        <input type="number" id="fanInput" placeholder="%" class="steuer-input">
+        <button class="btn-preset-main" onclick="sendCommand(SPEED_COMMAND_TOPIC, document.getElementById('fanInput').value)">Set Speed</button>
+        <button class="btn-small" onclick="sendCommand(AUTO_COMMAND_TOPIC, 'ON')">Auto</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="data-item collapsed">
+  <div class="steuerelement-header" onclick="toggleBox(this)" style="cursor: pointer;">
+    <h3><i class="fas fa-lightbulb"></i> Beleuchtung</h3>
+    <span class="toggle-icon">▼</span>
+  </div>
+
+  <div class="quick-power-bar" style="display: flex; gap: 10px; padding: 0 15px 10px 15px; margin-top: -5px;">
+    <button class="btn-preset-main btn-success" style="flex: 1; padding: 6px;" onclick="sendCommand(WLED_BASE, 'ON')">
+      <i class="fas fa-power-off"></i> AN
+    </button>
+    <button class="btn-preset-main btn-danger" style="flex: 1; padding: 6px;" onclick="sendCommand(WLED_BASE, 'OFF')">
+      <i class="fas fa-power-off"></i> AUS
+    </button>
+  </div>
+
+  <div class="steuerelement-body">
+    <div class="control-inner" style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+      
+      <button class="btn-preset-main" style="width: 100%; margin-bottom: 15px; background: #555;" 
+              onclick="sendCommand(wledConfig.mqttTopic, wledConfig.farben.solid)">
+        <i class="fas fa-stop-circle"></i> Effekt stoppen (Solid Mode)
+      </button>
+
+      <div class="color-dot-container">
+        <div class="color-dot" style="background: #00ff00;" onclick="sendCommand(wledConfig.mqttTopic, wledConfig.farben.gruen)"></div>
+        <div class="color-dot" style="background: #ffcc66;" onclick="sendCommand(wledConfig.mqttTopic, wledConfig.farben.warmweiss)"></div>
+        <div class="color-dot" style="background: #ffffff;" onclick="sendCommand(wledConfig.mqttTopic, wledConfig.farben.weiss)"></div>
+        <div class="color-dot" style="background: #ff0000;" onclick="sendCommand(wledConfig.mqttTopic, wledConfig.farben.rot)"></div>
+        <div class="color-dot" style="background: #0000ff;" onclick="sendCommand(wledConfig.mqttTopic, wledConfig.farben.blau)"></div>
+      </div>
+
+      <div class="effect-grid" style="margin-top: 15px;">
+        <button class="btn-eff e-rainbow" onclick="sendCommand(wledConfig.mqttTopic, wledConfig.effekte.rainbow)">Rainbow</button>
+        <button class="btn-eff e-fire" onclick="sendCommand(wledConfig.mqttTopic, wledConfig.effekte.fire)">Fire</button>
+        <button class="btn-eff" style="background: #444;" onclick="sendCommand(wledConfig.mqttTopic, wledConfig.effekte.wipe)">Wipe</button>
+        <button class="btn-eff" style="background: var(--accent-blue);" onclick="sendCommand(wledConfig.mqttTopic, wledConfig.effekte.scan)">Scanner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <div class="data-item govee-card" id="geoposCard">
+          <h3><i class="fas fa-home"></i> Klima</h3>
+          <div class="govee-card-body">
+            <div class="govee-temp-hum-group">
+              <div class="govee-value-item">
+                <div class="large-value">
+                  <span id="geoposTempValue">N/A</span>°C
+                </div>
+                <span class="unit-label">Temp Innen</span>
+              </div>
+              <div class="govee-value-item">
+                <div class="large-value">
+                  <span id="geoposHumValue">N/A</span>%
+                </div>
+                <span class="unit-label">Feuchte Innen</span>
+              </div>
+            </div>
+            <div
+              class="govee-temp-outdoor-row"
+              style="
+                border-top: 1px solid var(--border-color);
+                margin-top: 20px;
+                padding-top: 15px;
+              "
+            >
+              <div class="govee-value-item">
+                <div class="large-value">
+                  <span id="geoposOTValue">N/A</span>°C
+                </div>
+                <span class="unit-label">Temp Außen</span>
+              </div>
+            </div>
+            <div
+              class="time-display"
+              style="text-align: right; margin-top: 10px"
+            >
+              <span id="geoposTimeValue">--:--</span> |
+              <span id="geoposOTTimeValue">--:--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-item govee-card" id="goveeCard1">
+          <h3><i class="fas fa-thermometer-half"></i> Außentemperatur</h3>
+          <div class="govee-card-body">
+            <div class="govee-temp-hum-group">
+              <div class="govee-value-item">
+                <span class="unit-label">Temperatur</span>
+                <div class="large-value">
+                  <span id="goveeTempValue1">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">°C</span>
+                </div>
+              </div>
+              <div class="govee-value-item">
+                <span class="unit-label">Luftfeuchte</span>
+                <div class="large-value">
+                  <span id="goveeHumValue1">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-item govee-card" id="goveeCard2">
+          <h3><i class="fas fa-box"></i> Kühlschrank</h3>
+          <div class="govee-card-body">
+            <div class="govee-temp-hum-group">
+              <div class="govee-value-item">
+                <span class="unit-label">Temperatur</span>
+                <div class="large-value">
+                  <span id="goveeTempValue2">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">°C</span>
+                </div>
+              </div>
+              <div class="govee-value-item">
+                <span class="unit-label">Luftfeuchte</span>
+                <div class="large-value">
+                  <span id="goveeHumValue2">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">%</span>
+                </div>
+              </div>
+            </div>
+            <div class="battery-display">
+              <i class="fas fa-battery-full"></i> Batt:
+              <span id="goveeBattValue2">N/A</span> %
+            </div>
+            <div class="time-display">
+              <span id="goveeTimeValue2">--:--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="data-item govee-card" id="goveeCard3">
+          <h3><i class="fas fa-bed"></i> Schlafbereich</h3>
+          <div class="govee-card-body">
+            <div class="govee-temp-hum-group">
+              <div class="govee-value-item">
+                <span class="unit-label">Temperatur</span>
+                <div class="large-value">
+                  <span id="goveeTempValue3">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">°C</span>
+                </div>
+              </div>
+              <div class="govee-value-item">
+                <span class="unit-label">Luftfeuchte</span>
+                <div class="large-value">
+                  <span id="goveeHumValue3">N/A</span
+                  ><span style="font-size: 0.6em; vertical-align: top">%</span>
+                </div>
+              </div>
+            </div>
+            <div class="battery-display">
+              <i class="fas fa-battery-full"></i> Batt:
+              <span id="goveeBattValue3">N/A</span> %
+            </div>
+            <div class="time-display">
+              <span id="goveeTimeValue3">--:--</span>
+            </div>
+          </div>
+        </div>
+
+ 
+
+        <div class="data-item gps-card">
+          <h3>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                width: 100%;
+                align-items: center;
+              "
+            >
+              <span><i class="fas fa-location-arrow"></i> Position</span>
+              <span class="sat-header-info" style="font-size: 0.7em"
+                ><i class="fas fa-satellite"></i>
+                <span id="satValue">--</span></span
+              >
+            </div>
+          </h3>
+          <div class="custom-grid">
+            <div class="custom-grid-item">
+              <span class="custom-label">LON</span>
+              <div id="lonValue" class="custom-value">N/A</div>
+            </div>
+            <div class="custom-grid-item">
+              <span class="custom-label">LAT</span>
+              <div id="latValue" class="custom-value">N/A</div>
+            </div>
+          </div>
+          <div class="custom-grid" style="margin-top: 5px">
+            <div class="custom-grid-item">
+              <span class="custom-label">ALT</span>
+              <div class="custom-value"><span id="altValue">N/A</span>m</div>
+            </div>
+          </div>
+          <div
+            id="mapLinkContainer"
+            style="
+              text-align: center;
+              margin-top: 15px;
+              border-top: 1px solid var(--border-color);
+              padding-top: 10px;
+            "
+          >
+            <a
+              href="#"
+              id="mapLink"
+              target="_blank"
+              class="btn-preset"
+              style="
+                text-decoration: none;
+                display: inline-block;
+                padding: 5px 15px;
+                font-size: 0.9em;
+                color: white;
+                background-color: var(--accent-blue);
+              "
+            >
+              <i class="fas fa-map-marker-alt"></i> Google Maps
+            </a>
+          </div>
+        </div>
+
+        <div class="data-item map-card">
+          <h3><i class="fas fa-map"></i> Standort</h3>
+          <div
+            class="map-container"
+            style="
+              height: 220px;
+              width: 100%;
+              overflow: hidden;
+              position: relative;
+              border-radius: 8px;
+              border: 1px solid var(--border-color);
+            "
+          >
+            <iframe
+              id="mapIframe"
+              width="100%"
+              height="280"
+              frameborder="0"
+              src="about:blank"
+              style="position: absolute; top: 0; left: 0"
+            ></iframe>
+          </div>
+          <div id="mapStatusContainer" style="text-align: center; padding: 8px 0;">
+    <small id="mapStatus" style="opacity: 0.6; font-size: 0.75em;">Warte auf GPS-Daten...</small>
+  </div>
+        </div>
+
+<div class="data-item weather-card">
+  <h3><i class="fas fa-cloud-showers-heavy"></i> Wetter & Warnungen</h3>
+  <div class="govee-card-body" id="weatherWidget" style="padding-bottom: 20px !important;">
+    <div class="govee-temp-hum-group">
+      <div class="govee-value-item">
+        <div class="large-value"><span id="liveWindSpeed">--</span><span style="font-size: 0.5em"> km/h</span></div>
+        <span class="unit-label"><i class="fas fa-wind"></i> Wind</span>
+      </div>
+      <div class="govee-value-item">
+        <div class="large-value" id="windDirIcon" style="display: inline-block;">
+          <i class="fas fa-location-arrow"></i>
+        </div>
+        <span class="unit-label" id="windDirText">Richtung</span>
+      </div>
+    </div>
+
+    <div id="weatherAlertBox" style="margin: 15px 10px 0; padding: 10px; border-radius: 8px; background: rgba(211, 47, 47, 0.1); display: none; border: 1px solid rgba(211, 47, 47, 0.2);">
+      <div style="color: #d32f2f; font-weight: bold; font-size: 0.85em; margin-bottom: 4px;">
+        <i class="fas fa-exclamation-triangle"></i> WETTERWARNUNG:
+      </div>
+      <div id="weatherAlertText" style="font-size: 0.8em; line-height: 1.2; color: var(--text-color);">Keine Warnungen</div>
+    </div>
+
+    <div class="time-display" style="bottom: 8px; font-size: 0.7em;">
+      Update: <span id="weatherUpdateTime">--:--</span>
+    </div>
+  </div>
+</div>
+ <div class="data-item battery-card">
+          <h3><i class="fas fa-bolt"></i> Energie & BMS</h3>
+          <div class="govee-card-body">
+            <div class="govee-temp-hum-group">
+              <div class="govee-value-item">
+                <span class="unit-label">Ladestand</span>
+                <div class="large-value">
+                  <span id="bmsSocValue">N/A</span><span style="font-size: 0.6em">%</span>
+                </div>
+              </div>
+              <div class="govee-value-item">
+                <span class="unit-label">Strom</span>
+                <div class="large-value">
+                  <span id="bmsCurrentValue">N/A</span><span style="font-size: 0.6em">A</span>
+                </div>
+              </div>
+            </div>
+            <div class="battery-display" style="margin-top: 10px; display: flex; justify-content: space-between;">
+              <span><i class="fas fa-car-battery"></i> <span id="bmsVoltageValue">N/A</span> V</span>
+              <span><i class="fas fa-hourglass-half"></i> <span id="bmsTimeValue">N/A</span></span>
+            </div>
+          </div>
+        </div>
+
+  </div> <div class="data-item collapsed system-kachel">
+      <div class="steuerelement-header" onclick="toggleBox(this)">
+        <h3><i class="fas fa-microchip"></i> System-Steuerung</h3>
+        <span class="toggle-icon">▼</span>
+      </div>
+      
+      <div style="text-align: center; padding-bottom: 10px;">
+        <small style="opacity: 0.6;">Hardware neu starten</small>
+      </div>
+
+      <div class="steuerelement-body">
+        <div class="control-inner" style="border-top: 1px solid var(--border-color); padding-top: 15px;">
+          <div class="restart-grid">
+            <button class="btn-restart" onclick="sendCommand(RESTART_HEATER_TOPIC, '1')">
+              <i class="fas fa-fire"></i> Truma
+            </button>
+            <button class="btn-restart" onclick="sendCommand(RESTART_FAN_TOPIC, '1')">
+              <i class="fas fa-fan"></i> MaxxFan
+            </button>
+            <button class="btn-restart" onclick="sendCommand(RESTART_GPS_TOPIC, '1')">
+              <i class="fas fa-location-arrow"></i> GPS/Lage
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="system-status-container full-width-status">
+      <div class="mqtt-status-group">
+        <div id="mqttLed" class="status-led" style="margin-top: 0"></div>
+        <div class="mqtt-info">MQTT:</div>
+        <span id="mqttStatusLabel">Verbinden...</span>
+      </div>
+      
+      <div class="status-led-grid">
+        <div class="status-item"><div id="heaterLed" class="status-led"></div><div class="status-label">Heizung</div></div>
+        <div class="status-item"><div id="gpsLed" class="status-led"></div><div class="status-label">GPS</div></div>
+        <div class="status-item"><div id="maxxFanLed" class="status-led"></div><div class="status-label">Fan</div></div>
+        <div class="status-item"><div id="tempLed" class="status-led"></div><div class="status-label">Temp</div></div>
+        <div class="status-item"><div id="waterLed" class="status-led"></div><div class="status-label">Wasser</div></div>
+        <div class="status-item"><div id="cpLed" class="status-led"></div><div class="status-label">CP Plus</div></div>
+        <div class="status-item"><div id="wledLed" class="status-led"></div><div class="status-label">WLED</div></div>
+      </div>
+    </div>
+    <script>
+      /**
+       * =========================================================
+       * --- 0. GLOBALE VARIABLEN & KONFIGURATION ---
+       * =========================================================
+       */
+      let client;
+      let clientId = "webClient_" + Math.random().toString(16).substr(2, 8);
+      let currentLat = "N/A";
+      let currentLon = "N/A";
+      let currentRoll = 0;
+      let currentPitch = 0;
+      let rollOffset = parseFloat(localStorage.getItem("rollOffset")) || 0;
+      let pitchOffset = parseFloat(localStorage.getItem("pitchOffset")) || 0;
+      const mqttLedElement = document.getElementById("mqttLed");
+      const mqttStatusLabelElement = document.getElementById("mqttStatusLabel");
+      const mapLinkElement = document.getElementById("mapLink");
+      // Mapping der Status-Topics zu den LED-Elementen
+      const ledMap = {
+        [HEATER_STATE_TOPIC]: "heaterLed",
+        [ESPGEOPOS_STATE_TOPIC]: "gpsLed",
+        [MAXXFAN_STATE_TOPIC]: "maxxFanLed",
+        [ESPTEMP_STATE_TOPIC]: "tempLed",
+        [WATERLEVEL_STATE_TOPIC]: "waterLed",
+        [CP_PLUS_ALIVE_TOPIC]: "cpLed",
+        [WLED_STATUS_TOPIC]: "wledLed",
+      };
+      /**
+       * =========================================================
+       * --- 1. HILFSFUNKTIONEN (UI & BERECHNUNGEN) ---
+       * =========================================================
+       */
+      // Aktualisiert den externen Google Maps Link
+      function updateMapLink() {
+        if (currentLat !== "N/A" && currentLon !== "N/A") {
+          mapLinkElement.href = `https://www.google.com/maps/search/?api=1&query=${currentLat},${currentLon}`;
+          mapLinkElement.style.display = "inline-block";
+        } else {
+          mapLinkElement.style.display = "none";
+        }
+      }
+      // Aktualisiert die kleine OpenStreetMap-Vorschau
+   function updateMiniMap(lat, lon) {
+    const mapIframe = document.getElementById("mapIframe");
+    const mapStatus = document.getElementById("mapStatus");
+    if (!mapIframe) return;
+
+    const zoom = 0.005;
+    const latNum = parseFloat(lat);
+    const lonNum = parseFloat(lon);
+
+    if (!isNaN(latNum) && !isNaN(lonNum)) {
+        const url = `https://www.openstreetmap.org/export/embed.html?bbox=${lonNum - zoom},${latNum - zoom},${lonNum + zoom},${latNum + zoom}&layer=mapnik&marker=${latNum},${lonNum}`;
+        
+        if (mapIframe.src !== url) {
+            mapIframe.src = url;
+            if (mapStatus) {
+                mapStatus.textContent = "Karte aktualisiert: " + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            }
+        }
+    } else {
+        if (mapStatus) mapStatus.textContent = "Suche GPS Signal...";
+    }
+}
+
+      // Funktion zum Aufklappen der Kacheln
+  function toggleBox(headerElement) {
+    const box = headerElement.closest(".data-item");
+    box.classList.toggle("collapsed");
+  }
+
+  function sendCommand(topic, payload) {
+  if (client && client.connected) {
+    // Da du paho-mqtt (mqtt.min.js) nutzt:
+    const message = new Paho.MQTT.Message(payload.toString());
+    message.destinationName = topic;
+    client.send(message);
+    console.log(`MQTT gesendet: ${topic} -> ${payload}`);
+  } else {
+    console.error("MQTT nicht verbunden!");
+  }
+}
+
+async function updateWeatherData() {
+  // Nur abfragen, wenn wir Koordinaten haben
+  if (currentLat === "N/A" || currentLon === "N/A") return;
+
+  try {
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${currentLat}&lon=${currentLon}&appid=${weatherApiKey}&units=metric&lang=de`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    // 1. Windgeschwindigkeit (m/s zu km/h)
+    const windSpeedKmH = (data.wind.speed * 3.6).toFixed(1);
+    document.getElementById("liveWindSpeed").textContent = windSpeedKmH;
+    
+    // 2. Windrichtung Icon drehen
+    const windDeg = data.wind.deg;
+    const dirIcon = document.getElementById("windDirIcon");
+    if (dirIcon) {
+        // Wir addieren -45 Grad, weil das location-arrow Icon standardmäßig schräg steht
+        dirIcon.style.transform = `rotate(${windDeg - 45}deg)`; 
+        dirIcon.style.transition = "transform 1s ease";
+    }
+
+    // 3. Warn-Logik
+    const alertBox = document.getElementById("weatherAlertBox");
+    const alertText = document.getElementById("weatherAlertText");
+    
+    // Prüfen auf Unwetter (Thunderstorm) oder starken Wind (> 40 km/h)
+    if (data.wind.speed > 11.1 || data.weather[0].main === "Thunderstorm" || data.weather[0].main === "Snow") {
+        alertBox.style.display = "block";
+        alertText.textContent = data.weather[0].description + " bei " + windSpeedKmH + " km/h Wind.";
+    } else {
+        alertBox.style.display = "none";
+    }
+
+    document.getElementById("weatherUpdateTime").textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+  } catch (error) {
+    console.error("Wetter-Fehler:", error);
+  }
+}
+
+// Nur ein Intervall für das Wetter (alle 10 Minuten)
+setInterval(updateWeatherData, 600000);
+
+
+      // Verarbeitet Govee JSON Daten von der Python-Brücke
+      function processGoveeData(payload, index) {
+        try {
+          const data = JSON.parse(payload);
+          const elements = {
+            temp: document.getElementById(`goveeTempValue${index}`),
+            hum: document.getElementById(`goveeHumValue${index}`),
+            batt: document.getElementById(`goveeBattValue${index}`),
+            time: document.getElementById(`goveeTimeValue${index}`),
+          };
+          if (elements.temp) elements.temp.textContent = data.tempc.toFixed(1);
+          if (elements.hum) elements.hum.textContent = data.hum.toFixed(1);
+          if (elements.batt) elements.batt.textContent = data.batt.toFixed(0);
+          if (elements.time && data.time) elements.time.textContent = data.time;
+        } catch (e) {
+          console.error(
+            `Fehler beim Parsen der Govee Daten (Sensor ${index}):`,
+            e,
+          );
+        }
+      }
+
+       function sendAuthToWaterNode() {
+        if (!client || !client.connected) return;
+
+        // Prüfen, ob die Variablen existieren und NICHT mehr der Standard-Text sind
+        if (
+          typeof WATER_NODE_SEC === "undefined" ||
+          WATER_NODE_SEC === "" ||
+          WATER_NODE_SEC === "IHR_SEC_KEY_HIER"
+        ) {
+          // Wir loggen nur kurz, dass nichts zu tun ist, ohne "Warnung"
+          console.log("Wassersensor: Keine Authentifizierung konfiguriert.");
+          return;
+        }
+
+        const authTopic = `${MQTT_ROOT_ID}/toc/pipe`;
+        const authPayload = `app:${WATER_NODE_ID}:auth:${WATER_NODE_SEC};`;
+        client.publish(authTopic, authPayload, { qos: 0 });
+
+        const autoSendPayload = `app:${WATER_NODE_ID}:autosend:1;`;
+        client.publish(authTopic, autoSendPayload, { qos: 0 });
+
+        console.log("Wassersensor: Authentifizierung erfolgreich gesendet.");
+      }
+
+        function calibrateLevel() {
+    // Wir speichern die AKTUELLEN ROHWERTE des Sensors als neuen Nullpunkt.
+    // Wichtig: Wir addieren nichts mehr auf den alten Offset drauf.
+    rollOffset = currentRoll;
+    pitchOffset = currentPitch;
+
+    // Speichern im Browser, damit es nach einem Refresh bleibt
+    localStorage.setItem("rollOffset", rollOffset);
+    localStorage.setItem("pitchOffset", pitchOffset);
+
+    console.log("Neu kalibriert auf Absolutwert: Roll " + rollOffset + ", Pitch " + pitchOffset);
+    
+    // Anzeige sofort aktualisieren
+    updateBubblePosition();
+}
+
+        // Diese Funktion wird von MQTT aufgerufen
+        function updateTiltGauge(roll, pitch) {
+          currentRoll = roll;
+          currentPitch = pitch;
+          updateBubblePosition();
+        }
+
+     function updateBubblePosition() {
+    const bubble = document.getElementById("spiritBubble");
+    if (!bubble) return;
+
+    // Berechnung: Aktueller Sensorwert MINUS Kalibrierungs-Nullpunkt
+    const correctedRoll = currentRoll - rollOffset;
+    const correctedPitch = currentPitch - pitchOffset;
+
+    const sensitivity = 3.5;
+    const maxOffset = 55;
+
+    let xOffset = correctedRoll * sensitivity;
+    let yOffset = correctedPitch * sensitivity;
+
+    const distance = Math.sqrt(xOffset * xOffset + yOffset * yOffset);
+    if (distance > maxOffset) {
+        const ratio = maxOffset / distance;
+        xOffset *= ratio;
+        yOffset *= ratio;
+    }
+
+    bubble.style.left = `calc(50% + ${xOffset}px)`;
+    bubble.style.top = `calc(50% + ${yOffset}px)`;
+
+    // Textwerte in der Kachel aktualisieren
+    const rollText = document.getElementById("rollValueGraph");
+    const pitchText = document.getElementById("pitchValueGraph");
+    if (rollText) rollText.textContent = correctedRoll.toFixed(1);
+    if (pitchText) pitchText.textContent = correctedPitch.toFixed(1);
+}
+      /**
+       * =========================================================
+       * --- 2. MQTT VERBINDUNG & LOGIK ---
+       * =========================================================
+       */
+      function connectClient() {
+        const connectUrl = `ws://${WS_HOST}:${WS_PORT}${WS_PATH}`;
+        mqttStatusLabelElement.textContent = "Verbinden...";
+
+        client = mqtt.connect(connectUrl, {
+          clientId: clientId,
+          username: MQTT_USERNAME,
+          password: MQTT_PASSWORD,
+          clean: true,
+        });
+        client.on("connect", function () {
+          console.log("MQTT Verbunden!");
+          mqttStatusLabelElement.textContent = "OK";
+          mqttLedElement.className = "status-led status-led-online";
+          const topicsToSubscribe = [
+            HEATER_STATE_TOPIC,
+            ESPGEOPOS_STATE_TOPIC,
+            MAXXFAN_STATE_TOPIC,
+            ESPTEMP_STATE_TOPIC,
+            WATERLEVEL_STATE_TOPIC,
+            WLED_STATUS_TOPIC,
+            CP_PLUS_ALIVE_TOPIC,
+            HEATER_SETPOINT_TOPIC,
+            HEATER_CURRENT_TOPIC,
+            GPS_PITCH_TOPIC,
+            GPS_ROLL_TOPIC,
+            GPS_LAT_TOPIC,
+            GPS_LON_TOPIC,
+            GPS_ALT_TOPIC,
+            GPS_SPEED_TOPIC,
+            GPS_SAT_TOPIC,
+            MAXXFAN_FAN_STATE_TOPIC,
+            MAXXFAN_LID_STATE_TOPIC,
+            MAXXFAN_DIRECTION_TOPIC,
+            MAXXFAN_AUTO_STATE_TOPIC,
+            MAXXFAN_CEILING_STATE_TOPIC,
+            FRESH_WATER_PERCENT_TOPIC,
+            FRESH_WATER_VOLUME_TOPIC,
+            FRESH_WATER_ADC_TOPIC,
+            GOVEE_TEMP_TOPIC_1,
+            GOVEE_TEMP_TOPIC_2,
+            GOVEE_TEMP_TOPIC_3,
+            GEOPOS_TEMP_TOPIC,
+            GEOPOS_HUM_TOPIC,
+            GEOPOS_TEMPOUT_TOPIC,
+          ];
+          topicsToSubscribe.forEach((topic) => {
+            if (topic) client.subscribe(topic, { qos: 0 });
+          });
+
+          sendAuthToWaterNode();
+        });
+        client.on("message", function (topic, message) {
+          const payloadToUse = message.toString();
+          const nowTime = new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          // Govee Sensoren
+          if (topic === GOVEE_TEMP_TOPIC_1) {
+            processGoveeData(payloadToUse, 1);
+            return;
+          }
+          if (topic === GOVEE_TEMP_TOPIC_2) {
+            processGoveeData(payloadToUse, 2);
+            return;
+          }
+          if (topic === GOVEE_TEMP_TOPIC_3) {
+            processGoveeData(payloadToUse, 3);
+            return;
+          }
+          // Status LEDs Update
+          if (ledMap.hasOwnProperty(topic)) {
+            const ledElement = document.getElementById(ledMap[topic]);
+            if (ledElement) {
+              // Wir trimmen Leerzeichen und wandeln alles in Kleinbuchstaben um
+              const val = payloadToUse.trim().toLowerCase();
+
+              // Liste aller Werte, die als "Online" gewertet werden sollen
+              const onlineValues = [
+                "1",
+                "online",
+                "on",
+                "true",
+                "an",
+                "connected",
+                "active",
+              ];
+
+              const isOnline = onlineValues.includes(val);
+
+              ledElement.className = `status-led ${isOnline ? "status-led-online" : "status-led-offline"}`;
+
+              // Kleiner Debug-Log für dich in der Konsole:
+              console.log(
+                `LED Update für ${topic}: Wert ist "${val}" -> Online: ${isOnline}`,
+              );
+            }
+          }
+          // Sensor-Handling per Switch
+          switch (topic) {
+            case FRESH_WATER_PERCENT_TOPIC:
+              const percent = parseFloat(payloadToUse);
+              const pEl = document.getElementById("levelPercentValue");
+              const bEl = document.getElementById("freshWaterBar");
+
+              if (pEl) pEl.textContent = percent.toFixed(0);
+
+              if (bEl) {
+                bEl.style.height = percent + "%";
+
+                // Deine dynamische Farblogik
+                if (percent <= 20) {
+                  // KRITISCH: Rot
+                  bEl.style.background =
+                    "linear-gradient(to top, #d32f2f, #ff5252)";
+                  bEl.style.boxShadow = "0 0 15px rgba(211, 47, 47, 0.5)";
+                } else if (percent <= 40) {
+                  // WARNUNG: Gelb/Orange
+                  bEl.style.background =
+                    "linear-gradient(to top, #f57c00, #ffb74d)";
+                  bEl.style.boxShadow = "0 0 15px rgba(245, 124, 0, 0.5)";
+                } else {
+                  // OK: Blau
+                  bEl.style.background =
+                    "linear-gradient(to top, #1a73e8, #6dd5ed)";
+                  bEl.style.boxShadow = "0 0 15px rgba(26, 115, 232, 0.5)";
+                }
+              }
+              break;
+
+            case FRESH_WATER_VOLUME_TOPIC:
+              const volEl = document.getElementById("levelVolumeValue");
+              if (volEl)
+                volEl.textContent = parseFloat(payloadToUse).toFixed(0);
+              break;
+
+            case FRESH_WATER_ADC_TOPIC:
+              const adcEl = document.getElementById("adcValue");
+              if (adcEl)
+                adcEl.textContent = (parseFloat(payloadToUse) / 1000).toFixed(
+                  2,
+                );
+              break;
+            case HEATER_SETPOINT_TOPIC:
+              document.getElementById("setpointValue").textContent =
+                parseFloat(payloadToUse).toFixed(1);
+              break;
+            case HEATER_CURRENT_TOPIC:
+              document.getElementById("currentValue").textContent =
+                parseFloat(payloadToUse).toFixed(1);
+              break;
+            case MAXXFAN_FAN_STATE_TOPIC:
+              document.getElementById("fanStateValue").textContent =
+                payloadToUse;
+              break;
+            case MAXXFAN_LID_STATE_TOPIC:
+              document.getElementById("lidStateValue").textContent =
+                payloadToUse;
+              break;
+            case MAXXFAN_DIRECTION_TOPIC:
+              document.getElementById("directionValue").textContent =
+                payloadToUse;
+              break;
+            case MAXXFAN_AUTO_STATE_TOPIC:
+              document.getElementById("autoStateValue").textContent =
+                payloadToUse;
+              break;
+            case GPS_SPEED_TOPIC:
+              const speedEl = document.getElementById("speedValue");
+              if (speedEl)
+                speedEl.textContent = parseFloat(payloadToUse).toFixed(0);
+              break;
+
+            case GPS_ALT_TOPIC:
+              const altEl = document.getElementById("altValue");
+              if (altEl)
+                altEl.textContent = parseFloat(payloadToUse).toFixed(1);
+              break;
+
+            case GPS_SAT_TOPIC:
+              const satEl = document.getElementById("satValue");
+              if (satEl)
+                satEl.textContent = parseFloat(payloadToUse).toFixed(0);
+              break;
+
+            case GPS_LON_TOPIC:
+              currentLon = parseFloat(payloadToUse).toFixed(4);
+              const lonEl = document.getElementById("lonValue");
+              if (lonEl) lonEl.textContent = currentLon;
+              updateMapLink();
+              updateMiniMap(currentLat, currentLon);
+              updateWeatherData();
+              break;
+
+            case GPS_LAT_TOPIC:
+              currentLat = parseFloat(payloadToUse).toFixed(4);
+              const latEl = document.getElementById("latValue");
+              if (latEl) latEl.textContent = currentLat;
+              updateMapLink();
+              updateMiniMap(currentLat, currentLon);
+              updateWeatherData();
+              break;
+            case GPS_ROLL_TOPIC:
+            currentRoll = parseFloat(payloadToUse);
+            updateBubblePosition();
+            break;
+            case GPS_PITCH_TOPIC:
+            currentPitch = parseFloat(payloadToUse);
+            updateBubblePosition();
+            break;
+            case GEOPOS_TEMP_TOPIC:
+              document.getElementById("geoposTempValue").textContent =
+                parseFloat(payloadToUse).toFixed(1);
+              document.getElementById("geoposTimeValue").textContent = nowTime;
+              break;
+            case GEOPOS_HUM_TOPIC:
+              document.getElementById("geoposHumValue").textContent =
+                parseFloat(payloadToUse).toFixed(1);
+              break;
+            case GEOPOS_TEMPOUT_TOPIC:
+              const tempOutEl = document.getElementById("geoposOTValue");
+              const timeOutEl = document.getElementById("geoposOTTimeValue");
+
+              if (tempOutEl) {
+                tempOutEl.textContent = parseFloat(payloadToUse).toFixed(1);
+              }
+              if (timeOutEl) {
+                timeOutEl.textContent = nowTime;
+              }
+              break;
+          }
+        });
+        // Error Handling
+        client.on("error", () => {
+          mqttStatusLabelElement.textContent = "FEHLER";
+          mqttLedElement.className = "status-led status-led-offline";
+        });
+        client.on("close", () => {
+          mqttStatusLabelElement.textContent = "Verloren";
+          mqttLedElement.className = "status-led status-led-offline";
+        });
+        client.on("offline", () => {
+          mqttStatusLabelElement.textContent = "Offline";
+          mqttLedElement.className = "status-led status-led-offline";
+        });
+      }
+      document.addEventListener("DOMContentLoaded", connectClient);
+    </script>
+  </body>
+</html>
