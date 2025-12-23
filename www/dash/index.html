@@ -130,14 +130,7 @@
             </div>
           </div>
           <div class="steuerelement-body">
-            <div
-              class="control-inner"
-              style="
-                border-top: 1px solid var(--border-color);
-                padding-top: 15px;
-                margin-top: 10px;
-              "
-            >
+            <div class="control-inner" style="padding: 10px 5px">
               <div class="control-row">
                 <input
                   type="number"
@@ -701,6 +694,7 @@
             </div>
           </div>
         </div>
+
         <div class="data-item battery-card">
           <h3><i class="fas fa-bolt"></i> Energie & BMS</h3>
           <div class="govee-card-body">
@@ -739,82 +733,85 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="data-item collapsed system-kachel">
-      <div class="steuerelement-header" onclick="toggleBox(this)">
-        <h3><i class="fas fa-microchip"></i> System-Steuerung</h3>
-        <span class="toggle-icon">▼</span>
-      </div>
 
-      <div style="text-align: center; padding-bottom: 10px">
-        <small style="opacity: 0.6">Hardware neu starten</small>
-      </div>
+        <div class="data-item collapsed">
+          <div class="steuerelement-header" onclick="toggleBox(this)">
+            <h3><i class="fas fa-microchip"></i> Restarts</h3>
+            <span class="toggle-icon">▼</span>
+          </div>
 
-      <div class="steuerelement-body">
-        <div
-          class="control-inner"
-          style="border-top: 1px solid var(--border-color); padding-top: 15px"
-        >
-          <div class="restart-grid">
-            <button
-              class="btn-restart"
-              onclick="sendCommand(RESTART_HEATER_TOPIC, '1')"
+          <div style="text-align: center; padding-bottom: 10px">
+            <small style="opacity: 0.6">Hardware neu starten</small>
+          </div>
+
+          <div class="steuerelement-body">
+            <div
+              class="control-inner"
+              style="
+                border-top: 1px solid var(--border-color);
+                padding-top: 15px;
+              "
             >
-              <i class="fas fa-fire"></i> Truma
-            </button>
-            <button
-              class="btn-restart"
-              onclick="sendCommand(RESTART_FAN_TOPIC, '1')"
-            >
-              <i class="fas fa-fan"></i> MaxxFan
-            </button>
-            <button
-              class="btn-restart"
-              onclick="sendCommand(RESTART_GPS_TOPIC, '1')"
-            >
-              <i class="fas fa-location-arrow"></i> GPS/Lage
-            </button>
+              <div class="restart-grid">
+                <button
+                  class="btn-restart"
+                  onclick="sendCommand(RESTART_HEATER_TOPIC, '1')"
+                >
+                  <i class="fas fa-fire"></i> Truma
+                </button>
+                <button
+                  class="btn-restart"
+                  onclick="sendCommand(RESTART_FAN_TOPIC, '1')"
+                >
+                  <i class="fas fa-fan"></i> MaxxFan
+                </button>
+                <button
+                  class="btn-restart"
+                  onclick="sendCommand(RESTART_GPS_TOPIC, '1')"
+                >
+                  <i class="fas fa-location-arrow"></i> GPS/Lage
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <div class="system-status-container full-width-status">
+        <div class="mqtt-status-group">
+          <div id="mqttLed" class="status-led" style="margin-top: 0"></div>
+          <div class="mqtt-info">MQTT:</div>
+          <span id="mqttStatusLabel">Verbinden...</span>
+        </div>
 
-    <div class="system-status-container full-width-status">
-      <div class="mqtt-status-group">
-        <div id="mqttLed" class="status-led" style="margin-top: 0"></div>
-        <div class="mqtt-info">MQTT:</div>
-        <span id="mqttStatusLabel">Verbinden...</span>
-      </div>
-
-      <div class="status-led-grid">
-        <div class="status-item">
-          <div id="heaterLed" class="status-led"></div>
-          <div class="status-label">Heizung</div>
-        </div>
-        <div class="status-item">
-          <div id="gpsLed" class="status-led"></div>
-          <div class="status-label">GPS</div>
-        </div>
-        <div class="status-item">
-          <div id="maxxFanLed" class="status-led"></div>
-          <div class="status-label">Fan</div>
-        </div>
-        <div class="status-item">
-          <div id="tempLed" class="status-led"></div>
-          <div class="status-label">Temp</div>
-        </div>
-        <div class="status-item">
-          <div id="waterLed" class="status-led"></div>
-          <div class="status-label">Wasser</div>
-        </div>
-        <div class="status-item">
-          <div id="cpLed" class="status-led"></div>
-          <div class="status-label">CP Plus</div>
-        </div>
-        <div class="status-item">
-          <div id="wledLed" class="status-led"></div>
-          <div class="status-label">WLED</div>
+        <div class="status-led-grid">
+          <div class="status-item">
+            <div id="heaterLed" class="status-led"></div>
+            <div class="status-label">Heizung</div>
+          </div>
+          <div class="status-item">
+            <div id="gpsLed" class="status-led"></div>
+            <div class="status-label">GPS</div>
+          </div>
+          <div class="status-item">
+            <div id="maxxFanLed" class="status-led"></div>
+            <div class="status-label">Fan</div>
+          </div>
+          <div class="status-item">
+            <div id="tempLed" class="status-led"></div>
+            <div class="status-label">Temp</div>
+          </div>
+          <div class="status-item">
+            <div id="waterLed" class="status-led"></div>
+            <div class="status-label">Wasser</div>
+          </div>
+          <div class="status-item">
+            <div id="cpLed" class="status-led"></div>
+            <div class="status-label">CP Plus</div>
+          </div>
+          <div class="status-item">
+            <div id="wledLed" class="status-led"></div>
+            <div class="status-label">WLED</div>
+          </div>
         </div>
       </div>
     </div>
@@ -927,24 +924,27 @@
           console.log(
             "Wetter-Update übersprungen: Warte auf gültige GPS-Daten...",
           );
-          return; // Funktion abbrechen, wenn keine Daten da sind
+          return;
         }
 
         try {
           const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latNum}&lon=${lonNum}&appid=${weatherApiKey}&units=metric&lang=de`;
           const response = await fetch(url);
 
-          // Prüfen ob die Antwort vom Server okay ist
           if (!response.ok) {
             throw new Error(`OpenWeather API Fehler: ${response.status}`);
           }
 
           const data = await response.json();
 
-          // 2. Sicherheitscheck: Enthält die Antwort die erwarteten Daten?
           if (data && data.wind) {
-            // Windgeschwindigkeit (m/s zu km/h)
+            // Variablen definieren
             const windSpeedKmH = (data.wind.speed * 3.6).toFixed(1);
+            const windVal = parseFloat(windSpeedKmH);
+            const alertBox = document.getElementById("weatherAlertBox");
+            const alertText = document.getElementById("weatherAlertText");
+
+            // Anzeige aktualisieren
             document.getElementById("liveWindSpeed").textContent = windSpeedKmH;
 
             // Windrichtung Icon drehen
@@ -955,23 +955,42 @@
               dirIcon.style.transition = "transform 1s ease";
             }
 
-            // Warn-Logik
-            const alertBox = document.getElementById("weatherAlertBox");
-            const alertText = document.getElementById("weatherAlertText");
-
+            // --- 4. Dynamische Warn-Logik (Farbskala) ---
             if (
-              data.wind.speed > 11.1 ||
-              data.weather[0].main === "Thunderstorm" ||
-              data.weather[0].main === "Snow"
+              windVal > 11.0 ||
+              (data.weather && data.weather[0].main === "Thunderstorm")
             ) {
               alertBox.style.display = "block";
-              alertText.textContent =
-                data.weather[0].description +
-                " bei " +
-                windSpeedKmH +
-                " km/h Wind.";
+              alertBox.style.animation = "none"; // Animation zurücksetzen
+
+              let bgColor, textColor, extraNote;
+
+              if (windVal <= 15) {
+                bgColor = "rgba(255, 235, 59, 0.9)"; // GELB
+                textColor = "#000";
+                extraNote = "Markise beobachten.";
+              } else if (windVal <= 18) {
+                bgColor = "rgba(255, 152, 0, 0.9)"; // ORANGE
+                textColor = "#fff";
+                extraNote = "Vorsicht geboten.";
+              } else if (windVal <= 22) {
+                bgColor = "rgba(211, 47, 47, 0.9)"; // ROT
+                textColor = "#fff";
+                extraNote = "Markise einfahren!";
+              } else {
+                bgColor = "rgba(156, 39, 176, 0.9)"; // VIOLETT
+                textColor = "#fff";
+                extraNote = "GEFAHR: SOFORT ABBAUEN!";
+                alertBox.style.animation = "blink-crit 1s infinite";
+              }
+
+              alertBox.style.backgroundColor = bgColor;
+              alertBox.style.color = textColor;
+              alertBox.style.borderColor = "rgba(0,0,0,0.2)";
+              alertText.innerHTML = `<strong>${windSpeedKmH} km/h Wind</strong><br>${data.weather[0].description}. ${extraNote}`;
             } else {
               alertBox.style.display = "none";
+              alertBox.style.animation = "none";
             }
 
             document.getElementById("weatherUpdateTime").textContent =
@@ -985,7 +1004,8 @@
         }
       }
 
-      // Nur ein Intervall für das Wetter (alle 10 Minuten)
+      // DAS INTERVALL MUSS AUSSERHALB DER FUNKTION STEHEN!
+      // Alle 10 Minuten aktualisieren
       setInterval(updateWeatherData, 600000);
 
       // Verarbeitet Govee JSON Daten von der Python-Brücke
